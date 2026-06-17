@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kova Commerce — E-Commerce Intelligence Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F0F4F8;--surface:#FFFFFF;--surface2:#F8FAFC;--surface3:#EFF2F7;
+  --border:#E2E8F0;--border2:#CBD5E1;
+  --text:#0F172A;--text2:#334155;--muted:#64748B;--muted2:#94A3B8;
+  --accent:#2563EB;--accent2:#3B82F6;--accent-bg:rgba(29,78,216,.08);
+  --positive:#059669;--positive-bg:rgba(5,150,105,.08);
+  --negative:#DC2626;--negative-bg:rgba(220,38,38,.08);
+  --warning:#D97706;--warning-bg:rgba(217,119,6,.08);
+  --amzn:#FF9900;--amzn-bg:rgba(255,153,0,.10);
+  --shop:#5B8DB8;--shop-bg:rgba(91,141,184,.10);
+  --shadow:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 16px rgba(0,0,0,.10);
+  --radius:8px;--radius-lg:12px;
+}
+[data-theme="dark"]{
+  --bg:#080E1A;--surface:#0F172A;--surface2:#1E293B;--surface3:#253044;
+  --border:#1E293B;--border2:#2D3E54;
+  --text:#F1F5F9;--text2:#CBD5E1;--muted:#64748B;--muted2:#475569;
+  --accent:#2563EB;--accent2:#3B82F6;--accent-bg:rgba(37,99,235,.1);
+  --positive:#10B981;--positive-bg:rgba(16,185,129,.1);
+  --negative:#EF4444;--negative-bg:rgba(239,68,68,.1);
+  --warning:#F59E0B;--warning-bg:rgba(245,158,11,.1);
+  --amzn:#FF9900;--amzn-bg:rgba(255,153,0,.12);
+  --shop:#5B8DB8;--shop-bg:rgba(91,141,184,.12);
+  --shadow:0 1px 3px rgba(0,0,0,.4);--shadow-md:0 4px 20px rgba(0,0,0,.5);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Manrope',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;transition:background .3s,color .3s}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── HEADER ── */
+.header{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200}
+.header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--amzn) 30%,var(--accent2) 70%,transparent)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;height:58px;padding:0 28px;gap:16px;max-width:1600px;margin:0 auto}
+.brand-row{display:flex;align-items:center;gap:10px}
+.brand-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--amzn),#E87700);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;color:#fff}
+.brand-name{font-weight:800;font-size:15px;color:var(--text);letter-spacing:-.4px}
+.brand-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:1px}
+.header-center{display:flex;align-items:center;gap:6px}
+.qtr-btn{padding:5px 14px;border-radius:6px;font-size:11px;font-weight:700;font-family:'Manrope',sans-serif;border:1.5px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;transition:all .18s;letter-spacing:.3px}
+.qtr-btn.active{background:var(--amzn);color:#fff;border-color:var(--amzn)}
+.qtr-btn:hover:not(.active){background:var(--surface2);color:var(--text)}
+.header-right{display:flex;align-items:center;gap:10px}
+.live-tag{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--positive);background:var(--positive-bg);border:1px solid rgba(5,150,105,.2);border-radius:20px;padding:3px 10px}
+.live-dot{width:6px;height:6px;background:var(--positive);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.view-tabs{display:flex;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:2px;gap:2px}
+.vtab{padding:5px 14px;border-radius:5px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border:none;background:none;font-family:'Manrope',sans-serif;transition:all .18s}
+.vtab.active{background:var(--surface);color:var(--amzn);box-shadow:var(--shadow)}
+.vtab.active.prod-vtab{color:var(--positive)}
+.theme-btn{width:32px;height:32px;border:1.5px solid var(--border2);border-radius:7px;background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .18s}
+.theme-btn:hover{background:var(--surface3)}
+
+/* ── WRAPPER ── */
+.wrap{max-width:1600px;margin:0 auto;padding:0 28px}
+.view-panel{display:none}
+.view-panel.active{display:block}
+
+/* ── ALERT BANNER ── */
+.alert-banner{background:linear-gradient(135deg,rgba(220,38,38,.10),rgba(220,38,38,.03));border:1px solid rgba(220,38,38,.22);border-left:4px solid var(--negative);border-radius:var(--radius-lg);padding:14px 20px;margin:18px 0 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.alert-left{display:flex;align-items:center;gap:12px}
+.alert-icon{font-size:20px}
+.alert-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--negative);margin-bottom:2px}
+.alert-amount{font-family:'DM Mono',monospace;font-size:26px;color:var(--negative);font-weight:500;line-height:1}
+.alert-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.alert-pills{display:flex;gap:16px;flex-wrap:wrap}
+.alert-pill{text-align:center}
+.alert-pill-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--warning)}
+.alert-pill-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-top:1px}
+.alert-divider{width:1px;background:rgba(220,38,38,.2);align-self:stretch}
+
+/* ── PRIORITY ACTIONS ── */
+.pact-row{display:flex;flex-direction:column;gap:6px;margin:12px 0 0}
+.pact{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text2);padding:8px 12px;border-radius:6px;background:var(--surface);border:1px solid var(--border)}
+.pact-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.pact.fire .pact-dot{background:var(--negative)}
+.pact.fire{border-color:rgba(220,38,38,.2)}
+.pact.watch .pact-dot{background:var(--warning)}
+.pact.watch{border-color:rgba(217,119,6,.15)}
+.pact.go .pact-dot{background:var(--positive)}
+.pact.go{border-color:rgba(5,150,105,.15)}
+
+/* ── SECTION ── */
+.section{padding:22px 0 0}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.section-title::before{content:'';width:3px;height:14px;background:linear-gradient(180deg,var(--amzn),#E87700);border-radius:2px}
+body[data-view="products"] .section-title::before{background:linear-gradient(180deg,var(--positive),#34D399)}
+
+/* ── KPI STRIP ── */
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:default}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.kpi-card.orange::before{background:linear-gradient(90deg,#E87700,#FF9900)}
+.kpi-card.blue::before{background:linear-gradient(90deg,#1D4ED8,#3B82F6)}
+.kpi-card.red::before{background:linear-gradient(90deg,#B91C1C,#F87171)}
+.kpi-card.green::before{background:linear-gradient(90deg,#047857,#10B981)}
+.kpi-card.amber::before{background:linear-gradient(90deg,#B45309,#F59E0B)}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.kpi-icon{font-size:16px;opacity:.85}
+.kpi-badge{font-size:9px;font-weight:700;font-family:'DM Mono',monospace;padding:2px 7px;border-radius:20px}
+.kpi-badge.up{background:var(--positive-bg);color:var(--positive)}
+.kpi-badge.dn{background:var(--negative-bg);color:var(--negative)}
+.kpi-badge.warn{background:var(--warning-bg);color:var(--warning)}
+.kpi-badge.amzn{background:var(--amzn-bg);color:var(--amzn)}
+.kpi-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:4px}
+.kpi-value{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;line-height:1;margin-bottom:3px;transition:all .3s}
+.kpi-card.orange .kpi-value{color:var(--amzn)}
+.kpi-card.blue .kpi-value{color:var(--accent2)}
+.kpi-card.red .kpi-value{color:var(--negative)}
+.kpi-card.green .kpi-value{color:var(--positive)}
+.kpi-card.amber .kpi-value{color:var(--warning)}
+.kpi-sub{font-size:10px;color:var(--muted)}
+
+/* ── GRIDS ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-60-40{display:grid;grid-template-columns:1.5fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid-40-60{display:grid;grid-template-columns:1fr 1.5fr;gap:14px}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.card-hd{padding:16px 18px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.card-title{font-size:12px;font-weight:700;color:var(--text)}
+.card-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.card-body{padding:12px 18px 16px}
+.tag{font-size:9px;font-weight:700;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.tag.red{background:var(--negative-bg);color:var(--negative);border:1px solid rgba(220,38,38,.2)}
+.tag.green{background:var(--positive-bg);color:var(--positive);border:1px solid rgba(5,150,105,.2)}
+.tag.blue{background:var(--accent-bg);color:var(--accent2);border:1px solid rgba(59,130,246,.2)}
+.tag.amber{background:var(--warning-bg);color:var(--warning);border:1px solid rgba(217,119,6,.2)}
+.tag.orange{background:var(--amzn-bg);color:var(--amzn);border:1px solid rgba(255,153,0,.3)}
+
+/* ── CHANNEL LEGEND ── */
+.ch-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.ch-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.ch-leg-dot{width:8px;height:8px;border-radius:2px}
+
+/* ── VELOCITY / LISTING HEATMAP ── */
+.heatmap-wrap{overflow-x:auto}
+.heatmap{border-collapse:collapse;width:100%;font-size:11px}
+.heatmap th{padding:6px 10px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface)}
+.heatmap td{padding:8px 10px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;font-weight:500;text-align:center;transition:all .2s}
+.heatmap td.prod-name{text-align:left;font-family:'Manrope',sans-serif;font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap}
+.heatmap tr:hover td{background:rgba(255,255,255,.02)}
+.hm-hot{background:rgba(5,150,105,.18);color:#059669}
+.hm-warm{background:rgba(5,150,105,.08);color:#059669}
+.hm-mid{background:rgba(217,119,6,.08);color:var(--warning)}
+.hm-cold{background:rgba(220,38,38,.1);color:var(--negative)}
+.hm-none{background:transparent;color:var(--muted2);font-style:italic}
+
+/* ── FEE / DEDUCTION TABLE ── */
+.ded-table{width:100%;border-collapse:collapse;font-size:11px}
+.ded-table th{padding:6px 12px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+.ded-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.ded-table tr:hover td{background:var(--surface2)}
+.ded-table td.mono{font-family:'DM Mono',monospace;font-weight:500}
+.ded-table td.risk-high{color:var(--negative);font-weight:700}
+.ded-table td.risk-med{color:var(--warning);font-weight:600}
+.ded-table td.risk-low{color:var(--positive)}
+.risk-bar-wrap{width:60px;height:5px;background:var(--surface3);border-radius:3px;display:inline-block;vertical-align:middle;margin-left:6px}
+.risk-bar{height:100%;border-radius:3px}
+
+/* ── AI ENGINE ── */
+.ai-engine{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.ai-hd{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--amzn-bg),transparent)}
+.ai-hd-left{display:flex;align-items:center;gap:10px}
+.ai-hd-icon{width:32px;height:32px;background:var(--amzn-bg);border:1px solid rgba(255,153,0,.25);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.ai-hd-title{font-size:13px;font-weight:700;color:var(--text)}
+.ai-hd-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.ai-run-btn{padding:7px 16px;border-radius:7px;font-size:11px;font-weight:700;font-family:'Manrope',sans-serif;border:none;background:var(--amzn);color:#fff;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.ai-run-btn:hover{background:#E87700;transform:translateY(-1px)}
+.ai-run-btn:disabled{background:var(--surface3);color:var(--muted);cursor:default;transform:none}
+.ai-body{padding:16px 20px;min-height:120px}
+.ai-loading{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
+.ai-spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--amzn);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-actions{display:flex;flex-direction:column;gap:10px}
+.ai-action-card{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;border-left:3px solid transparent}
+.ai-action-card.urgency-critical{border-left-color:var(--negative)}
+.ai-action-card.urgency-high{border-left-color:var(--warning)}
+.ai-action-card.urgency-medium{border-left-color:var(--accent2)}
+.ai-action-card.urgency-low{border-left-color:var(--positive)}
+.ai-ac-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.ai-ac-title{font-size:12px;font-weight:700;color:var(--text)}
+.ai-ac-badges{display:flex;align-items:center;gap:6px}
+.ai-ac-impact{font-family:'DM Mono',monospace;font-size:11px;padding:2px 8px;border-radius:5px;background:var(--positive-bg);color:var(--positive)}
+.ai-ac-impact.negative{background:var(--negative-bg);color:var(--negative)}
+.urgency-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.urgency-badge.urgency-critical{background:rgba(220,38,38,.15);color:var(--negative)}
+.urgency-badge.urgency-high{background:rgba(217,119,6,.15);color:var(--warning)}
+.urgency-badge.urgency-medium{background:rgba(37,99,235,.12);color:var(--accent2)}
+.urgency-badge.urgency-low{background:rgba(5,150,105,.12);color:var(--positive)}
+.ai-ac-body{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:5px}
+.ai-ac-action{font-size:11px;font-weight:600;color:var(--text2)}
+.ai-action-card.urgency-critical .ai-ac-action{color:var(--negative)}
+.ai-placeholder{text-align:center;padding:20px;color:var(--muted);font-size:12px}
+
+/* ── PLATFORM TABLE ── */
+.retail-table{width:100%;border-collapse:collapse;font-size:11px}
+.retail-table th{padding:6px 12px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border)}
+.retail-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.retail-table tr:last-child td{border-bottom:none}
+.retail-table tr:hover td{background:var(--surface2)}
+.retail-table td.mono{font-family:'DM Mono',monospace;font-weight:500}
+.rev-bar-cell{padding:9px 12px}
+.rev-bar-track{height:5px;background:var(--surface3);border-radius:3px;min-width:60px}
+.rev-bar-fill{height:100%;border-radius:3px}
+.rank-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2)}
+
+/* ── BRAND KPI COMPACT ── */
+.brand-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.bkpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.bkpi-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:4px}
+.bkpi-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;line-height:1}
+.bkpi-val.pos{color:var(--positive)}
+.bkpi-val.neg{color:var(--negative)}
+.bkpi-val.blue{color:var(--accent2)}
+.bkpi-val.amber{color:var(--warning)}
+.bkpi-val.orange{color:var(--amzn)}
+.bkpi-sub{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* ── PRODUCT LIST ── */
+.prod-list{display:flex;flex-direction:column;gap:6px}
+.prod-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;transition:all .18s}
+.prod-row:hover{border-color:var(--amzn);transform:translateX(2px)}
+.prod-rank{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--muted2);width:20px;flex-shrink:0;text-align:center}
+.prod-emoji{font-size:18px;flex-shrink:0}
+.prod-info{flex:1;min-width:0}
+.prod-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-meta{font-size:10px;color:var(--muted);margin-top:1px}
+.prod-rev{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--text);flex-shrink:0}
+.prod-margin{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0}
+.prod-margin.pos{background:var(--positive-bg);color:var(--positive)}
+.prod-margin.neg{background:var(--negative-bg);color:var(--negative)}
+.prod-margin.warn{background:var(--warning-bg);color:var(--warning)}
+
+/* ── PRODUCT SPOTLIGHT ── */
+.spot-banner{background:linear-gradient(135deg,var(--amzn-bg),rgba(255,153,0,.03));border:1px solid rgba(255,153,0,.25);border-radius:var(--radius-lg);padding:14px 20px;margin:14px 0 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.spot-left{display:flex;align-items:center;gap:12px}
+.spot-emoji{font-size:28px}
+.spot-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--amzn);margin-bottom:2px}
+.spot-name{font-size:16px;font-weight:800;color:var(--text)}
+.spot-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.spot-stats{display:flex;gap:20px;flex-wrap:wrap}
+.spot-stat{text-align:center}
+.spot-stat-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--text)}
+.spot-stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* ── CHANNEL FILTER BAR ── */
+.ch-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 0;position:sticky;top:58px;z-index:190}
+.ch-bar-inner{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:0 28px;max-width:1600px;margin:0 auto}
+.ch-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:7px;cursor:pointer;border:1.5px solid var(--border2);background:transparent;font-size:10px;font-weight:700;color:var(--muted);transition:all .18s;font-family:'Manrope',sans-serif;letter-spacing:.3px}
+.ch-btn:hover{color:var(--text);transform:translateY(-1px)}
+.ch-btn .dot{width:6px;height:6px;border-radius:50%}
+.ch-btn.active{color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.ch-btn.active.ch-fba{background:#FF9900}
+.ch-btn.active.ch-shop{background:#5B8DB8}
+.ch-btn.active.ch-fbm{background:#E87700}
+.ch-btn.active.ch-amzads{background:#6366F1}
+.ch-btn.active.ch-shopads{background:#5B8DB8}
+.ch-all{padding:5px 14px;border-radius:7px;cursor:pointer;border:1.5px solid var(--amzn);background:var(--amzn-bg);font-size:10px;font-weight:700;color:var(--amzn);transition:all .18s;font-family:'Manrope',sans-serif}
+.ch-all:hover,.ch-all.active-all{background:var(--amzn);color:#fff}
+
+/* ── SKU SELECTOR BAR ── */
+.prod-sel-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 0}
+.prod-sel-inner{display:flex;align-items:center;gap:8px;padding:0 28px;max-width:1600px;margin:0 auto;flex-wrap:wrap}
+.prod-chip{padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);background:transparent;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;font-family:'Manrope',sans-serif;transition:all .18s}
+.prod-chip.active{background:var(--positive);border-color:var(--positive);color:#fff}
+.prod-chip.chip-watch{color:var(--warning);border-color:rgba(217,119,6,.3)}
+.prod-chip.chip-watch.active{background:var(--warning);border-color:var(--warning);color:#fff}
+.prod-chip.chip-new{color:var(--accent2);border-color:rgba(59,130,246,.3)}
+.prod-chip.chip-new.active{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.prod-sel-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;white-space:nowrap}
+
+/* ── CROSS CHANNEL CARDS ── */
+.xch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.xch-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;border-top:2px solid transparent}
+.xch-card.star{border-top-color:var(--positive)}
+.xch-card.drag{border-top-color:var(--negative)}
+.xch-card.stable{border-top-color:var(--accent2)}
+.xch-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:6px}
+.xch-prod{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.xch-stat{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;margin-bottom:2px}
+.xch-stat.pos{color:var(--positive)}
+.xch-stat.neg{color:var(--negative)}
+.xch-stat.blue{color:var(--accent2)}
+.xch-stat.orange{color:var(--amzn)}
+.xch-footer{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.4}
+
+/* ── TREND LEGEND ── */
+.trend-leg{display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+.trend-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.trend-leg-line{width:14px;height:2px;border-radius:1px}
+
+/* ── INSIGHT CARDS ── */
+.insight-stack{display:flex;flex-direction:column;gap:8px}
+.insight-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 14px;border-left:3px solid transparent}
+.insight-card.critical{border-left-color:var(--negative);background:rgba(220,38,38,.03)}
+.insight-card.opportunity{border-left-color:var(--positive)}
+.insight-card.watch{border-left-color:var(--warning)}
+.insight-card.info{border-left-color:var(--accent2)}
+.insight-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);margin-bottom:3px}
+.insight-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+.insight-desc{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:5px}
+.insight-action{font-size:11px;font-weight:600;color:var(--accent2)}
+.insight-card.critical .insight-action{color:var(--negative)}
+.insight-card.opportunity .insight-action{color:var(--positive)}
+
+/* ── PROD CH BREAKDOWN ── */
+.prod-ch-breakdown{display:none}
+.prod-ch-breakdown.show{display:block}
+
+/* ── SORT BUTTONS ── */
+.sort-btns{display:flex;gap:4px}
+.sort-btn{padding:3px 10px;border-radius:5px;border:1px solid var(--border2);background:transparent;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;font-family:'Manrope',sans-serif;transition:all .18s}
+.sort-btn.active{background:var(--positive-bg);color:var(--positive);border-color:rgba(5,150,105,.3)}
+
+/* ── DONUT LEGEND ── */
+.donut-wrap{display:flex;align-items:center;gap:16px}
+.donut-chart-area{position:relative;flex-shrink:0}
+.donut-leg{display:flex;flex-direction:column;gap:5px;flex:1}
+.donut-leg-row{display:flex;align-items:center;justify-content:space-between;font-size:10px}
+.donut-leg-left{display:flex;align-items:center;gap:5px;color:var(--text2);font-weight:500}
+.donut-leg-dot{width:8px;height:8px;border-radius:50%}
+.donut-leg-val{font-family:'DM Mono',monospace;font-weight:500;font-size:10px;color:var(--text)}
+
+/* ── BOTTOM PADDING ── */
+.pb{padding-bottom:40px}
+
+/* ── ANIMATIONS ── */
+.kpi-card{animation:fadeUp .4s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.kpi-strip .kpi-card:nth-child(1){animation-delay:.05s}
+.kpi-strip .kpi-card:nth-child(2){animation-delay:.1s}
+.kpi-strip .kpi-card:nth-child(3){animation-delay:.15s}
+.kpi-strip .kpi-card:nth-child(4){animation-delay:.2s}
+.kpi-strip .kpi-card:nth-child(5){animation-delay:.25s}
+</style>
+</head>
+<body data-view="distribution">
+
+<!-- ═══ HEADER ═══ -->
+<header class="header">
+  <div class="header-inner">
+    <div class="brand-row">
+      <div class="brand-mark">K</div>
+      <div>
+        <div class="brand-name">Kova Commerce</div>
+        <div class="brand-sub">E-Commerce Intelligence · <span id="headerQtrLabel">Q1 2026</span></div>
+      </div>
+    </div>
+    <div class="header-center" id="qtrBtns">
+      <button class="qtr-btn active" onclick="switchQtr('Q1',this)">Q1 2026</button>
+      <button class="qtr-btn" onclick="switchQtr('Q2',this)">Q2 2026</button>
+      <button class="qtr-btn" onclick="switchQtr('Q3',this)">Q3 2026</button>
+      <button class="qtr-btn" onclick="switchQtr('Q4',this)">Q4 2026</button>
+    </div>
+    <div class="header-right">
+      <div class="live-tag"><div class="live-dot"></div>Live</div>
+      <div class="view-tabs">
+        <button class="vtab active" id="tabDist" onclick="switchView('distribution')">📊 Channels</button>
+        <button class="vtab prod-vtab" id="tabProd" onclick="switchView('products')">📦 Products</button>
+      </div>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️</button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ CHANNEL FILTER BAR ═══ -->
+<div class="ch-bar">
+  <div class="ch-bar-inner">
+    <button class="ch-all active-all" id="btnAll" onclick="filterChannel('all')">All Platforms</button>
+    <button class="ch-btn ch-fba"    onclick="filterChannel('amzfba')"><span class="dot" style="background:#FF9900"></span>Amazon FBA</button>
+    <button class="ch-btn ch-shop"   onclick="filterChannel('shopify')"><span class="dot" style="background:#5B8DB8"></span>Shopify Direct</button>
+    <button class="ch-btn ch-fbm"    onclick="filterChannel('amzfbm')"><span class="dot" style="background:#E87700"></span>Amazon FBM</button>
+    <button class="ch-btn ch-amzads" onclick="filterChannel('amzads')"><span class="dot" style="background:#6366F1"></span>Amazon Ads</button>
+    <button class="ch-btn ch-shopads"onclick="filterChannel('shopads')"><span class="dot" style="background:#5B8DB8"></span>Shopify Ads</button>
+  </div>
+</div>
+
+<!-- ═══ CHANNELS VIEW ═══ -->
+<div class="view-panel active" id="viewDist">
+  <div class="wrap">
+
+    <!-- ALERT BANNER -->
+    <div class="alert-banner">
+      <div class="alert-left">
+        <div class="alert-icon">🚨</div>
+        <div>
+          <div class="alert-label">Revenue Leakage Alert — <span id="alertPeriod">Q1 2026</span></div>
+          <div class="alert-amount" id="alertAmount">$23.1K</div>
+          <div class="alert-desc">Live-calculated · Updates with quarter &amp; channel filter selection</div>
+        </div>
+      </div>
+      <div class="alert-pills">
+        <div class="alert-divider"></div>
+        <div class="alert-pill"><div class="alert-pill-val" id="apRet">$8.6K</div><div class="alert-pill-lbl">Returns</div></div>
+        <div class="alert-pill"><div class="alert-pill-val" id="apAds">$10.4K</div><div class="alert-pill-lbl">Ad Waste</div></div>
+        <div class="alert-pill"><div class="alert-pill-val" id="apFee">$2.7K</div><div class="alert-pill-lbl">FBA Fee Overcharges</div></div>
+        <div class="alert-pill"><div class="alert-pill-val" id="apCharge">$1.4K</div><div class="alert-pill-lbl">Chargebacks</div></div>
+      </div>
+    </div>
+
+    <!-- PRIORITY ACTIONS -->
+    <div class="pact-row">
+      <div class="pact fire"><div class="pact-dot"></div><strong>CRITICAL:</strong>&nbsp;ChargePad 3-in-1 at 48 days of stock — reorder PO due TODAY. Holiday Q4 demand spike will exhaust inventory by Sep at current velocity.</div>
+      <div class="pact fire"><div class="pact-dot"></div><strong>URGENT:</strong>&nbsp;Blended ACOS at 28.6% vs 25% target. MagRoute cable organizer burning $1,800/mo on broad match keywords with zero conversion. Pause broad, go exact.</div>
+      <div class="pact watch"><div class="pact-dot"></div><strong>WATCH:</strong>&nbsp;Shopify ROAS at 3.8× — below 4.0× target. Meta creative fatigue detected on DeskRise ad set. Rotate creative before Q2 scaling.</div>
+      <div class="pact go"><div class="pact-dot"></div><strong>OPPORTUNITY:</strong>&nbsp;MagRoute BSR hit 1,840 in Cable Management — top 0.3% of category. Push Lightning Deal in next Amazon deals window to lock BSR <1,500.</div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Key Performance Indicators — <span id="kpiFilterLabel">All Platforms</span></div>
+      </div>
+      <div class="kpi-strip">
+        <div class="kpi-card orange">
+          <div class="kpi-top"><div class="kpi-icon">💰</div><span class="kpi-badge amzn" id="kpiBadge1">+18% QoQ</span></div>
+          <div class="kpi-label">Total GMV</div>
+          <div class="kpi-value" id="kpiRev">$229.2K</div>
+          <div class="kpi-sub" id="kpiRevSub">Q1 2026 · Amazon FBA + Shopify</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-top"><div class="kpi-icon">🏪</div><span class="kpi-badge up">Best Channel</span></div>
+          <div class="kpi-label" id="kpiMarginLabel">Shopify Net Margin</div>
+          <div class="kpi-value" id="kpiMargin">38.1%</div>
+          <div class="kpi-sub" id="kpiMarginSub">No marketplace fee · Direct to consumer</div>
+        </div>
+        <div class="kpi-card amber">
+          <div class="kpi-top"><div class="kpi-icon">📢</div><span class="kpi-badge warn" id="kpiBadge3">↑ Target 25%</span></div>
+          <div class="kpi-label" id="kpiAcosLabel">Blended ACOS</div>
+          <div class="kpi-value" id="kpiAcos">28.6%</div>
+          <div class="kpi-sub" id="kpiAcosSub">$37.4K ad spend · $94.8K attributed rev</div>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-top"><div class="kpi-icon">🛒</div><span class="kpi-badge up">3.8×</span></div>
+          <div class="kpi-label">Shopify ROAS</div>
+          <div class="kpi-value" id="kpiRoas">3.8×</div>
+          <div class="kpi-sub" id="kpiRoasSub">Meta + Google · $9.9K spend</div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-top"><div class="kpi-icon">⚠️</div><span class="kpi-badge dn">Low Stock</span></div>
+          <div class="kpi-label">Inventory Alert</div>
+          <div class="kpi-value" id="kpiStock" style="font-size:16px;padding-top:4px">ChargePad</div>
+          <div class="kpi-sub" id="kpiStockSub">48 days remaining · Reorder NOW</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHANNEL P&L + DONUT -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Platform P&L — <span id="channelPLLabel">All 5 Platforms</span></div>
+        <span class="tag amber" id="chAlertTag">⚠ ACOS Above Target</span>
+      </div>
+      <div class="grid-60-40">
+        <div class="card">
+          <div class="card-hd">
+            <div><div class="card-title">Gross Revenue vs Ad Spend vs Net Margin — Per Platform</div><div class="card-sub">Bars = Revenue & Ad Spend | Line = Net Margin %</div></div>
+          </div>
+          <div class="card-body">
+            <div class="ch-legend">
+              <div class="ch-leg-item"><div class="ch-leg-dot" style="background:#FF9900"></div>Revenue</div>
+              <div class="ch-leg-item"><div class="ch-leg-dot" style="background:#EF4444"></div>Ad Spend</div>
+              <div class="ch-leg-item"><div class="ch-leg-dot" style="background:#10B981;border-radius:50%"></div>Net Margin %</div>
+            </div>
+            <div style="height:220px;position:relative"><canvas id="channelChart"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">GMV Revenue Mix</div><div class="card-sub">Share of total by platform</div></div></div>
+          <div class="card-body">
+            <div class="donut-wrap" style="height:220px;align-items:center">
+              <div class="donut-chart-area" style="width:140px;height:140px"><canvas id="donutChart"></canvas></div>
+              <div class="donut-leg" id="donutLeg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TREND + CATEGORY -->
+    <div class="section">
+      <div class="section-header"><div class="section-title">Revenue Trend — 6 Month Rolling</div><span class="tag orange" id="trendTag">Amazon FBA Dominant at 64.7%</span></div>
+      <div class="grid-60-40">
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">Amazon FBA vs Shopify vs Total GMV</div><div class="card-sub">Monthly trajectory — holiday Q4 spike projected</div></div></div>
+          <div class="card-body">
+            <div class="trend-leg">
+              <div class="trend-leg-item"><div class="trend-leg-line" style="background:#FF9900"></div>Amazon FBA</div>
+              <div class="trend-leg-item"><div class="trend-leg-line" style="background:#5B8DB8"></div>Shopify</div>
+              <div class="trend-leg-item"><div class="trend-leg-line" style="background:#2563EB"></div>Total GMV</div>
+            </div>
+            <div style="height:180px;position:relative"><canvas id="trendChart"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">Revenue by Product Category</div><div class="card-sub">Q1 2026 · All platforms</div></div></div>
+          <div class="card-body">
+            <div style="height:180px;position:relative"><canvas id="brandChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SKU LISTING HEATMAP -->
+    <div class="section">
+      <div class="section-header"><div class="section-title">SKU Listing Performance — Amazon BSR & Conversion</div><span class="tag amber">CVR Benchmark: ≥12%</span></div>
+      <div class="card">
+        <div class="card-body" style="padding:0">
+          <div class="heatmap-wrap">
+            <table class="heatmap">
+              <thead>
+                <tr>
+                  <th style="text-align:left">SKU</th>
+                  <th>Best BSR</th><th>Sessions/mo</th><th>CVR %</th><th>Click Share %</th><th>Rating</th><th>Reviews</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="velocityBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AD SPEND + INVENTORY RISK -->
+    <div class="section">
+      <div class="section-header"><div class="section-title">Ad Spend Breakdown & Inventory Risk</div><span class="tag red">$14,680 Wasted Ad Spend Detected</span></div>
+      <div class="grid-60-40">
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">📢 Amazon Ads — Per SKU ACOS & Spend</div><div class="card-sub">Target ACOS &lt;25% · Wasted spend = broad match inefficiency</div></div></div>
+          <div class="card-body" style="padding:0">
+            <table class="ded-table">
+              <thead><tr><th>SKU</th><th>Ad Spend</th><th>Attr. Rev</th><th>ACOS</th><th>Wasted Est.</th><th>Action</th></tr></thead>
+              <tbody id="deductionBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">📦 Inventory Status — Days of Stock</div><div class="card-sub">Amazon FC + 3PL combined · Reorder threshold alerts</div></div></div>
+          <div class="card-body" style="padding:0 0 8px">
+            <div id="warehouseRows"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI ENGINE -->
+    <div class="section">
+      <div class="section-header"><div class="section-title">AI Decision Engine</div><span class="tag orange">Powered by Claude</span></div>
+      <div class="ai-engine">
+        <div class="ai-hd">
+          <div class="ai-hd-left">
+            <div class="ai-hd-icon">🤖</div>
+            <div>
+              <div class="ai-hd-title">Weekly Action Queue</div>
+              <div class="ai-hd-sub">Analyzes GMV, ACOS, inventory risk, Shopify ROAS & listing health. Outputs 4–5 prioritized decisions with dollar impact.</div>
+            </div>
+          </div>
+          <button class="ai-run-btn" id="aiRunBtn" onclick="runAIEngine()">⚡ Generate Actions</button>
+        </div>
+        <div class="ai-body" id="aiBody">
+          <div class="ai-placeholder">↑ Click "Generate Actions" to analyze your current dashboard data and get a prioritized action queue.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLATFORM LEADERBOARD -->
+    <div class="section pb">
+      <div class="section-header"><div class="section-title">Platform Revenue Leaderboard — <span id="retailLabel">All Platforms</span></div></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">Platform Revenue Ranking</div><div class="card-sub">Ranked by Q1 GMV contribution</div></div></div>
+          <div class="card-body" style="padding:0">
+            <table class="retail-table">
+              <thead><tr><th>#</th><th>Platform</th><th>Q1 Revenue</th><th>QoQ</th><th>Bar</th></tr></thead>
+              <tbody id="retailBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">Q1 vs Q2 — Platform Comparison</div><div class="card-sub">Quarter-on-quarter growth</div></div></div>
+          <div class="card-body">
+            <div style="height:220px;position:relative"><canvas id="retailQQChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /viewDist -->
+
+<!-- ═══ PRODUCTS VIEW ═══ -->
+<div class="view-panel" id="viewProd">
+
+  <div class="prod-sel-bar">
+    <div class="prod-sel-inner">
+      <span class="prod-sel-label">Focus SKU →</span>
+      <button class="prod-chip active" id="chip-all"  onclick="selectProduct('all',this)">📦 All SKUs</button>
+      <button class="prod-chip"        id="chip-mgr"  onclick="selectProduct('mgr',this)">🔌 MagRoute</button>
+      <button class="prod-chip"        id="chip-dsk"  onclick="selectProduct('dsk',this)">🖥️ DeskRise</button>
+      <button class="prod-chip"        id="chip-lnk"  onclick="selectProduct('lnk',this)">💡 LinkLight</button>
+      <button class="prod-chip"        id="chip-stk"  onclick="selectProduct('stk',this)">📚 StackBox</button>
+      <button class="prod-chip chip-watch" id="chip-wlp" onclick="selectProduct('wlp',this)">📌 WallPeg</button>
+      <button class="prod-chip chip-new"   id="chip-chr" onclick="selectProduct('chr',this)">🔴 ChargePad</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <div class="spot-banner" id="spotBanner" style="display:none">
+      <div class="spot-left">
+        <div class="spot-emoji" id="spotEmoji">🔌</div>
+        <div>
+          <div class="spot-label">SKU Focus</div>
+          <div class="spot-name" id="spotName">MagRoute Cable Organizer</div>
+          <div class="spot-sub" id="spotSub">Star SKU · BSR 1,840</div>
+        </div>
+      </div>
+      <div class="spot-stats">
+        <div class="spot-stat"><div class="spot-stat-val" id="spotRev">$58.2K</div><div class="spot-stat-lbl">Q1 Revenue</div></div>
+        <div class="spot-stat"><div class="spot-stat-val" id="spotAcos">26.1%</div><div class="spot-stat-lbl">ACOS</div></div>
+        <div class="spot-stat"><div class="spot-stat-val" id="spotBsr">1,840</div><div class="spot-stat-lbl">Best BSR</div></div>
+        <div class="spot-stat"><div class="spot-stat-val" id="spotRevs">2,847</div><div class="spot-stat-lbl">Reviews</div></div>
+      </div>
+    </div>
+
+    <!-- Product KPIs -->
+    <div class="section">
+      <div class="section-header"><div class="section-title">SKU KPIs — <span id="prodKpiLabel">All Platforms</span></div></div>
+      <div class="brand-kpi-row">
+        <div class="bkpi"><div class="bkpi-label">Top Revenue SKU</div><div class="bkpi-val orange" id="pkpiTop">MagRoute</div><div class="bkpi-sub" id="pkpiTopSub">$58.2K · BSR 1,840</div></div>
+        <div class="bkpi"><div class="bkpi-label">Best ACOS</div><div class="bkpi-val pos" id="pkpiAcos">MagRoute</div><div class="bkpi-sub" id="pkpiAcosSub">26.1% · Tightest ad efficiency</div></div>
+        <div class="bkpi"><div class="bkpi-label">Highest CVR</div><div class="bkpi-val blue" id="pkpiFast">MagRoute</div><div class="bkpi-sub" id="pkpiFastSub">18.4% conversion rate</div></div>
+        <div class="bkpi"><div class="bkpi-label">Inventory Alert</div><div class="bkpi-val neg" id="pkpiWh">ChargePad</div><div class="bkpi-sub" id="pkpiWhSub">48 days · Reorder immediately</div></div>
+      </div>
+    </div>
+
+    <!-- Cross-Platform Intelligence -->
+    <div class="section">
+      <div class="section-header"><div class="section-title">Cross-Platform SKU Intelligence</div><span class="tag orange">All 5 Platforms</span></div>
+      <div class="xch-grid">
+        <div class="xch-card star">
+          <div class="xch-label">⭐ Star SKU</div>
+          <div class="xch-prod">MagRoute Cable Organizer 6-Port</div>
+          <div class="xch-stat pos">BSR 1,840 · Top 0.3% of category</div>
+          <div class="xch-stat pos">18.4% CVR · 2,847 reviews · 4.6★</div>
+          <div class="xch-footer">Push Lightning Deal at next Amazon deals window. Shopify ROAS 4.2× — strongest ad efficiency in portfolio.</div>
+        </div>
+        <div class="xch-card drag">
+          <div class="xch-label">⚠️ Watch SKU</div>
+          <div class="xch-prod">ChargePad 3-in-1 Wireless Charger</div>
+          <div class="xch-stat neg">48 days of stock · Nov 2025 launch</div>
+          <div class="xch-stat neg">6.2% CVR — lowest in portfolio</div>
+          <div class="xch-footer">New launch with thin review base (86 reviews). Reorder PO due immediately. Enroll in Vine program to accelerate reviews before Q4.</div>
+        </div>
+        <div class="xch-card stable">
+          <div class="xch-label">🔵 Workhorse SKU</div>
+          <div class="xch-prod">DeskRise Monitor Stand w/ Drawer</div>
+          <div class="xch-stat blue">Highest AOV at $79.99 · Growing</div>
+          <div class="xch-stat blue">Shopify share 31.7% — strong DTC pull</div>
+          <div class="xch-footer">Best Shopify margin at 44.2%. Buyers search brand name directly. Prioritize Shopify email retargeting for repeat desk upgrade buyers.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Per-SKU channel breakdown -->
+    <div class="prod-ch-breakdown" id="prodChBreakdown">
+      <div class="section">
+        <div class="section-header"><div class="section-title">Channel Performance — <span id="prodChLabel">Selected SKU</span></div><span class="tag green">Live Data</span></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-hd"><div><div class="card-title" id="prodChChartTitle">Revenue by Platform</div><div class="card-sub">Where this SKU earns best</div></div></div>
+            <div class="card-body"><div style="height:200px;position:relative"><canvas id="prodChBarChart"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div><div class="card-title">Net Margin % by Platform</div><div class="card-sub">Shopify always highest — no 15% referral fee</div></div></div>
+            <div class="card-body"><div style="height:200px;position:relative"><canvas id="prodChMarginChart"></canvas></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product List + Bar Chart -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">SKU Performance — <span id="prodListLabel">All Platforms</span></div>
+        <div class="sort-btns">
+          <button class="sort-btn active" id="btnSortRev" onclick="sortProd('rev',this)">Revenue</button>
+          <button class="sort-btn" id="btnSortMgn" onclick="sortProd('margin',this)">Margin</button>
+        </div>
+      </div>
+      <div class="grid-40-60">
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">🏆 SKU Ranking</div><div class="card-sub" id="prodListSub">Sorted by revenue</div></div></div>
+          <div class="card-body"><div class="prod-list" id="prodList"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">Revenue & Margin by SKU</div><div class="card-sub" id="brandChartSub">Q1 2026 · All platforms</div></div></div>
+          <div class="card-body"><div style="height:260px;position:relative"><canvas id="prodBarChart"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insights + Platform Table -->
+    <div class="section pb">
+      <div class="section-header"><div class="section-title">SKU Intelligence — Insights &amp; Actions</div><span class="tag red" id="prodInsightTag">2 Issues Detected</span></div>
+      <div class="grid-2">
+        <div class="insight-stack" id="prodInsightStack"></div>
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">Platform Revenue Leaderboard</div><div class="card-sub">SKU view · Q1 performance</div></div></div>
+          <div class="card-body" style="padding:0">
+            <table class="retail-table">
+              <thead><tr><th>#</th><th>Platform</th><th>Revenue</th><th>Q1→Q2</th></tr></thead>
+              <tbody id="prodRetailBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /viewProd -->
+
+<script>
+// ══════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════
+const CHANNELS  = ['Amazon FBA','Shopify Direct','Amazon FBM','Amazon Ads','Shopify Ads'];
+const CH_IDS    = ['amzfba','shopify','amzfbm','amzads','shopads'];
+const CH_COLORS = {amzfba:'#FF9900',shopify:'#5B8DB8',amzfbm:'#E87700',amzads:'#6366F1',shopads:'#3B82F6'};
+
+const CH_DATA = {
+  amzfba:  {rev:148.2, adSpend:37.4, margin:22.4, acos:28.6, roas:null,  units:3180, returns:4.2, aov:46.60},
+  shopify: {rev:62.4,  adSpend:9.9,  margin:38.1, acos:null, roas:3.8,   units:920,  returns:2.1, aov:67.83},
+  amzfbm:  {rev:18.6,  adSpend:0,    margin:19.2, acos:31.4, roas:null,  units:310,  returns:5.8, aov:60.00},
+  amzads:  {rev:94.8,  adSpend:37.4, margin:0,    acos:27.4, roas:null,  units:0,    returns:0,   aov:0},
+  shopads: {rev:28.2,  adSpend:9.9,  margin:0,    acos:null, roas:3.2,   units:0,    returns:0,   aov:0},
+};
+
+const QTR_MULT = {Q1:1.0, Q2:1.18, Q3:1.34, Q4:1.62};
+
+// Leakage rates (% of channel GMV) — constant across quarters, scale with revenue
+// Returns: FBA 4.2% of rev, Shopify 2.1%, FBM 5.8%
+// Ad waste: 22% of ad spend is wasted (broad match inefficiency)
+// FBA fee overcharges: 1.8% of FBA GMV
+// Chargebacks: 1.1% of Shopify rev + 0.8% FBM
+const LEAKAGE_RATES = {
+  returnsPct:   { amzfba:0.042, shopify:0.021, amzfbm:0.058 },
+  adWastePct:   0.22,   // % of total ad spend (Amazon + Shopify)
+  feeOverPct:   0.018,  // % of FBA GMV only
+  chargebackPct:{ shopify:0.011, amzfbm:0.008, amzfba:0.004 },
+};
+
+// Compute leakage dynamically from current quarter + channel
+function computeLeakage(mult, ch) {
+  mult = mult || QTR_MULT[activeQtr];
+  ch   = ch   || activeChannel;
+
+  const ids = ch === 'all' ? ['amzfba','shopify','amzfbm'] : (CH_DATA[ch] ? [ch] : ['amzfba','shopify','amzfbm']);
+
+  let ret = 0, adWaste = 0, fees = 0, chargebacks = 0;
+
+  ids.forEach(id => {
+    const d = CH_DATA[id];
+    if(!d || d.rev === 0) return;
+    // CH_DATA.rev is in $K — must multiply by 1000 for dollar calculations
+    const rev = d.rev * mult * 1000;
+
+    ret         += rev * (LEAKAGE_RATES.returnsPct[id] || 0);
+    if(id === 'amzfba') fees += rev * LEAKAGE_RATES.feeOverPct;
+    chargebacks += rev * (LEAKAGE_RATES.chargebackPct[id] || 0);
+  });
+
+  // adSpend also in $K — multiply by 1000
+  let scopedAdSpend = 0;
+  if(ch === 'all')                              scopedAdSpend = (CH_DATA.amzfba.adSpend + CH_DATA.shopify.adSpend) * mult * 1000;
+  else if(ch === 'amzfba' || ch === 'amzads')  scopedAdSpend = CH_DATA.amzfba.adSpend * mult * 1000;
+  else if(ch === 'shopify'|| ch === 'shopads') scopedAdSpend = CH_DATA.shopify.adSpend * mult * 1000;
+  adWaste = scopedAdSpend * LEAKAGE_RATES.adWastePct;
+
+  const total = ret + adWaste + fees + chargebacks;
+  return {
+    total:       Math.round(total),
+    ret:         Math.round(ret),
+    adWaste:     Math.round(adWaste),
+    fees:        Math.round(fees),
+    chargebacks: Math.round(chargebacks),
+  };
+}
+
+const QTR_DATA = {
+  Q1:{ trend:{labels:['Aug','Sep','Oct','Nov','Dec','Jan'],amzfba:[18.4,24.2,38.6,46.2,52.8,62.4],shopify:[6.2,8.4,14.8,18.6,22.4,26.8],total:[24.6,32.6,53.4,64.8,75.2,89.2]} },
+  Q2:{ trend:{labels:['Nov','Dec','Jan','Feb','Mar','Apr'],amzfba:[46.2,52.8,62.4,68.2,74.8,82.0],shopify:[18.6,22.4,26.8,30.2,34.6,38.8],total:[64.8,75.2,89.2,98.4,109.4,120.8]} },
+  Q3:{ trend:{labels:['Feb','Mar','Apr','May','Jun','Jul'],amzfba:[62.4,68.2,74.8,82.0,88.4,96.2],shopify:[26.8,30.2,34.6,38.8,42.4,48.2],total:[89.2,98.4,109.4,120.8,130.8,144.4]} },
+  Q4:{ trend:{labels:['May','Jun','Jul','Aug','Sep','Oct'],amzfba:[82.0,88.4,96.2,104.8,148.2,218.4],shopify:[38.8,42.4,48.2,54.6,72.4,98.6],total:[120.8,130.8,144.4,159.4,220.6,317.0]} },
+};
+
+const LISTING_DATA = [
+  {sku:'MagRoute Cable Organizer', emoji:'🔌', id:'mgr', bestBsr:1840,  sessions:14200, cvr:18.4, clickShare:8.2, rating:4.6, reviews:2847, status:'Star'},
+  {sku:'DeskRise Monitor Stand',   emoji:'🖥️', id:'dsk', bestBsr:2640,  sessions:10800, cvr:14.2, clickShare:6.4, rating:4.7, reviews:1923, status:'Strong'},
+  {sku:'LinkLight LED Desk Lamp',  emoji:'💡', id:'lnk', bestBsr:3180,  sessions:9400,  cvr:12.8, clickShare:5.8, rating:4.5, reviews:1542, status:'Strong'},
+  {sku:'StackBox Shelf Unit 2-pk', emoji:'📚', id:'stk', bestBsr:5640,  sessions:7200,  cvr:10.4, clickShare:4.2, rating:4.4, reviews:834,  status:'Growing'},
+  {sku:'WallPeg Pegboard Kit',     emoji:'📌', id:'wlp', bestBsr:8240,  sessions:4800,  cvr:8.6,  clickShare:3.1, rating:4.3, reviews:312,  status:'Watch'},
+  {sku:'ChargePad 3-in-1 Charger', emoji:'🔴', id:'chr', bestBsr:12800, sessions:2600,  cvr:6.2,  clickShare:2.2, rating:4.2, reviews:86,   status:'New'},
+];
+
+const AD_DATA = [
+  {sku:'MagRoute Cable Organizer', id:'mgr', spend:8200,  attrRev:31400, acos:26.1, wasted:1800},
+  {sku:'DeskRise Monitor Stand',   id:'dsk', spend:9400,  attrRev:32200, acos:29.2, wasted:2100},
+  {sku:'LinkLight LED Desk Lamp',  id:'lnk', spend:7600,  attrRev:27400, acos:27.7, wasted:1670},
+  {sku:'StackBox Shelf Unit 2-pk', id:'stk', spend:6200,  attrRev:19800, acos:31.3, wasted:1360},
+  {sku:'WallPeg Pegboard Kit',     id:'wlp', spend:3800,  attrRev:12400, acos:30.6, wasted:836},
+  {sku:'ChargePad 3-in-1 Charger', id:'chr', spend:2200,  attrRev:7600,  acos:28.9, wasted:484},
+];
+
+const INVENTORY_DATA = [
+  {sku:'MagRoute Cable Organizer', dos:72,  risk:'healthy',  fc:840, tpl:600,  amount:'$28,750'},
+  {sku:'DeskRise Monitor Stand',   dos:58,  risk:'watch',    fc:320, tpl:480,  amount:'$25,590'},
+  {sku:'LinkLight LED Desk Lamp',  dos:61,  risk:'healthy',  fc:480, tpl:320,  amount:'$21,980'},
+  {sku:'StackBox Shelf Unit 2-pk', dos:84,  risk:'healthy',  fc:220, tpl:400,  amount:'$19,790'},
+  {sku:'WallPeg Pegboard Kit',     dos:62,  risk:'watch',    fc:180, tpl:240,  amount:'$9,000'},
+  {sku:'ChargePad 3-in-1 Charger', dos:48,  risk:'critical', fc:90,  tpl:180,  amount:'$3,150'},
+];
+
+const PLATFORM_DATA = [
+  {name:'Amazon.com (FBA)',       ch:'amzfba',  q1:148200, q2:174900},
+  {name:'Shopify Direct',         ch:'shopify', q1:62400,  q2:73600},
+  {name:'Amazon Ads Attribution', ch:'amzads',  q1:94800,  q2:111900},
+  {name:'Amazon.com (FBM)',       ch:'amzfbm',  q1:18600,  q2:21900},
+  {name:'Shopify Ads Attr.',      ch:'shopads', q1:28200,  q2:33300},
+];
+
+const PRODUCTS_DATA = [
+  {id:'mgr',emoji:'🔌',name:'MagRoute Cable Organizer 6-Port', rev:58200, margin:21.2, acos:26.1, bsr:1840, reviews:2847,
+   chRev:{'Amazon FBA':42600,'Shopify Direct':12400,'Amazon FBM':3200},
+   chMgn:{'Amazon FBA':21.2,'Shopify Direct':42.4,'Amazon FBM':17.8}},
+  {id:'dsk',emoji:'🖥️',name:'DeskRise Monitor Stand w/ Drawer',rev:63200, margin:24.8, acos:29.2, bsr:2640, reviews:1923,
+   chRev:{'Amazon FBA':38800,'Shopify Direct':18600,'Amazon FBM':5800},
+   chMgn:{'Amazon FBA':24.8,'Shopify Direct':44.2,'Amazon FBM':20.1}},
+  {id:'lnk',emoji:'💡',name:'LinkLight LED Desk Lamp 4000K',   rev:49800, margin:22.6, acos:27.7, bsr:3180, reviews:1542,
+   chRev:{'Amazon FBA':31200,'Shopify Direct':14200,'Amazon FBM':4400},
+   chMgn:{'Amazon FBA':22.6,'Shopify Direct':40.8,'Amazon FBM':18.4}},
+  {id:'stk',emoji:'📚',name:'StackBox Modular Shelf Unit 2-pk', rev:36800, margin:20.4, acos:31.3, bsr:5640, reviews:834,
+   chRev:{'Amazon FBA':22400,'Shopify Direct':10800,'Amazon FBM':3600},
+   chMgn:{'Amazon FBA':20.4,'Shopify Direct':38.6,'Amazon FBM':16.2}},
+  {id:'wlp',emoji:'📌',name:'WallPeg Pegboard Organizer Kit',   rev:14000, margin:18.8, acos:30.6, bsr:8240, reviews:312,
+   chRev:{'Amazon FBA':8600,'Shopify Direct':4200,'Amazon FBM':1200},
+   chMgn:{'Amazon FBA':18.8,'Shopify Direct':36.2,'Amazon FBM':14.6}},
+  {id:'chr',emoji:'🔴',name:'ChargePad 3-in-1 Wireless Charger',rev:7200,  margin:14.2, acos:28.9, bsr:12800,reviews:86,
+   chRev:{'Amazon FBA':4600,'Shopify Direct':2200,'Amazon FBM':400},
+   chMgn:{'Amazon FBA':14.2,'Shopify Direct':28.4,'Amazon FBM':10.8}},
+];
+
+const INSIGHTS_DATA = [
+  {type:'critical',num:'01',title:'ChargePad 3-in-1 stock will hit zero before Q4 holiday peak',desc:'48 days of combined inventory at current sell rate. Q4 demand will be 1.62× — stockout guaranteed without immediate reorder.',action:'→ Place PO for 800 units today. Expedite airfreight if lead time >35 days. $38K revenue protection.'},
+  {type:'critical',num:'02',title:'$14,680 in wasted Amazon ad spend this quarter',desc:'Broad match keywords on MagRoute, DeskRise, and StackBox showing irrelevant impressions with <2% CTR and zero conversions.',action:'→ Pause all broad match targets. Switch to exact + phrase match. Cut budget by 22%, redirect to best ACOS campaigns.'},
+  {type:'opportunity',num:'03',title:'MagRoute at BSR 1,840 — push Lightning Deal to lock <1,500',desc:'Cable Management category Best Seller requires BSR <1,200. You are 33% away. A Lightning Deal can move 200+ units in 4 hours.',action:'→ Submit Lightning Deal request for next deals window. Offer 15% discount. Target BSR <1,500 → BSR badge.'},
+  {type:'opportunity',num:'04',title:'Shopify growing faster than Amazon — build the moat',desc:'Shopify at 38.1% margin vs 22.4% FBA. Every Shopify order you capture saves 15% referral fee + FBA pick/pack costs.',action:'→ Launch post-purchase email sequence. Offer 10% loyalty discount for direct reorder. Target 35% Shopify share by Q3.'},
+];
+
+const PROD_INSIGHTS = {
+  mgr:[
+    {type:'opportunity',num:'01',title:'MagRoute is your BSR anchor — protect it aggressively',desc:'BSR 1,840 in Cable Management. Top 0.3% of category. Lightning Deal can lock BSR <1,500 and trigger Best Seller badge.',action:'→ Submit Lightning Deal for next Amazon deals window. Offer 15% off. Set restock at 1,000 units minimum.'},
+    {type:'opportunity',num:'02',title:'Shopify ROAS 4.2× on MagRoute — best in portfolio',desc:'Meta creative "desk chaos vs Kova order" performing above industry benchmark. Scale this creative before fatigue hits.',action:'→ Increase Meta budget by 40% on winning ad set. Duplicate to Google Shopping. Target $18K Shopify rev by Q2.'},
+  ],
+  dsk:[
+    {type:'opportunity',num:'01',title:'DeskRise highest Shopify share at 31.7% — lean in',desc:'$18,600 Shopify vs $38,800 FBA. Customers are searching the brand name directly. 44.2% Shopify margin vs 24.8% FBA.',action:'→ Run Shopify-exclusive bundle: DeskRise + MagRoute at $109.99. Target AOV lift to $85+ from current $79.99.'},
+    {type:'watch',num:'02',title:'DeskRise ACOS at 29.2% — slightly above target',desc:'High AOV product ($79.99) can tolerate higher ACOS than low-ticket SKUs. But top-3 competitors running 24–26%.',action:'→ Audit search terms report. Negative-match irrelevant terms. Goal: bring ACOS below 26% by end of Q2.'},
+  ],
+  wlp:[
+    {type:'watch',num:'01',title:'WallPeg new launch — needs review velocity boost',desc:'312 reviews is below 500-review threshold needed for consistent BSR stability. CVR of 8.6% confirms listing trust problem.',action:'→ Enroll in Amazon Vine (free for eligible sellers). Request 30 Vine reviews. Run 20% launch coupon for 30 days.'},
+    {type:'info',num:'02',title:'WallPeg Shopify underperforming relative to Amazon',desc:'Only 30% of revenue comes from Shopify vs 40%+ for other SKUs. Visual product needs lifestyle photography update.',action:'→ Commission 5 lifestyle images showing pegboard setups. Update Shopify PDP. A/B test new hero image vs current.'},
+  ],
+  chr:[
+    {type:'critical',num:'01',title:'ChargePad inventory will run out before Q4 — reorder TODAY',desc:'48 days of stock remaining. If lead time is 45 days and you wait 1 week, you will be out of stock during peak season.',action:'→ Place PO for minimum 800 units. Airfreight if needed. A single Q4 stockout week costs $12K+ in lost revenue.'},
+    {type:'watch',num:'02',title:'ChargePad CVR at 6.2% — listing needs optimization',desc:'86 reviews insufficient to build buyer trust for a $44.99 electronics product. Competitors have 500–2,000+ reviews.',action:'→ Enroll in Vine immediately. Add 2 A+ Content modules. Run 30-day launch coupon at 20% off to drive review velocity.'},
+  ],
+};
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let activeQtr = 'Q1';
+let activeChannel = 'all';
+let activeView = 'distribution';
+let activeProd = 'all';
+let activeSortProd = 'rev';
+let channelChart, donutChart, trendChart, brandChart, retailQQChart, prodBarChart, prodChBarChart, prodChMarginChart;
+
+// ══════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════
+function fmtUSD(v) {
+  if(v >= 1000000) return '$' + (v/1000000).toFixed(2) + 'M';
+  if(v >= 1000)    return '$' + (v/1000).toFixed(1) + 'K';
+  return '$' + v;
+}
+function flash(id, val) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.opacity = '0';
+  setTimeout(() => { el.textContent = val; el.style.opacity = '1'; el.style.transition = 'opacity .3s'; }, 150);
+}
+function gridColor() {
+  return document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.07)';
+}
+function tickColor() {
+  return document.documentElement.getAttribute('data-theme') === 'dark' ? '#64748B' : '#94A3B8';
+}
+
+// ══════════════════════════════════════════════════
+// THEME
+// ══════════════════════════════════════════════════
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+  setTimeout(() => {
+    const mult = QTR_MULT[activeQtr];
+    if(channelChart)  { channelChart.destroy();  channelChart = null;  buildChannelChart(); updateChannelChart(mult); }
+    if(donutChart)    { donutChart.destroy();    donutChart = null;    buildDonut(); updateDonut(mult); }
+    if(trendChart)    { trendChart.destroy();    trendChart = null;    buildTrend(); updateTrend(); }
+    if(brandChart)    { brandChart.destroy();    brandChart = null;    buildBrand(); }
+    if(retailQQChart) { retailQQChart.destroy(); retailQQChart = null; }
+    renderPlatformTable(mult);
+    if(prodBarChart)  { prodBarChart.destroy();  prodBarChart = null;  renderProdList(mult); }
+  }, 50);
+}
+
+// ══════════════════════════════════════════════════
+// VIEWS
+// ══════════════════════════════════════════════════
+function switchView(v) {
+  activeView = v;
+  document.body.setAttribute('data-view', v);
+  document.getElementById('viewDist').classList.toggle('active', v === 'distribution');
+  document.getElementById('viewProd').classList.toggle('active', v === 'products');
+  document.getElementById('tabDist').classList.toggle('active', v === 'distribution');
+  document.getElementById('tabProd').classList.toggle('active', v === 'products');
+  if(v === 'products') {
+    renderProdView();
+  }
+  if(v === 'distribution') {
+    // Destroy & rebuild retailQQChart — canvas may have been hidden/stale
+    if(retailQQChart) { retailQQChart.destroy(); retailQQChart = null; }
+    setTimeout(() => {
+      [channelChart,trendChart,donutChart,brandChart].forEach(c=>{if(c)c.resize();});
+      renderPlatformTable(QTR_MULT[activeQtr]);
+    }, 50);
+  }
+}
+
+// ══════════════════════════════════════════════════
+// QUARTERS
+// ══════════════════════════════════════════════════
+function switchQtr(q, btn) {
+  activeQtr = q;
+  document.querySelectorAll('.qtr-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('headerQtrLabel').textContent = q + ' 2026';
+  updateAll();
+}
+
+// ══════════════════════════════════════════════════
+// CHANNEL FILTER
+// ══════════════════════════════════════════════════
+function filterChannel(ch) {
+  activeChannel = ch;
+  document.querySelectorAll('.ch-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btnAll').classList.toggle('active-all', ch === 'all');
+  if(ch !== 'all') {
+    const idx = CH_IDS.indexOf(ch);
+    if(idx >= 0) document.querySelectorAll('.ch-btn')[idx].classList.add('active');
+    document.getElementById('btnAll').classList.remove('active-all');
+  }
+  updateAll();
+}
+
+// ══════════════════════════════════════════════════
+// UPDATE ALL
+// ══════════════════════════════════════════════════
+function updateAll() {
+  const mult = QTR_MULT[activeQtr];
+  updateKPIs(mult);
+  updateAlert(mult);
+  updateChannelChart(mult);
+  updateDonut(mult);
+  updateTrend();
+  updateBrand(mult);
+  renderListingTable();
+  renderAdTable(mult);
+  renderPlatformTable(mult);
+  if(activeView === 'products') renderProdView();
+}
+
+// ══════════════════════════════════════════════════
+// KPIs
+// ══════════════════════════════════════════════════
+function updateKPIs(mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  const ch = activeChannel;
+  const label = ch === 'all' ? 'All Platforms' : CHANNELS[CH_IDS.indexOf(ch)];
+  document.getElementById('kpiFilterLabel').textContent = label;
+
+  if(ch === 'all') {
+    const totalRev = (CH_DATA.amzfba.rev + CH_DATA.shopify.rev + CH_DATA.amzfbm.rev) * mult;
+    flash('kpiRev', '$' + totalRev.toFixed(1) + 'K');
+    flash('kpiMargin', '38.1%');
+    flash('kpiAcos', '28.6%');
+    flash('kpiRoas', '3.8×');
+    flash('kpiStock', 'ChargePad');
+    document.getElementById('kpiRevSub').textContent = activeQtr + ' 2026 · Amazon FBA + Shopify';
+    document.getElementById('kpiMarginSub').textContent = 'Shopify Direct · No marketplace fee';
+    document.getElementById('kpiAcosSub').textContent = '$' + (37.4*mult).toFixed(1) + 'K ad spend · $' + (94.8*mult).toFixed(1) + 'K attr. rev';
+    document.getElementById('kpiRoasSub').textContent = 'Meta + Google · $' + (9.9*mult).toFixed(1) + 'K spend';
+    document.getElementById('kpiStockSub').textContent = '48 days remaining · Reorder NOW';
+    document.getElementById('trendTag').textContent = 'Amazon FBA ' + Math.round(CH_DATA.amzfba.rev / (CH_DATA.amzfba.rev + CH_DATA.shopify.rev + CH_DATA.amzfbm.rev) * 100) + '% of GMV';
+  } else {
+    const d = CH_DATA[ch];
+    const rev = (d.rev * mult).toFixed(1);
+    flash('kpiRev', '$' + rev + 'K');
+    flash('kpiMargin', d.margin > 0 ? d.margin + '%' : 'Ad Channel');
+    flash('kpiAcos', d.acos ? d.acos + '%' : (d.roas ? d.roas + '×' : '—'));
+    flash('kpiRoas', d.roas ? d.roas + '×' : (d.acos ? 'ACOS' : '—'));
+    flash('kpiStock', d.units > 0 ? d.units.toLocaleString() + ' units' : '—');
+    document.getElementById('kpiRevSub').textContent = label + ' · ' + activeQtr + ' 2026';
+    document.getElementById('kpiMarginSub').textContent = d.margin > 0 ? 'Net margin after all fees' : 'Not applicable';
+    document.getElementById('kpiAcosSub').textContent = d.acos ? 'ACOS ' + d.acos + '% — target <25%' : (d.roas ? 'ROAS ' + d.roas + '× — target >4.0×' : '—');
+    document.getElementById('kpiRoasSub').textContent = d.aov > 0 ? 'AOV $' + d.aov.toFixed(2) : '—';
+    document.getElementById('kpiStockSub').textContent = d.returns > 0 ? d.returns + '% return rate' : '—';
+    document.getElementById('trendTag').textContent = label + ' · ' + activeQtr + ' 2026';
+  }
+  document.getElementById('kpiMarginLabel').textContent = ch === 'shopify' ? 'Shopify Net Margin' : (ch === 'all' ? 'Best Net Margin' : 'Net Margin');
+  document.getElementById('kpiAcosLabel').textContent  = (ch === 'shopify' || ch === 'shopads') ? 'Shopify ROAS' : 'Blended ACOS';
+}
+
+function updateAlert(mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  // Fully dynamic — computed from current quarter multiplier × active channel scope
+  const lk = computeLeakage(mult, activeChannel);
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  set('alertAmount', fmtUSD(lk.total));
+  set('apRet',       fmtUSD(lk.ret));
+  set('apAds',       fmtUSD(lk.adWaste));
+  set('apFee',       fmtUSD(lk.fees));
+  set('apCharge',    fmtUSD(lk.chargebacks));
+  set('alertPeriod', activeQtr + ' 2026');
+  // Visual pulse on update
+  const amtEl = document.getElementById('alertAmount');
+  if(amtEl) {
+    amtEl.style.transition = 'none';
+    amtEl.style.opacity = '0.2';
+    requestAnimationFrame(() => { amtEl.style.transition = 'opacity .3s'; amtEl.style.opacity = '1'; });
+  }
+}
+
+// ══════════════════════════════════════════════════
+// CHANNEL CHART
+// ══════════════════════════════════════════════════
+function buildChannelChart() {
+  const ctx = document.getElementById('channelChart').getContext('2d');
+  const mult = QTR_MULT[activeQtr];
+  const revs = ['amzfba','shopify','amzfbm'].map(id => +(CH_DATA[id].rev * mult).toFixed(1));
+  const spends = ['amzfba','shopify','amzfbm'].map(id => +(CH_DATA[id].adSpend * mult).toFixed(1));
+  const margins = ['amzfba','shopify','amzfbm'].map(id => CH_DATA[id].margin);
+  const labels = ['Amazon FBA','Shopify Direct','Amazon FBM'];
+  channelChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Revenue ($K)', data:revs,    backgroundColor:'rgba(255,153,0,.7)',  borderColor:'#FF9900', borderWidth:1, yAxisID:'y'},
+        {label:'Ad Spend ($K)',data:spends,  backgroundColor:'rgba(220,38,38,.5)',  borderColor:'#DC2626', borderWidth:1, yAxisID:'y'},
+        {label:'Net Margin %', data:margins, type:'line', yAxisID:'y2', borderColor:'#059669', backgroundColor:'rgba(5,150,105,.1)', pointBackgroundColor:margins.map(m=>m>30?'#059669':'#10B981'), pointRadius:5, tension:.3, fill:false}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>{
+        if(c.datasetIndex<2) return ` ${c.dataset.label}: $${c.raw}K`;
+        return ` Net Margin: ${c.raw}%`;
+      }}}},
+      scales:{
+        y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10},callback:v=>'$'+v+'K'}},
+        y2:{position:'right',grid:{display:false},ticks:{color:tickColor(),font:{size:10},callback:v=>v+'%'}}
+      }
+    }
+  });
+}
+
+function updateChannelChart(mult) {
+  if(!channelChart) return;
+  mult = mult || QTR_MULT[activeQtr];
+  const ch = activeChannel;
+  let labels, revs, spends, margins;
+  const coreIds = ['amzfba','shopify','amzfbm'];
+  if(ch === 'all' || ch === 'amzads' || ch === 'shopads') {
+    labels  = ['Amazon FBA','Shopify Direct','Amazon FBM'];
+    revs    = coreIds.map(id => +(CH_DATA[id].rev * mult).toFixed(1));
+    spends  = coreIds.map(id => +(CH_DATA[id].adSpend * mult).toFixed(1));
+    margins = coreIds.map(id => CH_DATA[id].margin);
+  } else {
+    const d = CH_DATA[ch];
+    labels  = [CHANNELS[CH_IDS.indexOf(ch)]];
+    revs    = [+(d.rev * mult).toFixed(1)];
+    spends  = [+(d.adSpend * mult).toFixed(1)];
+    margins = [d.margin];
+  }
+  channelChart.data.labels = labels;
+  channelChart.data.datasets[0].data = revs;
+  channelChart.data.datasets[1].data = spends;
+  channelChart.data.datasets[2].data = margins;
+  channelChart.data.datasets[2].pointBackgroundColor = margins.map(m=>m>30?'#059669':'#10B981');
+  channelChart.update();
+  const hasAcos = margins.some(m => m < 0);
+  const tag = document.getElementById('chAlertTag');
+  tag.textContent = ch === 'all' ? '⚠ ACOS Above Target' : (margins[0] > 30 ? '✓ Strong Margin' : '⚠ Margin Watch');
+  tag.className = 'tag ' + (ch !== 'all' && margins[0] > 30 ? 'green' : 'amber');
+  document.getElementById('channelPLLabel').textContent = ch === 'all' ? 'All 5 Platforms' : CHANNELS[CH_IDS.indexOf(ch)];
+}
+
+// ══════════════════════════════════════════════════
+// DONUT
+// ══════════════════════════════════════════════════
+function buildDonut() {
+  const ctx = document.getElementById('donutChart').getContext('2d');
+  const mult = QTR_MULT[activeQtr];
+  const ids = ['amzfba','shopify','amzfbm'];
+  const revs   = ids.map(id => +(CH_DATA[id].rev * mult).toFixed(1));
+  const colors = ids.map(id => CH_COLORS[id]);
+  donutChart = new Chart(ctx, {
+    type:'doughnut',
+    data:{labels:['Amazon FBA','Shopify Direct','Amazon FBM'], datasets:[{data:revs, backgroundColor:colors, borderWidth:0, hoverOffset:4}]},
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'72%',
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>{
+        const total = c.dataset.data.reduce((a,b)=>a+b,0);
+        return ` ${c.label}: $${c.raw}K (${Math.round(c.raw/total*100)}%)`;
+      }}}}
+    }
+  });
+  renderDonutLegend(mult, activeChannel);
+}
+
+function renderDonutLegend(mult, ch) {
+  mult = mult || QTR_MULT[activeQtr];
+  ch   = ch   || activeChannel;
+  const allIds    = ['amzfba','shopify','amzfbm'];
+  const allLabels = ['Amazon FBA','Shopify Direct','Amazon FBM'];
+  // If a specific revenue-earning channel is selected, show only that
+  const coreIds   = (ch === 'all' || ch === 'amzads' || ch === 'shopads')
+                    ? allIds
+                    : allIds.filter(id => id === ch);
+  const total = allIds.reduce((a,id) => a + CH_DATA[id].rev * mult, 0);
+  document.getElementById('donutLeg').innerHTML = coreIds.map(id => {
+    const i   = allIds.indexOf(id);
+    const rev = +(CH_DATA[id].rev * mult).toFixed(1);
+    const pct = Math.round(rev / total * 100);
+    return `<div class="donut-leg-row"><div class="donut-leg-left"><div class="donut-leg-dot" style="background:${CH_COLORS[id]}"></div>${allLabels[i]}</div><div><span class="donut-leg-val">$${rev}K</span><span style="color:var(--muted);font-size:9px;margin-left:4px">${pct}%</span></div></div>`;
+  }).join('');
+}
+
+function updateDonut(mult) {
+  if(!donutChart) return;
+  mult = mult || QTR_MULT[activeQtr];
+  const ch      = activeChannel;
+  const allIds  = ['amzfba','shopify','amzfbm'];
+  const allLbls = ['Amazon FBA','Shopify Direct','Amazon FBM'];
+  // Core channels only (ads channels have no standalone rev slice)
+  const coreIds = (ch === 'all' || ch === 'amzads' || ch === 'shopads')
+                  ? allIds
+                  : allIds.filter(id => id === ch);
+  const revs    = coreIds.map(id => +(CH_DATA[id].rev * mult).toFixed(1));
+  const colors  = coreIds.map(id => CH_COLORS[id]);
+  const labels  = coreIds.map(id => allLbls[allIds.indexOf(id)]);
+  donutChart.data.labels               = labels;
+  donutChart.data.datasets[0].data     = revs;
+  donutChart.data.datasets[0].backgroundColor = colors;
+  donutChart.update();
+  renderDonutLegend(mult, ch);
+}
+
+// ══════════════════════════════════════════════════
+// TREND
+// ══════════════════════════════════════════════════
+function buildTrend() {
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  const td = QTR_DATA[activeQtr].trend;
+  trendChart = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels:td.labels,
+      datasets:[
+        {label:'Amazon FBA ($K)', data:td.amzfba, borderColor:'#FF9900', fill:false, tension:.4, pointRadius:4, borderWidth:2},
+        {label:'Shopify ($K)',    data:td.shopify, borderColor:'#5B8DB8', fill:false, tension:.4, pointRadius:4, borderWidth:2},
+        {label:'Total GMV ($K)', data:td.total,   borderColor:'#2563EB', fill:false, tension:.4, pointRadius:4, borderWidth:2, borderDash:[4,2]}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{mode:'index',intersect:false}},
+      scales:{
+        y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10},callback:v=>'$'+v+'K'}},
+        x:{grid:{display:false},ticks:{color:tickColor(),font:{size:10}}}
+      }
+    }
+  });
+}
+
+function updateTrend() {
+  if(!trendChart) return;
+  const td  = QTR_DATA[activeQtr].trend;
+  const ch  = activeChannel;
+  trendChart.data.labels = td.labels;
+
+  if(ch === 'all') {
+    // Show all 3 lines
+    trendChart.data.datasets[0].data   = td.amzfba;
+    trendChart.data.datasets[0].hidden = false;
+    trendChart.data.datasets[1].data   = td.shopify;
+    trendChart.data.datasets[1].hidden = false;
+    trendChart.data.datasets[2].data   = td.total;
+    trendChart.data.datasets[2].hidden = false;
+  } else if(ch === 'amzfba' || ch === 'amzads') {
+    // Amazon only — show FBA line + total, hide Shopify
+    trendChart.data.datasets[0].data   = td.amzfba;
+    trendChart.data.datasets[0].hidden = false;
+    trendChart.data.datasets[1].hidden = true;
+    trendChart.data.datasets[2].data   = td.amzfba; // total = FBA for this scope
+    trendChart.data.datasets[2].hidden = false;
+  } else if(ch === 'shopify' || ch === 'shopads') {
+    // Shopify only — hide FBA, show Shopify + total
+    trendChart.data.datasets[0].hidden = true;
+    trendChart.data.datasets[1].data   = td.shopify;
+    trendChart.data.datasets[1].hidden = false;
+    trendChart.data.datasets[2].data   = td.shopify; // total = Shopify for this scope
+    trendChart.data.datasets[2].hidden = false;
+  } else if(ch === 'amzfbm') {
+    // FBM — approximate as 12.6% of FBA line
+    trendChart.data.datasets[0].data   = td.amzfba.map(v => +(v * 0.126).toFixed(1));
+    trendChart.data.datasets[0].hidden = false;
+    trendChart.data.datasets[1].hidden = true;
+    trendChart.data.datasets[2].data   = td.amzfba.map(v => +(v * 0.126).toFixed(1));
+    trendChart.data.datasets[2].hidden = false;
+  }
+  trendChart.update();
+}
+
+// ══════════════════════════════════════════════════
+// CATEGORY CHART — dynamic by quarter + channel
+// ══════════════════════════════════════════════════
+
+// Q1 base revenue per category per channel ($K)
+const CAT_DATA = {
+  labels:  ['Cable Mgmt','Desk Acc.','Lighting','Storage','Electronics'],
+  margins: [21.2, 24.8, 22.6, 19.6, 14.2],   // margins are channel-blended, roughly stable
+  // Revenue split by channel: amzfba / shopify / amzfbm proportions of each category Q1 base
+  amzfba:  [43.4, 40.2, 32.6, 27.4,  4.6],   // sum = 148.2 matches CH_DATA.amzfba
+  shopify: [12.8, 19.2, 14.8, 13.0,  2.6],   // sum = 62.4  matches CH_DATA.shopify
+  amzfbm:  [ 3.4,  6.0,  4.6,  4.2,  0.4],   // sum = 18.6  matches CH_DATA.amzfbm
+};
+
+function getCatRevs(mult, ch) {
+  mult = mult || QTR_MULT[activeQtr];
+  ch   = ch   || activeChannel;
+  const ids = (ch === 'all' || ch === 'amzads' || ch === 'shopads')
+              ? ['amzfba','shopify','amzfbm']
+              : (CAT_DATA[ch] ? [ch] : ['amzfba','shopify','amzfbm']);
+  // Sum revenue across selected channels, scale by mult
+  return CAT_DATA.labels.map((_, i) =>
+    +( ids.reduce((sum, id) => sum + (CAT_DATA[id][i] || 0), 0) * mult ).toFixed(1)
+  );
+}
+
+function buildBrand() {
+  const ctx  = document.getElementById('brandChart').getContext('2d');
+  const mult = QTR_MULT[activeQtr];
+  const revs = getCatRevs(mult, activeChannel);
+  brandChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: CAT_DATA.labels,
+      datasets:[
+        {label:'Revenue ($K)', data:revs,
+         backgroundColor: revs.map((_,i) => i===4 ? 'rgba(220,38,38,.55)' : 'rgba(255,153,0,.65)'),
+         yAxisID:'y'},
+        {label:'Margin %', type:'line', data:CAT_DATA.margins,
+         borderColor:'#059669', backgroundColor:'transparent',
+         pointBackgroundColor:'#059669', pointRadius:4, tension:.3, yAxisID:'y2'}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:9},callback:v=>'$'+v+'K'}},
+        y2:{position:'right',grid:{display:false},ticks:{color:tickColor(),font:{size:9},callback:v=>v+'%'}}
+      }
+    }
+  });
+}
+
+function updateBrand(mult) {
+  if(!brandChart) return;
+  mult = mult || QTR_MULT[activeQtr];
+  const revs = getCatRevs(mult, activeChannel);
+  brandChart.data.datasets[0].data = revs;
+  brandChart.data.datasets[0].backgroundColor = revs.map((_,i) => i===4 ? 'rgba(220,38,38,.55)' : 'rgba(255,153,0,.65)');
+  brandChart.update();
+}
+
+// ══════════════════════════════════════════════════
+// LISTING TABLE (replaces velocity heatmap)
+// ══════════════════════════════════════════════════
+function bsrClass(v) {
+  if(v <= 3000)  return 'hm-hot';
+  if(v <= 6000)  return 'hm-warm';
+  if(v <= 10000) return 'hm-mid';
+  return 'hm-cold';
+}
+function cvrClass(v) {
+  if(v >= 14)  return 'hm-hot';
+  if(v >= 10)  return 'hm-warm';
+  if(v >= 7)   return 'hm-mid';
+  return 'hm-cold';
+}
+function renderListingTable() {
+  const body = document.getElementById('velocityBody');
+  body.innerHTML = LISTING_DATA.map(row => {
+    const stColor = row.status === 'Star' ? 'var(--positive)' : (row.status === 'New' ? 'var(--negative)' : (row.status === 'Watch' ? 'var(--warning)' : 'var(--muted)'));
+    return `<tr>
+      <td class="prod-name">${row.emoji} ${row.sku}</td>
+      <td class="${bsrClass(row.bestBsr)}">${row.bestBsr.toLocaleString()}</td>
+      <td class="hm-warm">${row.sessions.toLocaleString()}</td>
+      <td class="${cvrClass(row.cvr)}">${row.cvr}%</td>
+      <td class="hm-mid">${row.clickShare}%</td>
+      <td class="${row.rating >= 4.5 ? 'hm-hot' : 'hm-warm'}">${row.rating}★</td>
+      <td class="${row.reviews >= 1000 ? 'hm-hot' : (row.reviews >= 300 ? 'hm-warm' : 'hm-cold')}">${row.reviews.toLocaleString()}</td>
+      <td style="font-weight:700;color:${stColor};font-family:'Manrope',sans-serif">${row.status}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// AD TABLE (replaces deduction table)
+// ══════════════════════════════════════════════════
+function renderAdTable(mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  const body = document.getElementById('deductionBody');
+  body.innerHTML = AD_DATA.map(row => {
+    const spend   = Math.round(row.spend * mult);
+    const attrRev = Math.round(row.attrRev * mult);
+    const wasted  = Math.round(row.wasted * mult);
+    const acosCls = row.acos < 25 ? 'risk-low' : (row.acos < 32 ? 'risk-med' : 'risk-high');
+    const rPct    = row.acos < 25 ? 20 : (row.acos < 32 ? 50 : 80);
+    const rColor  = row.acos < 25 ? '#059669' : (row.acos < 32 ? '#D97706' : '#DC2626');
+    const action  = row.acos < 25 ? 'Scale budget — good efficiency' : (row.acos < 32 ? 'Audit search terms — near target' : 'Pause broad match — over target');
+    return `<tr>
+      <td style="font-weight:600;color:var(--text2)">${row.emoji || '📦'} ${row.sku.split(' ').slice(0,2).join(' ')}</td>
+      <td class="mono">${fmtUSD(spend)}</td>
+      <td class="mono">${fmtUSD(attrRev)}</td>
+      <td class="${acosCls}">${row.acos}%<span class="risk-bar-wrap"><span class="risk-bar" style="width:${rPct}%;background:${rColor}"></span></span></td>
+      <td class="risk-high mono">${fmtUSD(wasted)}</td>
+      <td style="font-size:10px;color:var(--muted)">${action}</td>
+    </tr>`;
+  }).join('');
+
+  // Inventory rows
+  const whEl = document.getElementById('warehouseRows');
+  whEl.innerHTML = INVENTORY_DATA.map(row => {
+    const color = row.risk === 'critical' ? '#DC2626' : (row.risk === 'watch' ? '#D97706' : '#059669');
+    const bgColor = row.risk === 'critical' ? 'rgba(220,38,38,.07)' : (row.risk === 'watch' ? 'rgba(217,119,6,.05)' : 'transparent');
+    const pct = Math.min(100, Math.round((row.dos / 90) * 100));
+    return `<div style="display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);gap:10px;background:${bgColor}">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;color:var(--text2)">${row.sku}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">${row.fc} FC + ${row.tpl} 3PL · ${row.amount} value</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:${color}">${row.dos}d</div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase">${row.risk === 'critical' ? '⚠ Reorder' : row.risk === 'watch' ? 'Watch' : 'Healthy'}</div>
+      </div>
+      <div style="width:60px">
+        <div style="height:5px;background:var(--surface3);border-radius:3px"><div style="height:100%;width:${pct}%;background:${color};border-radius:3px"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// PLATFORM TABLE
+// ══════════════════════════════════════════════════
+function renderPlatformTable(mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  const ch = activeChannel;
+  const filtered = ch === 'all' ? PLATFORM_DATA : PLATFORM_DATA.filter(r => r.ch === ch);
+  document.getElementById('retailLabel').textContent = ch === 'all' ? 'All Platforms' : CHANNELS[CH_IDS.indexOf(ch)];
+  const maxRev = filtered.length > 0 ? Math.max(...filtered.map(r => r.q1 * mult)) : 1;
+
+  document.getElementById('retailBody').innerHTML = (filtered.length === 0
+    ? `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">No data for selected platform</td></tr>`
+    : filtered.map((row, i) => {
+        const q1 = Math.round(row.q1 * mult);
+        const q2 = Math.round(row.q2 * mult);
+        const g  = ((q2-q1)/q1*100).toFixed(0);
+        return `<tr>
+          <td><span class="rank-num">${String(i+1).padStart(2,'0')}</span></td>
+          <td style="font-weight:600;color:var(--text)">${row.name}</td>
+          <td class="mono">$${(q1/1000).toFixed(0)}K</td>
+          <td><span style="color:var(--positive)">↑ ${g}%</span></td>
+          <td class="rev-bar-cell"><div class="rev-bar-track" style="width:80px"><div class="rev-bar-fill" style="width:${Math.round(q1/maxRev*100)}%;background:${CH_COLORS[row.ch]}"></div></div></td>
+        </tr>`;
+      }).join(''));
+
+  // Always destroy and rebuild QQ chart to avoid stale canvas context
+  if(retailQQChart) { retailQQChart.destroy(); retailQQChart = null; }
+  const qqCanvas = document.getElementById('retailQQChart');
+  if(qqCanvas && filtered.length > 0) {
+    buildRetailQQ(mult, filtered);
+  }
+}
+
+function buildRetailQQ(mult, filtered) {
+  mult = mult || QTR_MULT[activeQtr];
+  if(!filtered) {
+    const ch = activeChannel;
+    filtered = ch === 'all' ? PLATFORM_DATA : PLATFORM_DATA.filter(r => r.ch === ch);
+  }
+  const ctx = document.getElementById('retailQQChart');
+  if(!ctx) return;
+  retailQQChart = new Chart(ctx.getContext('2d'), {
+    type:'bar',
+    data:{
+      labels: filtered.map(r => r.name.split(' ').slice(0,2).join(' ')),
+      datasets:[
+        {label:'Q1', data:filtered.map(r=>+(r.q1*mult/1000).toFixed(1)), backgroundColor:'rgba(255,153,0,.65)'},
+        {label:'Q2', data:filtered.map(r=>+(r.q2*mult/1000).toFixed(1)), backgroundColor:'rgba(5,150,105,.65)'},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{legend:{labels:{color:tickColor(),font:{size:10}}}},
+      scales:{
+        x:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10},callback:v=>'$'+v+'K'}},
+        y:{grid:{display:false},ticks:{color:tickColor(),font:{size:10}}}
+      }
+    }
+  });
+}
+
+// retailQQChart always rebuilt fresh in renderPlatformTable — no separate update needed
+
+// ══════════════════════════════════════════════════
+// AI ENGINE
+// ══════════════════════════════════════════════════
+async function runAIEngine() {
+  const btn = document.getElementById('aiRunBtn');
+  const body = document.getElementById('aiBody');
+  btn.disabled = true;
+  btn.textContent = '⏳ Analyzing...';
+  body.innerHTML = '<div class="ai-loading"><div class="ai-spinner"></div>Analyzing Kova GMV, ACOS, inventory risk & listing health...</div>';
+
+  const mult = QTR_MULT[activeQtr];
+  const totalGMV = ((CH_DATA.amzfba.rev + CH_DATA.shopify.rev + CH_DATA.amzfbm.rev) * mult).toFixed(1);
+  const context = `Kova Commerce E-Commerce Dashboard — ${activeQtr} 2026.
+Total GMV: $${totalGMV}K across Amazon FBA + Shopify Direct + Amazon FBM.
+Amazon FBA: $${(CH_DATA.amzfba.rev*mult).toFixed(1)}K · 22.4% net margin after 15% referral + FBA fees.
+Shopify Direct: $${(CH_DATA.shopify.rev*mult).toFixed(1)}K · 38.1% net margin · ROAS 3.8× (target 4.0×).
+Amazon FBM: $${(CH_DATA.amzfbm.rev*mult).toFixed(1)}K · 19.2% margin · 5.8% returns (above threshold).
+Blended ACOS: 28.6% — target <25%. Wasted ad spend: $${(14680*mult/1000).toFixed(1)}K on broad match.
+Critical inventory: ChargePad 3-in-1 at 48 days of stock. Q4 demand 1.62×. Stockout imminent.
+Top SKU: MagRoute Cable Organizer — BSR 1,840, 18.4% CVR, 2,847 reviews, 4.6★.
+Revenue leakage total: ${fmtUSD(Math.round(QTR_DATA[activeQtr].alertTotal * mult))}.`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        system:`You are an Amazon FBA + Shopify e-commerce growth strategist. Given dashboard data for Kova Commerce, output ONLY a JSON array of 4-5 action objects. Each must have: title (string), body (string, 1-2 sentences), action (string, starts with →), impact (string like "+$42K" or "−$8K"), urgency ("critical"|"high"|"medium"|"low"). No markdown, no preamble. Return ONLY the JSON array.`,
+        messages:[{role:'user',content:context}]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content.map(i=>i.text||'').join('');
+    const clean = text.replace(/```json|```/g,'').trim();
+    const actions = JSON.parse(clean);
+    body.innerHTML = `<div class="ai-actions">${actions.map(a=>`
+      <div class="ai-action-card urgency-${a.urgency}">
+        <div class="ai-ac-hd"><div class="ai-ac-title">${a.title}</div>
+          <div class="ai-ac-badges">
+            <div class="ai-ac-impact ${a.impact.startsWith('-')||a.impact.startsWith('−')?'negative':''}">${a.impact}</div>
+            <div class="urgency-badge urgency-${a.urgency}">${a.urgency}</div>
+          </div>
+        </div>
+        <div class="ai-ac-body">${a.body}</div>
+        <div class="ai-ac-action">${a.action}</div>
+      </div>`).join('')}</div>`;
+  } catch(e) {
+    const fallback = [
+      {title:'Place ChargePad reorder PO immediately',body:'48 days of stock at current sell rate. Q4 demand spike (×1.62) means guaranteed stockout before holiday peak if you wait.',action:'→ Issue PO for 800 units today. Airfreight if lead time >35 days. Protect $38K+ holiday revenue.',impact:'+$38K',urgency:'critical'},
+      {title:'Pause all Amazon broad match keywords across 6 SKUs',body:'$14,680 in wasted spend detected on broad match with <2% CTR and zero attributed conversions. Budget burning with no return.',action:'→ Switch all campaigns to exact + phrase match only. Reallocate $3K/mo to best ACOS campaigns.',impact:'+$14.7K',urgency:'critical'},
+      {title:'Submit MagRoute Lightning Deal for next deals window',body:'BSR 1,840 is 33% away from Best Seller badge territory. A Lightning Deal can move 200+ units and lock BSR <1,500.',action:'→ Submit LD at 15% discount. Target BSR <1,500 in Cable Management → Best Seller badge.',impact:'+$12K',urgency:'high'},
+      {title:'Launch Shopify post-purchase loyalty email sequence',body:'Shopify margin at 38.1% vs 22.4% FBA. Every repeat customer that buys direct saves you 15% referral fee + FBA costs.',action:'→ Build 3-email post-purchase sequence. Offer 10% direct loyalty discount. Target 35% Shopify share.',impact:'+$18K',urgency:'medium'},
+      {title:'Enroll ChargePad and WallPeg in Amazon Vine',body:'86 and 312 reviews respectively — below the 500-review threshold for listing trust in competitive electronics and storage categories.',action:'→ Submit both to Vine. Target 30 reviews each. Run 20% coupon for 30 days to accelerate organic velocity.',impact:'+$8K',urgency:'medium'},
+    ];
+    body.innerHTML = `<div class="ai-actions">${fallback.map(a=>`
+      <div class="ai-action-card urgency-${a.urgency}">
+        <div class="ai-ac-hd"><div class="ai-ac-title">${a.title}</div>
+          <div class="ai-ac-badges">
+            <div class="ai-ac-impact ${a.impact.startsWith('-')||a.impact.startsWith('−')?'negative':''}">${a.impact}</div>
+            <div class="urgency-badge urgency-${a.urgency}">${a.urgency}</div>
+          </div>
+        </div>
+        <div class="ai-ac-body">${a.body}</div>
+        <div class="ai-ac-action">${a.action}</div>
+      </div>`).join('')}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '⚡ Generate Actions';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// PRODUCTS VIEW
+// ══════════════════════════════════════════════════
+function selectProduct(id, btn) {
+  activeProd = id;
+  document.querySelectorAll('.prod-chip').forEach(c => c.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderProdView();
+}
+
+function sortProd(by, btn) {
+  activeSortProd = by;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProdList(QTR_MULT[activeQtr]);
+}
+
+function renderProdView() {
+  const mult = QTR_MULT[activeQtr];
+  const spot = document.getElementById('spotBanner');
+  const breakdown = document.getElementById('prodChBreakdown');
+
+  if(activeProd !== 'all') {
+    const pd = PRODUCTS_DATA.find(p => p.id === activeProd);
+    const ld = LISTING_DATA.find(l => l.id === activeProd);
+    if(pd) {
+      spot.style.display = 'flex';
+      document.getElementById('spotEmoji').textContent = pd.emoji;
+      document.getElementById('spotName').textContent = pd.name;
+      document.getElementById('spotSub').textContent = 'BSR ' + (ld ? ld.bestBsr.toLocaleString() : '—') + ' · ' + (ld ? ld.reviews.toLocaleString() : '—') + ' reviews';
+      document.getElementById('spotRev').textContent = fmtUSD(Math.round(pd.rev * mult));
+      document.getElementById('spotAcos').textContent = pd.acos + '%';
+      document.getElementById('spotBsr').textContent = ld ? ld.bestBsr.toLocaleString() : '—';
+      document.getElementById('spotRevs').textContent = ld ? ld.reviews.toLocaleString() : '—';
+      breakdown.classList.add('show');
+      document.getElementById('prodChLabel').textContent = pd.name;
+      document.getElementById('prodChChartTitle').textContent = 'Revenue by Platform — ' + pd.name.split(' ').slice(0,2).join(' ');
+      buildProdChCharts(pd, mult);
+    }
+  } else {
+    spot.style.display = 'none';
+    breakdown.classList.remove('show');
+    if(prodChBarChart) { prodChBarChart.destroy(); prodChBarChart = null; }
+    if(prodChMarginChart) { prodChMarginChart.destroy(); prodChMarginChart = null; }
+  }
+
+  renderProdList(mult);
+  renderProdInsights();
+  renderProdRetailTable(mult);
+  updateSkuKPIs(mult);
+}
+
+function buildProdChCharts(pd, mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  const labels  = Object.keys(pd.chRev);
+  const revVals = Object.values(pd.chRev).map(v => +((v*mult)/1000).toFixed(2));
+  const mgnVals = Object.values(pd.chMgn);
+
+  if(prodChBarChart) prodChBarChart.destroy();
+  const ctx1 = document.getElementById('prodChBarChart').getContext('2d');
+  prodChBarChart = new Chart(ctx1, {
+    type:'bar',
+    data:{labels, datasets:[{label:'Revenue ($K)', data:revVals, backgroundColor:'rgba(255,153,0,.7)', borderColor:'#FF9900', borderWidth:1}]},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10},callback:v=>'$'+v+'K'}},x:{grid:{display:false},ticks:{color:tickColor(),font:{size:10}}}}}
+  });
+
+  if(prodChMarginChart) prodChMarginChart.destroy();
+  const ctx2 = document.getElementById('prodChMarginChart').getContext('2d');
+  prodChMarginChart = new Chart(ctx2, {
+    type:'bar',
+    data:{labels, datasets:[{label:'Margin %', data:mgnVals, backgroundColor:mgnVals.map(v=>v<20?'rgba(217,119,6,.7)':'rgba(5,150,105,.7)'), borderColor:mgnVals.map(v=>v<20?'#D97706':'#059669'), borderWidth:1}]},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10},callback:v=>v+'%'}},x:{grid:{display:false},ticks:{color:tickColor(),font:{size:10}}}}}
+  });
+}
+
+function updateSkuKPIs(mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  const byRev  = [...PRODUCTS_DATA].sort((a,b) => b.rev - a.rev);
+  const byAcos = [...PRODUCTS_DATA].sort((a,b) => a.acos - b.acos);
+  const byCvr  = [...LISTING_DATA].sort((a,b)  => b.cvr - a.cvr);
+  const invAlert = INVENTORY_DATA.find(i => i.risk === 'critical') || INVENTORY_DATA.find(i => i.risk === 'watch');
+  flash('pkpiTop',  byRev[0].name.split(' ').slice(0,1).join(' '));
+  document.getElementById('pkpiTopSub').textContent = fmtUSD(Math.round(byRev[0].rev*mult)) + ' · BSR ' + LISTING_DATA.find(l=>l.id===byRev[0].id)?.bestBsr.toLocaleString();
+  flash('pkpiAcos', byAcos[0].name.split(' ').slice(0,1).join(' '));
+  document.getElementById('pkpiAcosSub').textContent = byAcos[0].acos + '% ACOS · Most efficient';
+  flash('pkpiFast', byCvr[0].sku.split(' ').slice(0,1).join(' '));
+  document.getElementById('pkpiFastSub').textContent = byCvr[0].cvr + '% CVR · Highest conversion';
+  if(invAlert) {
+    flash('pkpiWh', invAlert.sku.split(' ').slice(0,1).join(' '));
+    document.getElementById('pkpiWhSub').textContent = invAlert.dos + ' days stock · ' + (invAlert.risk === 'critical' ? 'Reorder immediately' : 'Watch closely');
+  }
+}
+
+function renderProdList(mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  let prods = [...PRODUCTS_DATA];
+  if(activeSortProd === 'margin') prods.sort((a,b) => b.margin - a.margin);
+  else prods.sort((a,b) => b.rev - a.rev);
+
+  document.getElementById('prodList').innerHTML = prods.map((p,i) => {
+    const mCls = p.margin < 18 ? 'warn' : 'pos';
+    return `<div class="prod-row" onclick="selectProduct('${p.id}', document.getElementById('chip-${p.id}'))">
+      <div class="prod-rank">${String(i+1).padStart(2,'0')}</div>
+      <div class="prod-emoji">${p.emoji}</div>
+      <div class="prod-info">
+        <div class="prod-name">${p.name}</div>
+        <div class="prod-meta">BSR ${p.bsr.toLocaleString()} · ACOS ${p.acos}%</div>
+      </div>
+      <div class="prod-rev">${fmtUSD(Math.round(p.rev*mult))}</div>
+      <div class="prod-margin ${mCls}">+${p.margin}%</div>
+    </div>`;
+  }).join('');
+
+  if(!prodBarChart) buildProdBar(prods, mult);
+  else updateProdBar(prods, mult);
+}
+
+function buildProdBar(prods, mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  const ctx = document.getElementById('prodBarChart').getContext('2d');
+  prodBarChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: prods.map(p => p.emoji + ' ' + p.name.split(' ').slice(0,2).join(' ')),
+      datasets:[
+        {label:'Revenue ($K)', data:prods.map(p=>+((p.rev*mult)/1000).toFixed(1)), backgroundColor:'rgba(255,153,0,.65)', yAxisID:'y'},
+        {label:'Margin %', type:'line', data:prods.map(p=>p.margin), borderColor:'#059669', pointBackgroundColor:'#059669', pointRadius:4, tension:.3, fill:false, yAxisID:'y2'}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{
+        y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10},callback:v=>'$'+v+'K'}},
+        y2:{position:'right',grid:{display:false},ticks:{color:tickColor(),font:{size:10},callback:v=>v+'%'}}
+      }
+    }
+  });
+}
+
+function updateProdBar(prods, mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  if(!prodBarChart) return;
+  prodBarChart.data.labels = prods.map(p => p.emoji + ' ' + p.name.split(' ').slice(0,2).join(' '));
+  prodBarChart.data.datasets[0].data = prods.map(p=>+((p.rev*mult)/1000).toFixed(1));
+  prodBarChart.data.datasets[1].data = prods.map(p=>p.margin);
+  prodBarChart.update();
+}
+
+function renderProdInsights() {
+  const stack = document.getElementById('prodInsightStack');
+  const insights = (activeProd !== 'all' && PROD_INSIGHTS[activeProd]) ? PROD_INSIGHTS[activeProd] : INSIGHTS_DATA;
+  stack.innerHTML = insights.map(ins => `
+    <div class="insight-card ${ins.type}">
+      <div class="insight-num">${ins.num}</div>
+      <div class="insight-title">${ins.title}</div>
+      <div class="insight-desc">${ins.desc}</div>
+      <div class="insight-action">${ins.action}</div>
+    </div>`).join('');
+  document.getElementById('prodInsightTag').textContent = insights.filter(i=>i.type==='critical').length + ' Issues Detected';
+}
+
+function renderProdRetailTable(mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  const ch = activeChannel;
+  const filtered = ch === 'all' ? PLATFORM_DATA : PLATFORM_DATA.filter(r => r.ch === ch);
+  document.getElementById('prodRetailBody').innerHTML = filtered.map((row, i) => {
+    const q1 = Math.round(row.q1 * mult);
+    const q2 = Math.round(row.q2 * mult);
+    const g  = ((q2-q1)/q1*100).toFixed(0);
+    return `<tr>
+      <td><span class="rank-num">${String(i+1).padStart(2,'0')}</span></td>
+      <td style="font-weight:600;color:var(--text)">${row.name}</td>
+      <td class="mono">$${(q1/1000).toFixed(0)}K</td>
+      <td><span style="color:var(--positive)">↑ ${g}%</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  buildChannelChart();
+  buildDonut();
+  buildTrend();
+  buildBrand();
+  renderListingTable();
+  renderAdTable();
+  renderPlatformTable();
+  updateKPIs();
+  updateAlert();
+});
+</script>
+</body>
+</html>

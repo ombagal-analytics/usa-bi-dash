@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brightfield Foods Co. — CPG Intelligence Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080E1A;
+  --surface: #0F172A;
+  --surface2: #1E293B;
+  --surface3: #253044;
+  --border: #1E293B;
+  --border2: #2D3E54;
+  --text: #F1F5F9;
+  --text2: #CBD5E1;
+  --muted: #64748B;
+  --muted2: #475569;
+  --accent: #2563EB;
+  --accent2: #3B82F6;
+  --accent-bg: rgba(37,99,235,0.1);
+  --positive: #10B981;
+  --positive-bg: rgba(16,185,129,0.1);
+  --negative: #EF4444;
+  --negative-bg: rgba(239,68,68,0.1);
+  --warning: #F59E0B;
+  --warning-bg: rgba(245,158,11,0.1);
+  --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.3);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+[data-theme="light"] {
+  --bg: #F0F4F8;
+  --surface: #FFFFFF;
+  --surface2: #F8FAFC;
+  --surface3: #EFF2F7;
+  --border: #E2E8F0;
+  --border2: #CBD5E1;
+  --text: #0F172A;
+  --text2: #334155;
+  --muted: #64748B;
+  --muted2: #94A3B8;
+  --accent: #1D4ED8;
+  --accent2: #2563EB;
+  --accent-bg: rgba(29,78,216,0.08);
+  --positive: #059669;
+  --positive-bg: rgba(5,150,105,0.08);
+  --negative: #DC2626;
+  --negative-bg: rgba(220,38,38,0.08);
+  --warning: #D97706;
+  --warning-bg: rgba(217,119,6,0.08);
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Manrope',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;transition:background .3s,color .3s}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── HEADER ── */
+.header{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200}
+.header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent) 30%,var(--accent2) 70%,transparent)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;height:58px;padding:0 28px;gap:16px;max-width:1600px;margin:0 auto}
+.brand-row{display:flex;align-items:center;gap:10px}
+.brand-mark{width:32px;height:32px;background:var(--positive);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;font-weight:800;flex-shrink:0}
+.brand-name{font-weight:800;font-size:15px;color:var(--text);letter-spacing:-.4px}
+.brand-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:1px}
+.header-center{display:flex;align-items:center;gap:6px}
+.qtr-btn{padding:5px 14px;border-radius:6px;font-size:11px;font-weight:700;font-family:'Manrope',sans-serif;border:1.5px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;transition:all .18s;letter-spacing:.3px}
+.qtr-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.qtr-btn:hover:not(.active){background:var(--surface2);color:var(--text)}
+.header-right{display:flex;align-items:center;gap:10px}
+.live-tag{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--positive);background:var(--positive-bg);border:1px solid rgba(16,185,129,.2);border-radius:20px;padding:3px 10px}
+.live-dot{width:6px;height:6px;background:var(--positive);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.view-tabs{display:flex;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:2px;gap:2px}
+.vtab{padding:5px 14px;border-radius:5px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border:none;background:none;font-family:'Manrope',sans-serif;transition:all .18s}
+.vtab.active{background:var(--surface);color:var(--accent);box-shadow:var(--shadow)}
+.vtab.active.prod-vtab{color:var(--positive)}
+.theme-btn{width:32px;height:32px;border:1.5px solid var(--border2);border-radius:7px;background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .18s}
+.theme-btn:hover{background:var(--surface3)}
+
+/* ── WRAPPER ── */
+.wrap{max-width:1600px;margin:0 auto;padding:0 28px}
+.view-panel{display:none}
+.view-panel.active{display:block}
+
+/* ── ALERT BANNER ── */
+.alert-banner{background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(239,68,68,.04));border:1px solid rgba(239,68,68,.25);border-left:4px solid var(--negative);border-radius:var(--radius-lg);padding:14px 20px;margin:18px 0 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.alert-left{display:flex;align-items:center;gap:12px}
+.alert-icon{font-size:20px}
+.alert-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--negative);margin-bottom:2px}
+.alert-amount{font-family:'DM Mono',monospace;font-size:26px;color:var(--negative);font-weight:500;line-height:1}
+.alert-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.alert-pills{display:flex;gap:16px;flex-wrap:wrap}
+.alert-pill{text-align:center}
+.alert-pill-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--warning)}
+.alert-pill-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-top:1px}
+.alert-divider{width:1px;background:rgba(239,68,68,.2);align-self:stretch}
+
+/* ── PRIORITY ACTIONS ── */
+.pact-row{display:flex;flex-direction:column;gap:6px;margin:12px 0 0}
+.pact{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text2);padding:8px 12px;border-radius:6px;background:var(--surface);border:1px solid var(--border)}
+.pact-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.pact.fire .pact-dot{background:var(--negative)}
+.pact.fire{border-color:rgba(239,68,68,.2)}
+.pact.watch .pact-dot{background:var(--warning)}
+.pact.watch{border-color:rgba(245,158,11,.15)}
+.pact.go .pact-dot{background:var(--positive)}
+.pact.go{border-color:rgba(16,185,129,.15)}
+
+/* ── SECTION ── */
+.section{padding:22px 0 0}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.section-title::before{content:'';width:3px;height:14px;background:linear-gradient(180deg,var(--accent),var(--accent2));border-radius:2px}
+body[data-view="products"] .section-title::before{background:linear-gradient(180deg,var(--positive),#34D399)}
+
+/* ── KPI STRIP ── */
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:default}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.kpi-card.blue::before{background:linear-gradient(90deg,#1D4ED8,#3B82F6)}
+.kpi-card.red::before{background:linear-gradient(90deg,#B91C1C,#F87171)}
+.kpi-card.green::before{background:linear-gradient(90deg,#047857,#10B981)}
+.kpi-card.amber::before{background:linear-gradient(90deg,#B45309,#F59E0B)}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.kpi-icon{font-size:16px;opacity:.85}
+.kpi-badge{font-size:9px;font-weight:700;font-family:'DM Mono',monospace;padding:2px 7px;border-radius:20px}
+.kpi-badge.up{background:var(--positive-bg);color:var(--positive)}
+.kpi-badge.dn{background:var(--negative-bg);color:var(--negative)}
+.kpi-badge.warn{background:var(--warning-bg);color:var(--warning)}
+.kpi-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:4px}
+.kpi-value{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;line-height:1;margin-bottom:3px;transition:all .3s}
+.kpi-card.blue .kpi-value{color:var(--accent2)}
+.kpi-card.red .kpi-value{color:var(--negative)}
+.kpi-card.green .kpi-value{color:var(--positive)}
+.kpi-card.amber .kpi-value{color:var(--warning)}
+.kpi-sub{font-size:10px;color:var(--muted)}
+
+/* ── GRIDS ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-60-40{display:grid;grid-template-columns:1.5fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid-40-60{display:grid;grid-template-columns:1fr 1.5fr;gap:14px}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.card-hd{padding:16px 18px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.card-title{font-size:12px;font-weight:700;color:var(--text)}
+.card-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.card-body{padding:12px 18px 16px}
+.tag{font-size:9px;font-weight:700;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.tag.red{background:var(--negative-bg);color:var(--negative);border:1px solid rgba(239,68,68,.2)}
+.tag.green{background:var(--positive-bg);color:var(--positive);border:1px solid rgba(16,185,129,.2)}
+.tag.blue{background:var(--accent-bg);color:var(--accent2);border:1px solid rgba(59,130,246,.2)}
+.tag.amber{background:var(--warning-bg);color:var(--warning);border:1px solid rgba(245,158,11,.2)}
+
+/* ── CHANNEL LEGEND ── */
+.ch-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.ch-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.ch-leg-dot{width:8px;height:8px;border-radius:2px}
+
+/* ── VELOCITY HEATMAP ── */
+.heatmap-wrap{overflow-x:auto}
+.heatmap{border-collapse:collapse;width:100%;font-size:11px}
+.heatmap th{padding:6px 10px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface)}
+.heatmap td{padding:8px 10px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;font-weight:500;text-align:center;transition:all .2s}
+.heatmap td.prod-name{text-align:left;font-family:'Manrope',sans-serif;font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap}
+.heatmap tr:hover td{background:rgba(255,255,255,.02)}
+.hm-hot{background:rgba(16,185,129,.18);color:#34D399}
+.hm-warm{background:rgba(16,185,129,.08);color:#10B981}
+.hm-mid{background:rgba(245,158,11,.08);color:#F59E0B}
+.hm-cold{background:rgba(239,68,68,.1);color:#F87171}
+.hm-none{background:transparent;color:var(--muted2);font-style:italic}
+
+/* ── DEDUCTION TABLE ── */
+.ded-table{width:100%;border-collapse:collapse;font-size:11px}
+.ded-table th{padding:6px 12px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+.ded-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.ded-table tr:hover td{background:var(--surface2)}
+.ded-table td.mono{font-family:'DM Mono',monospace;font-weight:500}
+.ded-table td.risk-high{color:var(--negative);font-weight:700}
+.ded-table td.risk-med{color:var(--warning);font-weight:600}
+.ded-table td.risk-low{color:var(--positive)}
+.risk-bar-wrap{width:80px;height:5px;background:var(--surface3);border-radius:3px;display:inline-block;vertical-align:middle;margin-left:6px}
+.risk-bar{height:100%;border-radius:3px}
+
+/* ── AI ENGINE ── */
+.ai-engine{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.ai-hd{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:linear-gradient(135deg,rgba(37,99,235,.08),transparent)}
+.ai-hd-left{display:flex;align-items:center;gap:10px}
+.ai-hd-icon{width:32px;height:32px;background:var(--accent-bg);border:1px solid rgba(59,130,246,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.ai-hd-title{font-size:13px;font-weight:700;color:var(--text)}
+.ai-hd-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.ai-run-btn{padding:7px 16px;border-radius:7px;font-size:11px;font-weight:700;font-family:'Manrope',sans-serif;border:none;background:var(--accent);color:#fff;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.ai-run-btn:hover{background:#1D4ED8;transform:translateY(-1px)}
+.ai-run-btn:disabled{background:var(--surface3);color:var(--muted);cursor:default;transform:none}
+.ai-body{padding:16px 20px;min-height:120px}
+.ai-loading{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
+.ai-spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-actions{display:flex;flex-direction:column;gap:10px}
+.ai-action-card{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;border-left:3px solid transparent}
+.ai-action-card.urgency-critical{border-left-color:var(--negative)}
+.ai-action-card.urgency-high{border-left-color:var(--warning)}
+.ai-action-card.urgency-medium{border-left-color:var(--accent2)}
+.ai-action-card.urgency-low{border-left-color:var(--positive)}
+.ai-ac-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.ai-ac-title{font-size:12px;font-weight:700;color:var(--text)}
+.ai-ac-badges{display:flex;align-items:center;gap:6px}
+.ai-ac-impact{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:2px 8px;border-radius:5px;background:var(--positive-bg);color:var(--positive)}
+.ai-ac-impact.negative{background:var(--negative-bg);color:var(--negative)}
+.urgency-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.urgency-badge.urgency-critical{background:rgba(239,68,68,.15);color:var(--negative)}
+.urgency-badge.urgency-high{background:rgba(245,158,11,.15);color:var(--warning)}
+.urgency-badge.urgency-medium{background:rgba(59,130,246,.12);color:var(--accent2)}
+.urgency-badge.urgency-low{background:rgba(16,185,129,.12);color:var(--positive)}
+.ai-ac-body{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:5px}
+.ai-ac-action{font-size:11px;font-weight:600;color:var(--text2)}
+.ai-action-card.urgency-critical .ai-ac-action{color:var(--negative)}
+.ai-placeholder{text-align:center;padding:20px;color:var(--muted);font-size:12px}
+
+/* ── RETAILER TABLE ── */
+.retail-table{width:100%;border-collapse:collapse;font-size:11px}
+.retail-table th{padding:6px 12px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border)}
+.retail-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.retail-table tr:last-child td{border-bottom:none}
+.retail-table tr:hover td{background:var(--surface2)}
+.retail-table td.mono{font-family:'DM Mono',monospace;font-weight:500}
+.rev-bar-cell{padding:9px 12px}
+.rev-bar-track{height:5px;background:var(--surface3);border-radius:3px;min-width:60px}
+.rev-bar-fill{height:100%;border-radius:3px}
+.rank-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);font-weight:500}
+
+/* ── BRAND KPI COMPACT ── */
+.brand-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.bkpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.bkpi-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:4px}
+.bkpi-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;line-height:1}
+.bkpi-val.pos{color:var(--positive)}
+.bkpi-val.neg{color:var(--negative)}
+.bkpi-val.blue{color:var(--accent2)}
+.bkpi-val.amber{color:var(--warning)}
+.bkpi-sub{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* ── PRODUCT LIST ── */
+.prod-list{display:flex;flex-direction:column;gap:6px}
+.prod-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;transition:all .18s}
+.prod-row:hover{border-color:var(--accent);transform:translateX(2px)}
+.prod-rank{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--muted2);width:20px;flex-shrink:0;text-align:center}
+.prod-emoji{font-size:18px;flex-shrink:0}
+.prod-info{flex:1;min-width:0}
+.prod-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-meta{font-size:10px;color:var(--muted);margin-top:1px}
+.prod-rev{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--text);flex-shrink:0}
+.prod-margin{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0}
+.prod-margin.pos{background:var(--positive-bg);color:var(--positive)}
+.prod-margin.neg{background:var(--negative-bg);color:var(--negative)}
+.prod-margin.warn{background:var(--warning-bg);color:var(--warning)}
+
+/* ── PRODUCT SPOTLIGHT ── */
+.spot-banner{background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(16,185,129,.03));border:1px solid rgba(16,185,129,.2);border-radius:var(--radius-lg);padding:14px 20px;margin:14px 0 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.spot-left{display:flex;align-items:center;gap:12px}
+.spot-emoji{font-size:28px}
+.spot-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--positive);margin-bottom:2px}
+.spot-name{font-size:16px;font-weight:800;color:var(--text)}
+.spot-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.spot-stats{display:flex;gap:20px;flex-wrap:wrap}
+.spot-stat{text-align:center}
+.spot-stat-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--text)}
+.spot-stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* ── CHANNEL FILTER BAR ── */
+.ch-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 0;position:sticky;top:58px;z-index:190}
+.ch-bar-inner{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:0 28px;max-width:1600px;margin:0 auto}
+.ch-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:7px;cursor:pointer;border:1.5px solid var(--border2);background:transparent;font-size:10px;font-weight:700;color:var(--muted);transition:all .18s;font-family:'Manrope',sans-serif;letter-spacing:.3px}
+.ch-btn:hover{color:var(--text);transform:translateY(-1px)}
+.ch-btn .dot{width:6px;height:6px;border-radius:50%}
+.ch-btn.active{color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.ch-btn.active.ch-wmt{background:#1a56db}
+.ch-btn.active.ch-tgt{background:#0369a1}
+.ch-btn.active.ch-kr{background:#059669}
+.ch-btn.active.ch-amz{background:#6366f1}
+.ch-btn.active.ch-wfm{background:#7c3aed}
+.ch-btn.active.ch-ic{background:#ea580c}
+.ch-btn.active.ch-dd{background:#dc2626}
+.ch-all{padding:5px 14px;border-radius:7px;cursor:pointer;border:1.5px solid var(--accent);background:var(--accent-bg);font-size:10px;font-weight:700;color:var(--accent2);transition:all .18s;font-family:'Manrope',sans-serif}
+.ch-all:hover,.ch-all.active-all{background:var(--accent);color:#fff}
+
+/* ── PRODUCT SELECTOR BAR ── */
+.prod-sel-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 0}
+.prod-sel-inner{display:flex;align-items:center;gap:8px;padding:0 28px;max-width:1600px;margin:0 auto;flex-wrap:wrap}
+.prod-chip{padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);background:transparent;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;font-family:'Manrope',sans-serif;transition:all .18s}
+.prod-chip.active{background:var(--positive);border-color:var(--positive);color:#fff}
+.prod-chip.chip-loss{color:var(--negative);border-color:rgba(239,68,68,.3)}
+.prod-chip.chip-loss.active{background:var(--negative);border-color:var(--negative);color:#fff}
+.prod-chip.chip-watch{color:var(--warning);border-color:rgba(245,158,11,.3)}
+.prod-chip.chip-watch.active{background:var(--warning);border-color:var(--warning);color:#1a1a1a}
+.prod-sel-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;white-space:nowrap}
+
+/* ── CROSS CHANNEL CARDS ── */
+.xch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.xch-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;border-top:2px solid transparent}
+.xch-card.star{border-top-color:var(--positive)}
+.xch-card.drag{border-top-color:var(--negative)}
+.xch-card.stable{border-top-color:var(--accent2)}
+.xch-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:6px}
+.xch-prod{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.xch-stat{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;margin-bottom:2px}
+.xch-stat.pos{color:var(--positive)}
+.xch-stat.neg{color:var(--negative)}
+.xch-stat.blue{color:var(--accent2)}
+.xch-footer{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.4}
+
+/* ── TREND LEGEND ── */
+.trend-leg{display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+.trend-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.trend-leg-line{width:14px;height:2px;border-radius:1px}
+
+/* ── INSIGHT CARDS ── */
+.insight-stack{display:flex;flex-direction:column;gap:8px}
+.insight-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 14px;border-left:3px solid transparent}
+.insight-card.critical{border-left-color:var(--negative);background:rgba(239,68,68,.04)}
+.insight-card.opportunity{border-left-color:var(--positive)}
+.insight-card.watch{border-left-color:var(--warning)}
+.insight-card.info{border-left-color:var(--accent2)}
+.insight-num{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--muted2);margin-bottom:3px}
+.insight-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+.insight-desc{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:5px}
+.insight-action{font-size:11px;font-weight:600;color:var(--accent2)}
+.insight-card.critical .insight-action{color:var(--negative)}
+.insight-card.opportunity .insight-action{color:var(--positive)}
+
+/* ── PROD CHANNEL BREAKDOWN ── */
+.prod-ch-breakdown{display:none}
+.prod-ch-breakdown.show{display:block}
+
+/* ── SORT BUTTONS ── */
+.sort-btns{display:flex;gap:4px}
+.sort-btn{padding:3px 10px;border-radius:5px;border:1px solid var(--border2);background:transparent;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;font-family:'Manrope',sans-serif;transition:all .18s}
+.sort-btn.active{background:var(--positive-bg);color:var(--positive);border-color:rgba(16,185,129,.3)}
+
+/* ── DONUT LEGEND ── */
+.donut-wrap{display:flex;align-items:center;gap:16px}
+.donut-chart-area{position:relative;flex-shrink:0}
+.donut-leg{display:flex;flex-direction:column;gap:5px;flex:1}
+.donut-leg-row{display:flex;align-items:center;justify-content:space-between;font-size:10px}
+.donut-leg-left{display:flex;align-items:center;gap:5px;color:var(--text2);font-weight:500}
+.donut-leg-dot{width:8px;height:8px;border-radius:50%}
+.donut-leg-val{font-family:'DM Mono',monospace;font-weight:500;font-size:10px;color:var(--text)}
+
+/* ── BOTTOM PADDING ── */
+.pb{padding-bottom:40px}
+
+/* ── ANIMATIONS ── */
+.kpi-card{animation:fadeUp .4s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.kpi-strip .kpi-card:nth-child(1){animation-delay:.05s}
+.kpi-strip .kpi-card:nth-child(2){animation-delay:.1s}
+.kpi-strip .kpi-card:nth-child(3){animation-delay:.15s}
+.kpi-strip .kpi-card:nth-child(4){animation-delay:.2s}
+.kpi-strip .kpi-card:nth-child(5){animation-delay:.25s}
+</style>
+</head>
+<body data-view="distribution">
+
+<!-- ═══ HEADER ═══ -->
+<header class="header">
+  <div class="header-inner">
+    <div class="brand-row">
+      <div class="brand-mark">🌿</div>
+      <div>
+        <div class="brand-name">Brightfield Foods Co.</div>
+        <div class="brand-sub">CPG Intelligence · <span id="headerQtrLabel">Q1 2026</span></div>
+      </div>
+    </div>
+    <div class="header-center" id="qtrBtns">
+      <button class="qtr-btn active" onclick="switchQtr('Q1',this)">Q1 2026</button>
+      <button class="qtr-btn" onclick="switchQtr('Q2',this)">Q2 2026</button>
+      <button class="qtr-btn" onclick="switchQtr('Q3',this)">Q3 2026</button>
+      <button class="qtr-btn" onclick="switchQtr('Q4',this)">Q4 2026</button>
+    </div>
+    <div class="header-right">
+      <div class="live-tag"><div class="live-dot"></div>Live</div>
+      <div class="view-tabs">
+        <button class="vtab active" id="tabDist" onclick="switchView('distribution')">📊 Distribution</button>
+        <button class="vtab prod-vtab" id="tabProd" onclick="switchView('products')">📦 Products</button>
+      </div>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️</button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ CHANNEL FILTER BAR ═══ -->
+<div class="ch-bar">
+  <div class="ch-bar-inner">
+    <button class="ch-all active-all" id="btnAll" onclick="filterChannel('all')">All Channels</button>
+    <button class="ch-btn ch-wmt" onclick="filterChannel('walmart')"><span class="dot" style="background:#1a56db"></span>Walmart</button>
+    <button class="ch-btn ch-tgt" onclick="filterChannel('target')"><span class="dot" style="background:#0369a1"></span>Target</button>
+    <button class="ch-btn ch-kr"  onclick="filterChannel('kroger')"><span class="dot" style="background:#059669"></span>Kroger</button>
+    <button class="ch-btn ch-amz" onclick="filterChannel('amazon')"><span class="dot" style="background:#6366f1"></span>Amazon</button>
+    <button class="ch-btn ch-wfm" onclick="filterChannel('wholefds')"><span class="dot" style="background:#7c3aed"></span>Whole Foods</button>
+    <button class="ch-btn ch-ic"  onclick="filterChannel('instacart')"><span class="dot" style="background:#ea580c"></span>Instacart</button>
+    <button class="ch-btn ch-dd"  onclick="filterChannel('doordash')"><span class="dot" style="background:#dc2626"></span>DoorDash</button>
+  </div>
+</div>
+
+<!-- ═══ DISTRIBUTION VIEW ═══ -->
+<div class="view-panel active" id="viewDist">
+  <div class="wrap">
+
+    <!-- ALERT BANNER -->
+    <div class="alert-banner">
+      <div class="alert-left">
+        <div class="alert-icon">🚨</div>
+        <div>
+          <div class="alert-label">Revenue Leakage Alert — <span id="alertPeriod">Q1 2026</span></div>
+          <div class="alert-amount" id="alertAmount">$1,231,700</div>
+          <div class="alert-desc">Returns, delayed collections, warehouse storage risk &amp; platform overruns</div>
+        </div>
+      </div>
+      <div class="alert-pills">
+        <div class="alert-divider"></div>
+        <div class="alert-pill"><div class="alert-pill-val" id="apRet">$387.2K</div><div class="alert-pill-lbl">Return Losses</div></div>
+        <div class="alert-pill"><div class="alert-pill-val" id="apCol">$558.4K</div><div class="alert-pill-lbl">Collection Delays</div></div>
+        <div class="alert-pill"><div class="alert-pill-val" id="apStor">$286.1K</div><div class="alert-pill-lbl">Warehouse Risk</div></div>
+      </div>
+    </div>
+
+    <!-- PRIORITY ACTIONS -->
+    <div class="pact-row">
+      <div class="pact fire"><div class="pact-dot"></div><strong>URGENT:</strong>&nbsp;Pause Instacart &amp; DoorDash — both channels are net-negative. $34K revenue, confirmed net loss after platform commissions.</div>
+      <div class="pact fire"><div class="pact-dot"></div><strong>CRITICAL:</strong>&nbsp;Brightfield Protein Powder 2lb expires in 8 days. Call foodservice buyers NOW. Recover $86K vs $0 write-off.</div>
+      <div class="pact watch"><div class="pact-dot"></div><strong>WATCH:</strong>&nbsp;Cold-Press Juice losing money on 3 of 7 channels. Same product earns +11.2% on Kroger. Channel selection problem, not product.</div>
+      <div class="pact go"><div class="pact-dot"></div><strong>OPPORTUNITY:</strong>&nbsp;Granola Bar 12-pk — your #1 anchor SKU. Push priority restocking before next Walmart buyer review cycle.</div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Key Performance Indicators — <span id="kpiFilterLabel">All Channels</span></div>
+      </div>
+      <div class="kpi-strip">
+        <div class="kpi-card blue">
+          <div class="kpi-top"><div class="kpi-icon">💰</div><span class="kpi-badge up" id="kpiBadge1">↑ 8.3%</span></div>
+          <div class="kpi-label">Total Revenue Billed</div>
+          <div class="kpi-value" id="kpiRev">$35.1K</div>
+          <div class="kpi-sub" id="kpiRevSub">Q1 2026 · 7 channels</div>
+        </div>
+        <div class="kpi-card red" id="kpiGapCard">
+          <div class="kpi-top"><div class="kpi-icon">🕳️</div><span class="kpi-badge dn" id="kpiBadge2">↑ 18.2% YoY</span></div>
+          <div class="kpi-label" id="kpiGapLabel">Collection Gap</div>
+          <div class="kpi-value" id="kpiGap">$3.9K</div>
+          <div class="kpi-sub" id="kpiGapSub">$31.2K collected vs $35.1K billed</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-top"><div class="kpi-icon">📈</div><span class="kpi-badge up" id="kpiBadge3">↑ 1.4pts</span></div>
+          <div class="kpi-label" id="kpiMarginLabel">Best Net Margin</div>
+          <div class="kpi-value" id="kpiMargin">18.2%</div>
+          <div class="kpi-sub" id="kpiMarginSub">Walmart · Avg 12d collection</div>
+        </div>
+        <div class="kpi-card amber">
+          <div class="kpi-top"><div class="kpi-icon">🏭</div><span class="kpi-badge warn" id="kpiBadge4">3 critical</span></div>
+          <div class="kpi-label">Warehouse At Risk</div>
+          <div class="kpi-value" id="kpiWh">$286.1K</div>
+          <div class="kpi-sub" id="kpiWhSub">Products &gt;30 days in storage</div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-top"><div class="kpi-icon">⚠️</div><span class="kpi-badge dn">Net Loss</span></div>
+          <div class="kpi-label">Worst Channel</div>
+          <div class="kpi-value" id="kpiWorst" style="font-size:16px;padding-top:4px">DoorDash</div>
+          <div class="kpi-sub" id="kpiWorstSub">−5.7% net margin · Exit immediately</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHANNEL P&L + DONUT -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Channel P&amp;L — <span id="channelPLLabel">All 7 Channels</span></div>
+        <div><span class="tag red" id="chAlertTag">⚠ 2 Channels Net-Negative</span></div>
+      </div>
+      <div class="grid-60-40">
+        <div class="card">
+          <div class="card-hd">
+            <div><div class="card-title">Revenue vs Cost vs Net Margin — Per Channel</div><div class="card-sub">Bars = Revenue &amp; Cost | Line = Net Margin %</div></div>
+          </div>
+          <div class="card-body">
+            <div class="ch-legend">
+              <div class="ch-leg-item"><div class="ch-leg-dot" style="background:#2563EB"></div>Revenue</div>
+              <div class="ch-leg-item"><div class="ch-leg-dot" style="background:#EF4444"></div>Total Cost</div>
+              <div class="ch-leg-item"><div class="ch-leg-dot" style="background:#10B981;border-radius:50%"></div>Net Margin %</div>
+            </div>
+            <div style="height:220px;position:relative"><canvas id="channelChart"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">Channel Revenue Mix</div><div class="card-sub">Share of total by channel</div></div></div>
+          <div class="card-body">
+            <div class="donut-wrap" style="height:220px;align-items:center">
+              <div class="donut-chart-area" style="width:140px;height:140px"><canvas id="donutChart"></canvas></div>
+              <div class="donut-leg" id="donutLeg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVENUE TREND + PRODUCT LINE -->
+    <div class="section">
+      <div class="section-header"><div class="section-title">Revenue vs Collections — 6 Month Trend</div><span class="tag red" id="trendTag">Gap $3.9K &amp; Growing</span></div>
+      <div class="grid-60-40">
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">Billed vs Collected Revenue</div><div class="card-sub">Widening gap = working capital drain</div></div></div>
+          <div class="card-body">
+            <div class="trend-leg">
+              <div class="trend-leg-item"><div class="trend-leg-line" style="background:#2563EB"></div>Billed</div>
+              <div class="trend-leg-item"><div class="trend-leg-line" style="background:#10B981"></div>Collected</div>
+              <div class="trend-leg-item"><div class="trend-leg-line" style="background:#EF4444;border-top:2px dashed #EF4444;height:0"></div>Gap</div>
+            </div>
+            <div style="height:180px;position:relative"><canvas id="trendChart"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">Product Line Revenue &amp; Margin</div><div class="card-sub">Q1 2026 · All channels</div></div></div>
+          <div class="card-body">
+            <div style="height:180px;position:relative"><canvas id="brandChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VELOCITY HEATMAP -->
+    <div class="section">
+      <div class="section-header"><div class="section-title">SKU Velocity Heatmap — Units/Store/Week</div><span class="tag amber">Buyer Benchmark: ≥3.0</span></div>
+      <div class="card">
+        <div class="card-body" style="padding:0">
+          <div class="heatmap-wrap">
+            <table class="heatmap">
+              <thead>
+                <tr>
+                  <th style="text-align:left">SKU</th>
+                  <th>Walmart</th><th>Target</th><th>Kroger</th><th>Amazon</th><th>Whole Foods</th><th>Instacart</th><th>DoorDash</th>
+                  <th>Avg</th>
+                </tr>
+              </thead>
+              <tbody id="velocityBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEDUCTIONS + WAREHOUSE -->
+    <div class="section">
+      <div class="section-header"><div class="section-title">Deductions &amp; Outstanding Payments</div><span class="tag red">$665.2K Total Exposure</span></div>
+      <div class="grid-60-40">
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">💸 Retailer Outstanding Payments</div><div class="card-sub">Sorted by overdue risk</div></div></div>
+          <div class="card-body" style="padding:0">
+            <table class="ded-table">
+              <thead><tr><th>Retailer</th><th>Amount</th><th>Days</th><th>Risk</th><th>Action</th></tr></thead>
+              <tbody id="deductionBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">🏭 Warehouse Aging Risk</div><div class="card-sub">Products exceeding safe storage window</div></div></div>
+          <div class="card-body" style="padding:0 0 8px">
+            <div id="warehouseRows" style="padding:0 4px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI DECISION ENGINE -->
+    <div class="section">
+      <div class="section-header"><div class="section-title">AI Decision Engine</div><span class="tag blue">Powered by Claude</span></div>
+      <div class="ai-engine">
+        <div class="ai-hd">
+          <div class="ai-hd-left">
+            <div class="ai-hd-icon">🤖</div>
+            <div>
+              <div class="ai-hd-title">Weekly Action Queue</div>
+              <div class="ai-hd-sub">Analyzes P&amp;L, deductions, velocity &amp; channel data. Outputs 4–5 prioritized decisions with dollar impact.</div>
+            </div>
+          </div>
+          <button class="ai-run-btn" id="aiRunBtn" onclick="runAIEngine()">⚡ Generate Actions</button>
+        </div>
+        <div class="ai-body" id="aiBody">
+          <div class="ai-placeholder">↑ Click "Generate Actions" to analyze your current dashboard data and get a prioritized action queue.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RETAILER LEADERBOARD -->
+    <div class="section pb">
+      <div class="section-header"><div class="section-title">Top Retail Partners — <span id="retailLabel">All Channels</span></div></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">Retailer Revenue Leaderboard</div><div class="card-sub">Ranked by Q1 contribution</div></div></div>
+          <div class="card-body" style="padding:0">
+            <table class="retail-table">
+              <thead><tr><th>#</th><th>Retailer</th><th>Q1 Revenue</th><th>Trend</th><th>Bar</th></tr></thead>
+              <tbody id="retailBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">Q1 vs Q2 — Top Partners</div><div class="card-sub">Quarter-on-quarter comparison</div></div></div>
+          <div class="card-body">
+            <div style="height:220px;position:relative"><canvas id="retailQQChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /viewDist -->
+
+<!-- ═══ PRODUCTS VIEW ═══ -->
+<div class="view-panel" id="viewProd">
+
+  <div class="prod-sel-bar">
+    <div class="prod-sel-inner">
+      <span class="prod-sel-label">Focus SKU →</span>
+      <button class="prod-chip active" id="chip-all" onclick="selectProduct('all',this)">📦 All Products</button>
+      <button class="prod-chip" id="chip-gb" onclick="selectProduct('gb',this)">🍫 Granola Bar</button>
+      <button class="prod-chip" id="chip-ab" onclick="selectProduct('ab',this)">🥜 Almond Butter</button>
+      <button class="prod-chip" id="chip-oo" onclick="selectProduct('oo',this)">🌾 Overnight Oats</button>
+      <button class="prod-chip" id="chip-om" onclick="selectProduct('om',this)">🥛 Oat Milk</button>
+      <button class="prod-chip chip-watch" id="chip-cp" onclick="selectProduct('cp',this)">🧃 Cold-Press Juice</button>
+      <button class="prod-chip chip-loss" id="chip-pp" onclick="selectProduct('pp',this)">🔴 Protein Powder</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <div class="spot-banner" id="spotBanner" style="display:none">
+      <div class="spot-left">
+        <div class="spot-emoji" id="spotEmoji">🍫</div>
+        <div>
+          <div class="spot-label">Product Focus</div>
+          <div class="spot-name" id="spotName">Granola Bar 12-pk</div>
+          <div class="spot-sub" id="spotSub">Revenue leader · 6/7 channels</div>
+        </div>
+      </div>
+      <div class="spot-stats">
+        <div class="spot-stat"><div class="spot-stat-val" id="spotRev">$48.2K</div><div class="spot-stat-lbl">Revenue</div></div>
+        <div class="spot-stat"><div class="spot-stat-val" id="spotMargin">+22.4%</div><div class="spot-stat-lbl">Best Margin</div></div>
+        <div class="spot-stat"><div class="spot-stat-val" id="spotUnits">1,240</div><div class="spot-stat-lbl">Units Sold</div></div>
+        <div class="spot-stat"><div class="spot-stat-val" id="spotChannels">6</div><div class="spot-stat-lbl">Channels</div></div>
+      </div>
+    </div>
+
+    <!-- Brand KPIs -->
+    <div class="section">
+      <div class="section-header"><div class="section-title">Product KPIs — <span id="prodKpiLabel">All Channels</span></div></div>
+      <div class="brand-kpi-row">
+        <div class="bkpi"><div class="bkpi-label">Top Revenue SKU</div><div class="bkpi-val pos" id="pkpiTop">Granola Bar</div><div class="bkpi-sub" id="pkpiTopSub">$48.2K · 6/7 channels</div></div>
+        <div class="bkpi"><div class="bkpi-label">Worst Margin SKU</div><div class="bkpi-val neg" id="pkpiWorst">Cold-Press Juice</div><div class="bkpi-sub" id="pkpiWorstSub">−9.2% DoorDash · Delist now</div></div>
+        <div class="bkpi"><div class="bkpi-label">Fastest Mover</div><div class="bkpi-val blue" id="pkpiFast">Granola Bar</div><div class="bkpi-sub" id="pkpiFastSub">Highest velocity · Walmart #1</div></div>
+        <div class="bkpi"><div class="bkpi-label">Warehouse Emergency</div><div class="bkpi-val amber" id="pkpiWh">Protein Powder</div><div class="bkpi-sub" id="pkpiWhSub">8 days to expiry · $86K at risk</div></div>
+      </div>
+    </div>
+
+    <!-- Cross Channel Intelligence -->
+    <div class="section">
+      <div class="section-header"><div class="section-title">Cross-Channel Product Intelligence</div><span class="tag blue">All 7 Channels</span></div>
+      <div class="xch-grid">
+        <div class="xch-card star">
+          <div class="xch-label">⭐ Star Product</div>
+          <div class="xch-prod">Granola Bar 12-pk</div>
+          <div class="xch-stat pos">+22.4% best margin · Walmart</div>
+          <div class="xch-stat pos">Highest velocity across all channels</div>
+          <div class="xch-footer">Present in 6/7 channels · Top-3 rank everywhere. Push restock before Walmart buyer review.</div>
+        </div>
+        <div class="xch-card drag">
+          <div class="xch-label">📉 Drag Product</div>
+          <div class="xch-prod">Cold-Press Juice 12oz</div>
+          <div class="xch-stat neg">−8.4% Instacart · −9.2% DoorDash</div>
+          <div class="xch-stat neg">Losing money on 3 of 7 channels</div>
+          <div class="xch-footer">Same product earns +11.2% on Kroger. Exit all delivery app channels immediately.</div>
+        </div>
+        <div class="xch-card stable">
+          <div class="xch-label">🔵 Ubiquitous SKU</div>
+          <div class="xch-prod">Almond Butter 16oz</div>
+          <div class="xch-stat blue">7/7 channels · $39.4K combined</div>
+          <div class="xch-stat blue">Consistent demand everywhere</div>
+          <div class="xch-footer">Safest SKU in portfolio. Prioritize stock availability. Never let this go out of stock.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product channel breakdown -->
+    <div class="prod-ch-breakdown" id="prodChBreakdown">
+      <div class="section">
+        <div class="section-header"><div class="section-title">Channel Performance — <span id="prodChLabel">Selected SKU</span></div><span class="tag green">Live Data</span></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-hd"><div><div class="card-title" id="prodChChartTitle">Revenue by Channel</div><div class="card-sub">Where this SKU sells best</div></div></div>
+            <div class="card-body"><div style="height:200px;position:relative"><canvas id="prodChBarChart"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div><div class="card-title">Margin % by Channel</div><div class="card-sub">Profitability varies — act on losers</div></div></div>
+            <div class="card-body"><div style="height:200px;position:relative"><canvas id="prodChMarginChart"></canvas></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product List + Bar Chart -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Product Performance — <span id="prodListLabel">All Channels</span></div>
+        <div class="sort-btns">
+          <button class="sort-btn active" id="btnSortRev" onclick="sortProd('rev',this)">Revenue</button>
+          <button class="sort-btn" id="btnSortMgn" onclick="sortProd('margin',this)">Margin</button>
+        </div>
+      </div>
+      <div class="grid-40-60">
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">🏆 SKU Ranking</div><div class="card-sub" id="prodListSub">Sorted by revenue</div></div></div>
+          <div class="card-body"><div class="prod-list" id="prodList"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">Revenue &amp; Margin by Product Line</div><div class="card-sub" id="brandChartSub">Q1 2026 · All channels</div></div></div>
+          <div class="card-body"><div style="height:260px;position:relative"><canvas id="prodBarChart"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Insights -->
+    <div class="section pb">
+      <div class="section-header"><div class="section-title">Product Intelligence — Insights &amp; Actions</div><span class="tag red" id="prodInsightTag">3 Issues Detected</span></div>
+      <div class="grid-2">
+        <div class="insight-stack" id="prodInsightStack"></div>
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">Retailer Revenue Leaderboard</div><div class="card-sub">Product view · Q1 performance</div></div></div>
+          <div class="card-body" style="padding:0">
+            <table class="retail-table">
+              <thead><tr><th>#</th><th>Retailer</th><th>Revenue</th><th>Q1→Q2</th></tr></thead>
+              <tbody id="prodRetailBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /viewProd -->
+
+<script>
+// ══════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════
+const CHANNELS = ['Walmart','Target','Kroger','Amazon','Whole Foods','Instacart','DoorDash'];
+const CH_IDS   = ['walmart','target','kroger','amazon','wholefds','instacart','doordash'];
+const CH_COLORS = {walmart:'#1a56db',target:'#0369a1',kroger:'#059669',amazon:'#6366f1',wholefds:'#7c3aed',instacart:'#ea580c',doordash:'#dc2626'};
+
+// Per-channel: rev($K), cost($K), marginPct, collectionDays
+const CH_DATA = {
+  walmart:  {rev:8.43, cost:6.91, margin:18.2, days:12},
+  target:   {rev:7.07, cost:5.95, margin:15.8, days:14},
+  kroger:   {rev:6.31, cost:5.59, margin:11.4, days:18},
+  amazon:   {rev:5.18, cost:4.72, margin:8.9,  days:22},
+  wholefds: {rev:4.42, cost:4.23, margin:4.2,  days:26},
+  instacart:{rev:1.87, cost:1.93, margin:-3.1, days:34},
+  doordash: {rev:1.53, cost:1.62, margin:-5.7, days:40},
+};
+
+// Quarter multipliers for trend variation
+const QTR_MULT = {Q1:1.0, Q2:1.14, Q3:1.28, Q4:1.42};
+
+const QTR_DATA = {
+  Q1:{
+    alertTotal:1231700, ret:387200, col:558400, stor:286100,
+    trend:{labels:['Aug','Sep','Oct','Nov','Dec','Jan'],billed:[21.8,24.8,27.2,29.8,32.2,35.1],collected:[20.4,22.8,24.6,26.2,27.8,31.2]}
+  },
+  Q2:{
+    alertTotal:1408000, ret:442000, col:637600, stor:328400,
+    trend:{labels:['Nov','Dec','Jan','Feb','Mar','Apr'],billed:[29.8,32.2,35.1,37.4,39.2,40.0],collected:[26.2,27.8,31.2,33.4,35.6,35.8]}
+  },
+  Q3:{
+    alertTotal:1602000, ret:504000, col:726800, stor:371200,
+    trend:{labels:['Feb','Mar','Apr','May','Jun','Jul'],billed:[35.1,37.4,40.0,42.4,44.4,45.0],collected:[31.2,33.4,35.8,38.2,40.4,40.0]}
+  },
+  Q4:{
+    alertTotal:1812000, ret:570000, col:822000, stor:420000,
+    trend:{labels:['May','Jun','Jul','Aug','Sep','Oct'],billed:[40.0,42.4,45.0,47.4,49.8,49.8],collected:[35.8,38.2,40.0,43.0,44.8,43.2]}
+  }
+};
+
+const VELOCITY_DATA = [
+  {sku:'Granola Bar 12-pk',      emoji:'🍫', vals:{Walmart:4.8, Target:4.2, Kroger:3.8, Amazon:3.2, 'Whole Foods':2.8, Instacart:1.6, DoorDash:1.2}},
+  {sku:'Almond Butter 16oz',     emoji:'🥜', vals:{Walmart:4.1, Target:3.6, Kroger:3.4, Amazon:2.8, 'Whole Foods':2.4, Instacart:1.4, DoorDash:1.0}},
+  {sku:'Overnight Oats 4-pk',    emoji:'🌾', vals:{Walmart:3.6, Target:3.8, Kroger:2.8, Amazon:3.2, 'Whole Foods':2.2, Instacart:1.2, DoorDash:0.8}},
+  {sku:'Oat Milk 32oz',          emoji:'🥛', vals:{Walmart:3.2, Target:2.8, Kroger:3.4, Amazon:2.4, 'Whole Foods':2.6, Instacart:1.0, DoorDash:null}},
+  {sku:'Cold-Press Juice 12oz',  emoji:'🧃', vals:{Walmart:2.2, Target:2.4, Kroger:2.8, Amazon:1.8, 'Whole Foods':1.6, Instacart:0.8, DoorDash:0.6}},
+  {sku:'Protein Powder 2lb',     emoji:'🔴', vals:{Walmart:null, Target:0.8, Kroger:0.6, Amazon:0.4, 'Whole Foods':null, Instacart:0.2, DoorDash:0.2}},
+];
+
+const DEDUCTION_DATA = [
+  {retailer:'Instacart (Platform)',amount:482000,days:62,risk:'high',  action:'Exit channel — net loss confirmed'},
+  {retailer:'DoorDash Grocery',   amount:183000,days:54,risk:'high',  action:'Pause all orders immediately'},
+  {retailer:'Whole Foods Market', amount:82100, days:28,risk:'high',  action:'Escalate account manager'},
+  {retailer:'Amazon Fresh',       amount:78300, days:22,risk:'med',   action:'Renegotiate payment terms'},
+  {retailer:'Kroger Co.',         amount:68900, days:18,risk:'med',   action:'Monitor — follow up week 3'},
+  {retailer:'Target Corp',        amount:71600, days:14,risk:'low',   action:'On track — no action needed'},
+];
+
+const WAREHOUSE_DATA = [
+  {sku:'Protein Powder 2lb',     days:47, pct:94, risk:'critical', amount:'$86,000'},
+  {sku:'Cold-Press Juice 12oz',  days:34, pct:68, risk:'warn',     amount:'$52,800'},
+  {sku:'Overnight Oats 4-pk',    days:28, pct:52, risk:'warn',     amount:'$32,100'},
+];
+
+const RETAILER_DATA = [
+  {name:'Walmart Supercenter', ch:'walmart',  q1:42150, q2:84300},
+  {name:'Target Corp',         ch:'target',   q1:35350, q2:70700},
+  {name:'Kroger Co.',          ch:'kroger',   q1:31550, q2:63100},
+  {name:'Amazon Fresh',        ch:'amazon',   q1:25900, q2:51800},
+  {name:'Whole Foods Market',  ch:'wholefds', q1:22100, q2:44200},
+  {name:'Walmart Grocery',     ch:'walmart',  q1:6800,  q2:13600},
+  {name:'Target Online',       ch:'target',   q1:5500,  q2:11000},
+  {name:'Kroger Pickup',       ch:'kroger',   q1:4100,  q2:8200},
+];
+
+const PRODUCTS_DATA = [
+  {id:'gb', emoji:'🍫', name:'Granola Bar 12-pk',    rev:48200, margin:22.4, channels:6,
+   chRev:{Walmart:26400,Target:16200,Kroger:12200,Amazon:9400,WholeFoods:7400,Instacart:2200},
+   chMgn:{Walmart:22.4,Target:18.8,Kroger:15.4,Amazon:12.2,WholeFoods:7.4,Instacart:0.4}},
+  {id:'ab', emoji:'🥜', name:'Almond Butter 16oz',   rev:39400, margin:19.1, channels:7,
+   chRev:{Walmart:19800,Target:9200,Kroger:19600,Amazon:6400,WholeFoods:5800,Instacart:4800,DoorDash:3600},
+   chMgn:{Walmart:19.1,Target:16.2,Kroger:19.4,Amazon:11.8,WholeFoods:8.4,Instacart:4.2,DoorDash:2.8}},
+  {id:'oo', emoji:'🌾', name:'Overnight Oats 4-pk',  rev:32100, margin:17.8, channels:5,
+   chRev:{Walmart:11800,Target:18400,Kroger:8400,Amazon:14400,WholeFoods:6400},
+   chMgn:{Walmart:16.4,Target:19.2,Kroger:12.8,Amazon:16.2,WholeFoods:6.8}},
+  {id:'om', emoji:'🥛', name:'Oat Milk 32oz',         rev:28800, margin:15.3, channels:5,
+   chRev:{Walmart:9600,Target:7400,Kroger:14800,Amazon:7400,WholeFoods:10000},
+   chMgn:{Walmart:15.2,Target:13.6,Kroger:16.8,Amazon:10.6,WholeFoods:8.2}},
+  {id:'cp', emoji:'🧃', name:'Cold-Press Juice 12oz', rev:16200, margin:-2.8, channels:7,
+   chRev:{Walmart:2820,Target:8200,Kroger:6400,Amazon:5400,WholeFoods:1800,Instacart:5280,DoorDash:3360},
+   chMgn:{Walmart:8.4,Target:14.1,Kroger:11.2,Amazon:9.8,WholeFoods:-4.6,Instacart:-8.4,DoorDash:-9.2}},
+  {id:'pp', emoji:'🔴', name:'Protein Powder 2lb',    rev:6200,  margin:-6.2, channels:4,
+   chRev:{Target:2860,Kroger:3200,Amazon:1800,Instacart:400},
+   chMgn:{Target:-2.4,Kroger:-5.8,Amazon:-3.4,Instacart:-2.8}},
+];
+
+const INSIGHTS_DATA = [
+  {type:'critical',num:'01',title:'Pause Instacart & DoorDash — both channels net-negative',desc:'Platform commission (18-22%) + return rates (11%) + payment delays = negative margin. $34K revenue, net loss.',action:'→ Pause orders. Renegotiate commission to <14% before resuming. Redirect SKUs to Walmart.'},
+  {type:'critical',num:'02',title:'Protein Powder 2lb expires in 8 days',desc:'47 days warehouse storage, no open orders. Every hour without action = money burning.',action:'→ Call 3 foodservice buyers NOW. Offer at $85/unit (70% MSRP). Recover $86K vs $0 write-off.'},
+  {type:'opportunity',num:'03',title:'Cold-Press Juice: channel selection problem, not product',desc:'Same product earns +11.2% on Kroger and −9.2% on DoorDash. Exit delivery apps, expand retail.',action:'→ Remove from Instacart & DoorDash. Route to Kroger & Target only.'},
+  {type:'opportunity',num:'04',title:'Granola Bar is your negotiation anchor — use it',desc:'$48.2K combined revenue, +17–22% margin, 6 channels, zero return issues. No other SKU comes close.',action:'→ Lead all buyer pitches with Granola Bar performance data. Request premium shelf placement.'},
+];
+
+const PROD_INSIGHTS = {
+  gb:[
+    {type:'opportunity',num:'01',title:'Granola Bar 12-pk cannot go out of stock at Walmart — ever',desc:'$26.4K revenue, 22.4% margin, 680 units. Any stockout loses $8,800/day in margin.',action:'→ Set restock at 2-week forward stock. Never go below 200 units in storage.'},
+    {type:'opportunity',num:'02',title:'Granola Bar is your negotiation anchor across all buyers',desc:'Consistent top-3 rank in every channel with no return issues. This is your strongest leverage SKU.',action:'→ Lead all buyer pitches with Granola Bar data. Request premium shelf placement in every review.'},
+    {type:'info',num:'03',title:'Target & Kroger have headroom to grow Granola Bar',desc:'Both channels show strong velocity but lower revenue than Walmart. Untapped distribution.',action:'→ Increase case quantities to Target by 20%. Propose end-cap placement at Kroger.'},
+  ],
+  ab:[
+    {type:'info',num:'01',title:'Almond Butter is your most widely distributed SKU',desc:'7/7 channels, consistent margin everywhere. No channel shows a loss. This is your safest SKU.',action:'→ Maintain stock across all channels. Use as door-opener in new buyer negotiations.'},
+    {type:'opportunity',num:'02',title:'Kroger is your best Almond Butter channel at +19.4%',desc:'Highest margin in the portfolio. Strong velocity and fast payment at 18 days.',action:'→ Increase Kroger Almond Butter allocation by 30%. Negotiate dedicated shelf space.'},
+  ],
+  cp:[
+    {type:'critical',num:'01',title:'Cold-Press Juice is losing money on 3 of 7 channels',desc:'−8.4% Instacart, −9.2% DoorDash, −4.6% Whole Foods. Channel selection problem, not product.',action:'→ Delist from all delivery apps today. Route only to Kroger (+11.2%) and Target (+14.1%).'},
+    {type:'critical',num:'02',title:'Instacart Cold-Press Juice is your single worst SKU-channel pair',desc:'$52,800 revenue but generating an actual loss after returns (18%), commission (20%) and delivery costs.',action:'→ Delist immediately. Do not supply Cold-Press Juice to any delivery app under any circumstances.'},
+  ],
+  pp:[
+    {type:'critical',num:'01',title:'EMERGENCY: Protein Powder 2lb expires in 8 days',desc:'47 days in warehouse storage, no active orders. Expiry at ~55 days. Every hour is money burning.',action:'→ Call 3 foodservice buyers NOW. Price at $85/unit (70% of MSRP). Recover $86K vs $0.'},
+    {type:'critical',num:'02',title:'Protein Powder is net-negative across all 4 channels',desc:'Returns (cold chain breakage), platform fees, and slow velocity all contribute to -6.2% average margin.',action:'→ After liquidating current stock, do not reorder. Discontinue SKU from portfolio.'},
+  ],
+};
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let activeQtr = 'Q1';
+let activeChannel = 'all';
+let activeView = 'distribution';
+let activeProd = 'all';
+let activeSortProd = 'rev';
+let channelChart, donutChart, trendChart, brandChart, retailQQChart, prodBarChart, prodChBarChart, prodChMarginChart;
+
+// ══════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════
+function fmtUSD(v) {
+  if(v >= 1000000) return '$' + (v/1000000).toFixed(2) + 'M';
+  if(v >= 1000) return '$' + (v/1000).toFixed(1) + 'K';
+  return '$' + v;
+}
+function flash(id, val) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.opacity = '0';
+  setTimeout(() => { el.textContent = val; el.style.opacity = '1'; el.style.transition = 'opacity .3s'; }, 150);
+}
+
+// ══════════════════════════════════════════════════
+// THEME HELPERS
+// ══════════════════════════════════════════════════
+function gridColor() {
+  return document.documentElement.getAttribute('data-theme') === 'dark'
+    ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.07)';
+}
+function tickColor() {
+  return document.documentElement.getAttribute('data-theme') === 'dark' ? '#64748B' : '#94A3B8';
+}
+
+// ══════════════════════════════════════════════════
+// THEME
+// ══════════════════════════════════════════════════
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+  // Rebuild charts so grid/tick colors pick up new theme
+  setTimeout(() => {
+    const mult = QTR_MULT[activeQtr];
+    if(channelChart)  { channelChart.destroy();  channelChart = null;  buildChannelChart(); updateChannelChart(mult); }
+    if(donutChart)    { donutChart.destroy();    donutChart = null;    buildDonut(); updateDonut(mult); }
+    if(trendChart)    { trendChart.destroy();    trendChart = null;    buildTrend(); updateTrend(); }
+    if(brandChart)    { brandChart.destroy();    brandChart = null;    buildBrand(); }
+    if(retailQQChart) { retailQQChart.destroy(); retailQQChart = null; renderRetailerTable(mult); }
+    if(prodBarChart)  { prodBarChart.destroy();  prodBarChart = null;  renderProdList(); }
+  }, 50);
+}
+
+// ══════════════════════════════════════════════════
+// VIEWS
+// ══════════════════════════════════════════════════
+function switchView(v) {
+  activeView = v;
+  document.body.setAttribute('data-view', v);
+  document.getElementById('viewDist').classList.toggle('active', v === 'distribution');
+  document.getElementById('viewProd').classList.toggle('active', v === 'products');
+  document.getElementById('tabDist').classList.toggle('active', v === 'distribution');
+  document.getElementById('tabProd').classList.toggle('active', v === 'products');
+  if(v === 'products') renderProdView();
+  if(v === 'distribution') setTimeout(() => { [channelChart,trendChart,donutChart,brandChart].forEach(c=>{if(c)c.resize();}); }, 50);
+}
+
+// ══════════════════════════════════════════════════
+// QUARTERS
+// ══════════════════════════════════════════════════
+function switchQtr(q, btn) {
+  activeQtr = q;
+  document.querySelectorAll('.qtr-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('headerQtrLabel').textContent = q + ' 2026';
+  updateAll();
+}
+
+// ══════════════════════════════════════════════════
+// CHANNEL FILTER
+// ══════════════════════════════════════════════════
+function filterChannel(ch) {
+  activeChannel = ch;
+  document.querySelectorAll('.ch-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btnAll').classList.toggle('active-all', ch === 'all');
+  if(ch !== 'all') {
+    const idx = CH_IDS.indexOf(ch);
+    if(idx >= 0) document.querySelectorAll('.ch-btn')[idx].classList.add('active');
+    document.getElementById('btnAll').classList.remove('active-all');
+  }
+  updateAll();
+}
+
+// ══════════════════════════════════════════════════
+// UPDATE ALL
+// ══════════════════════════════════════════════════
+function updateAll() {
+  const mult = QTR_MULT[activeQtr];
+  updateKPIs(mult);
+  updateAlert(mult);
+  updateChannelChart(mult);
+  updateDonut(mult);
+  updateTrend();
+  updateBrand(mult);
+  renderVelocityTable();
+  renderDeductionTable();
+  renderRetailerTable(mult);
+  if(activeView === 'products') renderProdView();
+}
+
+// ══════════════════════════════════════════════════
+// KPIs
+// ══════════════════════════════════════════════════
+function updateKPIs(mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  const ch = activeChannel;
+  const label = ch === 'all' ? 'All Channels' : CHANNELS[CH_IDS.indexOf(ch)];
+  document.getElementById('kpiFilterLabel').textContent = label;
+
+  if(ch === 'all') {
+    const totalRev = CH_IDS.reduce((s,id) => s + CH_DATA[id].rev, 0) * mult;
+    const totalCollected = totalRev * 0.89;
+    const gap = totalRev - totalCollected;
+    const bestMargin = Math.max(...CH_IDS.map(id => CH_DATA[id].margin));
+    const wh = QTR_DATA[activeQtr].stor / 1000;
+    flash('kpiRev', '$' + totalRev.toFixed(1) + 'K');
+    flash('kpiGap', '$' + gap.toFixed(1) + 'K');
+    flash('kpiMargin', bestMargin + '%');
+    flash('kpiWh', fmtUSD(QTR_DATA[activeQtr].stor));
+    flash('kpiWorst', 'DoorDash');
+    document.getElementById('kpiRevSub').textContent = activeQtr + ' 2026 · 7 channels';
+    document.getElementById('kpiGapSub').textContent = '$' + totalCollected.toFixed(1) + 'K collected vs $' + totalRev.toFixed(1) + 'K billed';
+    document.getElementById('kpiMarginSub').textContent = 'Walmart · Avg 12d collection';
+    document.getElementById('kpiWhSub').textContent = 'Products >30 days in storage';
+    document.getElementById('kpiWorstSub').textContent = '−5.7% net margin · Exit immediately';
+    document.getElementById('kpiGapLabel').textContent = 'Collection Gap';
+    document.getElementById('kpiMarginLabel').textContent = 'Best Net Margin';
+    document.getElementById('trendTag').textContent = 'Gap $' + gap.toFixed(1) + 'K & Growing';
+  } else {
+    const d = CH_DATA[ch];
+    const rev = (d.rev * mult).toFixed(2);
+    flash('kpiRev', '$' + rev + 'K');
+    flash('kpiGap', (d.margin >= 0 ? '+' : '') + d.margin + '%');
+    flash('kpiMargin', d.margin + '%');
+    flash('kpiWh', d.days + ' days');
+    flash('kpiWorst', d.margin < 0 ? '⚠ Loss' : '✓ OK');
+    document.getElementById('kpiRevSub').textContent = label + ' · ' + activeQtr + ' 2026';
+    document.getElementById('kpiGapSub').textContent = 'Net margin for ' + label;
+    document.getElementById('kpiMarginSub').textContent = 'Channel net margin';
+    document.getElementById('kpiWhSub').textContent = 'Avg payment collection days';
+    document.getElementById('kpiWorstSub').textContent = d.margin < 0 ? 'Net-negative — review channel' : 'Channel is profitable';
+    document.getElementById('kpiGapLabel').textContent = 'Net Margin';
+    document.getElementById('kpiMarginLabel').textContent = 'Collection Days';
+  }
+}
+
+function updateAlert(mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  const ch = activeChannel;
+  let total, ret, col, stor;
+  if(ch === 'all') {
+    total = QTR_DATA[activeQtr].alertTotal;
+    ret   = QTR_DATA[activeQtr].ret;
+    col   = QTR_DATA[activeQtr].col;
+    stor  = QTR_DATA[activeQtr].stor;
+  } else {
+    // scale per channel weight
+    const weight = CH_DATA[ch].rev / CH_IDS.reduce((s,id) => s + CH_DATA[id].rev, 0);
+    total = Math.round(QTR_DATA[activeQtr].alertTotal * weight);
+    ret   = Math.round(QTR_DATA[activeQtr].ret * weight);
+    col   = Math.round(QTR_DATA[activeQtr].col * weight);
+    stor  = Math.round(QTR_DATA[activeQtr].stor * weight);
+  }
+  flash('alertAmount', fmtUSD(total));
+  flash('apRet', fmtUSD(ret));
+  flash('apCol', fmtUSD(col));
+  flash('apStor', fmtUSD(stor));
+  document.getElementById('alertPeriod').textContent = activeQtr + ' 2026';
+}
+
+// ══════════════════════════════════════════════════
+// CHANNEL CHART
+// ══════════════════════════════════════════════════
+function buildChannelChart() {
+  const ctx = document.getElementById('channelChart').getContext('2d');
+  const mult = QTR_MULT[activeQtr];
+  const revs = CH_IDS.map(id => +(CH_DATA[id].rev * mult).toFixed(2));
+  const costs = CH_IDS.map(id => +(CH_DATA[id].cost * mult).toFixed(2));
+  const margins = CH_IDS.map(id => CH_DATA[id].margin);
+
+  channelChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: CHANNELS,
+      datasets: [
+        {label:'Revenue ($K)',    data:revs,    backgroundColor:'rgba(37,99,235,.7)',  borderColor:'#2563EB', borderWidth:1, yAxisID:'y'},
+        {label:'Total Cost ($K)', data:costs,   backgroundColor:'rgba(239,68,68,.5)', borderColor:'#EF4444', borderWidth:1, yAxisID:'y'},
+        {label:'Net Margin %',    data:margins, type:'line', yAxisID:'y2', borderColor:'#10B981', backgroundColor:'rgba(16,185,129,.1)', pointBackgroundColor:margins.map(m=>m<0?'#EF4444':'#10B981'), pointRadius:5, tension:.3, fill:false}
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>{
+        if(c.datasetIndex<2) return ` ${c.dataset.label}: $${c.raw}K`;
+        return ` Net Margin: ${c.raw>=0?'+':''}${c.raw}%`;
+      }}}},
+      scales:{
+        y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10},callback:v=>'$'+v+'K'}},
+        y2:{position:'right',grid:{display:false},ticks:{color:tickColor(),font:{size:10},callback:v=>v+'%'}}
+      }
+    }
+  });
+}
+
+function updateChannelChart(mult) {
+  if(!channelChart) return;
+  mult = mult || QTR_MULT[activeQtr];
+  const ch = activeChannel;
+  let labels, revs, costs, margins;
+  if(ch === 'all') {
+    labels = CHANNELS;
+    revs = CH_IDS.map(id => +(CH_DATA[id].rev * mult).toFixed(2));
+    costs = CH_IDS.map(id => +(CH_DATA[id].cost * mult).toFixed(2));
+    margins = CH_IDS.map(id => CH_DATA[id].margin);
+  } else {
+    const d = CH_DATA[ch];
+    labels = [CHANNELS[CH_IDS.indexOf(ch)]];
+    revs = [+(d.rev * mult).toFixed(2)];
+    costs = [+(d.cost * mult).toFixed(2)];
+    margins = [d.margin];
+  }
+  const negs = margins.filter(m => m < 0).length;
+  const alertTag = document.getElementById('chAlertTag');
+  alertTag.textContent = negs > 0 ? `⚠ ${negs} Channel${negs>1?'s':''} Net-Negative` : '✓ All Channels Profitable';
+  alertTag.className = 'tag ' + (negs > 0 ? 'red' : 'green');
+  channelChart.data.labels = labels;
+  channelChart.data.datasets[0].data = revs;
+  channelChart.data.datasets[1].data = costs;
+  channelChart.data.datasets[2].data = margins;
+  channelChart.data.datasets[2].pointBackgroundColor = margins.map(m=>m<0?'#EF4444':'#10B981');
+  channelChart.update();
+  document.getElementById('channelPLLabel').textContent = ch === 'all' ? 'All 7 Channels' : CHANNELS[CH_IDS.indexOf(ch)];
+}
+
+// ══════════════════════════════════════════════════
+// DONUT
+// ══════════════════════════════════════════════════
+function buildDonut() {
+  const ctx = document.getElementById('donutChart').getContext('2d');
+  const mult = QTR_MULT[activeQtr];
+  const revs = CH_IDS.map(id => +(CH_DATA[id].rev * mult).toFixed(2));
+  const colors = CH_IDS.map(id => CH_COLORS[id]);
+
+  donutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels: CHANNELS, datasets: [{data:revs, backgroundColor:colors, borderWidth:0, hoverOffset:4}] },
+    options: {
+      responsive:true, maintainAspectRatio:false, cutout:'72%',
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>{
+        const total = c.dataset.data.reduce((a,b)=>a+b,0);
+        return ` ${c.label}: $${c.raw}K (${Math.round(c.raw/total*100)}%)`;
+      }}}}
+    }
+  });
+  renderDonutLegend();
+}
+
+function renderDonutLegend() {
+  const mult = QTR_MULT[activeQtr];
+  const ch = activeChannel;
+  const legEl = document.getElementById('donutLeg');
+  const total = CH_IDS.reduce((a,id) => a + CH_DATA[id].rev, 0) * mult;
+  const ids = ch === 'all' ? CH_IDS : [ch];
+  legEl.innerHTML = ids.map(id => {
+    const rev = +(CH_DATA[id].rev * mult).toFixed(1);
+    const pct = Math.round(rev/total*100);
+    return `<div class="donut-leg-row"><div class="donut-leg-left"><div class="donut-leg-dot" style="background:${CH_COLORS[id]}"></div>${CHANNELS[CH_IDS.indexOf(id)]}</div><div><span class="donut-leg-val">$${rev}K</span><span style="color:var(--muted);font-size:9px;margin-left:4px">${pct}%</span></div></div>`;
+  }).join('');
+}
+
+function updateDonut(mult) {
+  if(!donutChart) return;
+  mult = mult || QTR_MULT[activeQtr];
+  const ch = activeChannel;
+  if(ch === 'all') {
+    donutChart.data.labels = CHANNELS;
+    donutChart.data.datasets[0].data = CH_IDS.map(id => +(CH_DATA[id].rev * mult).toFixed(2));
+    donutChart.data.datasets[0].backgroundColor = CH_IDS.map(id => CH_COLORS[id]);
+  } else {
+    donutChart.data.labels = [CHANNELS[CH_IDS.indexOf(ch)]];
+    donutChart.data.datasets[0].data = [+(CH_DATA[ch].rev * mult).toFixed(2)];
+    donutChart.data.datasets[0].backgroundColor = [CH_COLORS[ch]];
+  }
+  donutChart.update();
+  renderDonutLegend();
+}
+
+// ══════════════════════════════════════════════════
+// TREND
+// ══════════════════════════════════════════════════
+function buildTrend() {
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  const td = QTR_DATA[activeQtr].trend;
+
+  trendChart = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels:td.labels,
+      datasets:[
+        {label:'Billed ($K)',    data:td.billed,    borderColor:'#2563EB',fill:false,tension:.4,pointRadius:4,borderWidth:2},
+        {label:'Collected ($K)', data:td.collected, borderColor:'#10B981',fill:false,tension:.4,pointRadius:4,borderWidth:2},
+        {label:'Gap',            data:td.billed.map((b,i)=>+(b-td.collected[i]).toFixed(2)), borderColor:'#EF4444',borderDash:[4,4],fill:false,tension:.4,pointRadius:0,borderWidth:1.5}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},
+      scales:{
+        y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10},callback:v=>'$'+v+'K'}},
+        x:{grid:{display:false},ticks:{color:tickColor(),font:{size:10}}}
+      }
+    }
+  });
+}
+
+function updateTrend() {
+  if(!trendChart) return;
+  const td = QTR_DATA[activeQtr].trend;
+  trendChart.data.labels = td.labels;
+  trendChart.data.datasets[0].data = td.billed;
+  trendChart.data.datasets[1].data = td.collected;
+  trendChart.data.datasets[2].data = td.billed.map((b,i) => +(b-td.collected[i]).toFixed(2));
+  trendChart.update();
+}
+
+// ══════════════════════════════════════════════════
+// BRAND CHART
+// ══════════════════════════════════════════════════
+function buildBrand() {
+  const ctx = document.getElementById('brandChart').getContext('2d');
+  const labels = ['Snack Bars','Beverages','Spreads','Breakfast','Cold-Press'];
+  const revs = [9.2, 7.8, 6.4, 5.9, 3.1];
+  const margins = [19.4, 16.2, 14.8, 17.1, 6.2];
+
+  brandChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Revenue ($K)', data:revs, backgroundColor:revs.map((_,i)=>i===4?'rgba(239,68,68,.6)':'rgba(37,99,235,.6)'), yAxisID:'y'},
+        {label:'Margin %', type:'line', data:margins, borderColor:'#10B981', backgroundColor:'transparent', pointBackgroundColor:'#10B981', pointRadius:4, tension:.3, yAxisID:'y2'}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:9},callback:v=>'$'+v+'K'}},
+        y2:{position:'right',grid:{display:false},ticks:{color:tickColor(),font:{size:9},callback:v=>v+'%'}}
+      }
+    }
+  });
+}
+
+function updateBrand() { if(brandChart) brandChart.update(); }
+
+// ══════════════════════════════════════════════════
+// VELOCITY TABLE
+// ══════════════════════════════════════════════════
+function heatClass(v) {
+  if(v === null || v === undefined) return 'hm-none';
+  if(v >= 3.5) return 'hm-hot';
+  if(v >= 2.5) return 'hm-warm';
+  if(v >= 1.5) return 'hm-mid';
+  return 'hm-cold';
+}
+
+function renderVelocityTable() {
+  const body = document.getElementById('velocityBody');
+  body.innerHTML = VELOCITY_DATA.map(row => {
+    const vals = CHANNELS.map(ch => row.vals[ch]);
+    const defined = vals.filter(v => v !== null && v !== undefined);
+    const avg = defined.length ? (defined.reduce((a,b)=>a+b,0)/defined.length).toFixed(1) : '—';
+    const cells = CHANNELS.map(ch => {
+      const v = row.vals[ch];
+      return `<td class="${heatClass(v)}">${v !== null && v !== undefined ? v.toFixed(1) : '—'}</td>`;
+    }).join('');
+    return `<tr><td class="prod-name">${row.emoji} ${row.sku}</td>${cells}<td class="${heatClass(parseFloat(avg))}" style="font-weight:700">${avg}</td></tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// DEDUCTION TABLE
+// ══════════════════════════════════════════════════
+function renderDeductionTable() {
+  const body = document.getElementById('deductionBody');
+  body.innerHTML = DEDUCTION_DATA.map(row => {
+    const rCls = row.risk === 'high' ? 'risk-high' : row.risk === 'med' ? 'risk-med' : 'risk-low';
+    const rPct = row.risk === 'high' ? 80 : row.risk === 'med' ? 50 : 20;
+    const rColor = row.risk === 'high' ? '#EF4444' : row.risk === 'med' ? '#F59E0B' : '#10B981';
+    const rLabel = row.risk === 'high' ? '🔴 High' : row.risk === 'med' ? '🟡 Medium' : '🟢 Low';
+    return `<tr>
+      <td style="font-weight:600;color:var(--text2)">${row.retailer}</td>
+      <td class="mono ${rCls}">${fmtUSD(row.amount)}</td>
+      <td class="mono">${row.days}d</td>
+      <td class="${rCls}">${rLabel}<span class="risk-bar-wrap"><span class="risk-bar" style="width:${rPct}%;background:${rColor}"></span></span></td>
+      <td style="font-size:10px;color:var(--muted)">${row.action}</td>
+    </tr>`;
+  }).join('');
+
+  // Warehouse rows
+  const whEl = document.getElementById('warehouseRows');
+  whEl.innerHTML = WAREHOUSE_DATA.map(row => {
+    const color = row.risk === 'critical' ? '#EF4444' : '#F59E0B';
+    const bgColor = row.risk === 'critical' ? 'rgba(239,68,68,.08)' : 'rgba(245,158,11,.06)';
+    return `<div style="display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);gap:10px;background:${bgColor}">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;color:var(--text2)">${row.sku}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">${row.amount} at risk</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:${color}">${row.days}d</div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase">in storage</div>
+      </div>
+      <div style="width:60px">
+        <div style="height:5px;background:var(--surface3);border-radius:3px"><div style="height:100%;width:${row.pct}%;background:${color};border-radius:3px"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// RETAILER TABLE
+// ══════════════════════════════════════════════════
+function renderRetailerTable(mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  const ch = activeChannel;
+  const filtered = ch === 'all' ? RETAILER_DATA : RETAILER_DATA.filter(r => r.ch === ch);
+  document.getElementById('retailLabel').textContent = ch === 'all' ? 'All Channels' : CHANNELS[CH_IDS.indexOf(ch)];
+  const maxRev = filtered.length > 0 ? Math.max(...filtered.map(r => r.q1 * mult)) : 1;
+  const body = document.getElementById('retailBody');
+  body.innerHTML = filtered.map((row, i) => {
+    const q1 = Math.round(row.q1 * mult);
+    const q2 = Math.round(row.q2 * mult);
+    const trend = q2 > q1 ? `<span style="color:var(--positive)">↑ ${((q2-q1)/q1*100).toFixed(0)}%</span>` : `<span style="color:var(--negative)">↓</span>`;
+    const barW = Math.round(q1/maxRev*100);
+    return `<tr>
+      <td><span class="rank-num">${String(i+1).padStart(2,'0')}</span></td>
+      <td style="font-weight:600;color:var(--text)">${row.name}</td>
+      <td class="mono">$${(q1/1000).toFixed(0)}K</td>
+      <td>${trend}</td>
+      <td class="rev-bar-cell"><div class="rev-bar-track" style="width:80px"><div class="rev-bar-fill" style="width:${barW}%;background:${CH_COLORS[row.ch]}"></div></div></td>
+    </tr>`;
+  }).join('');
+
+  if(!retailQQChart) buildRetailQQ(mult);
+  else updateRetailQQ(mult);
+}
+
+function buildRetailQQ(mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  const ctx = document.getElementById('retailQQChart').getContext('2d');
+  const ch = activeChannel;
+  const filtered = ch === 'all' ? RETAILER_DATA : RETAILER_DATA.filter(r => r.ch === ch);
+  retailQQChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: filtered.map(r => r.name.split(' ').slice(0,2).join(' ')),
+      datasets:[
+        {label:'Q1', data:filtered.map(r=>+(r.q1*mult/1000).toFixed(1)), backgroundColor:'rgba(37,99,235,.6)'},
+        {label:'Q2', data:filtered.map(r=>+(r.q2*mult/1000).toFixed(1)), backgroundColor:'rgba(16,185,129,.6)'},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{legend:{labels:{color:tickColor(),font:{size:10}}}},
+      scales:{
+        x:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10},callback:v=>'$'+v+'K'}},
+        y:{grid:{display:false},ticks:{color:tickColor(),font:{size:10}}}
+      }
+    }
+  });
+}
+
+function updateRetailQQ(mult) {
+  if(!retailQQChart) return;
+  mult = mult || QTR_MULT[activeQtr];
+  const ch = activeChannel;
+  const filtered = ch === 'all' ? RETAILER_DATA : RETAILER_DATA.filter(r => r.ch === ch);
+  retailQQChart.data.labels = filtered.map(r => r.name.split(' ').slice(0,2).join(' '));
+  retailQQChart.data.datasets[0].data = filtered.map(r=>+(r.q1*mult/1000).toFixed(1));
+  retailQQChart.data.datasets[1].data = filtered.map(r=>+(r.q2*mult/1000).toFixed(1));
+  retailQQChart.update();
+}
+
+// ══════════════════════════════════════════════════
+// AI ENGINE
+// ══════════════════════════════════════════════════
+async function runAIEngine() {
+  const btn = document.getElementById('aiRunBtn');
+  const body = document.getElementById('aiBody');
+  btn.disabled = true;
+  btn.textContent = '⏳ Analyzing...';
+  body.innerHTML = '<div class="ai-loading"><div class="ai-spinner"></div>Analyzing Brightfield channel data, deductions & velocity signals...</div>';
+
+  const context = `Brightfield Foods Co. CPG Dashboard — ${activeQtr} 2026.
+Revenue: $${(CH_IDS.reduce((s,id)=>s+CH_DATA[id].rev,0)*QTR_MULT[activeQtr]).toFixed(1)}K across 7 channels.
+Net-negative channels: Instacart (−3.1%), DoorDash (−5.7%).
+Critical SKU: Protein Powder 2lb — 47 days warehouse storage, expires in 8 days, $86K at risk.
+Leakage total: ${fmtUSD(QTR_DATA[activeQtr].alertTotal)} (returns + delayed collections + warehouse).
+Top performer: Granola Bar 12-pk — 22.4% margin at Walmart, strongest velocity.
+Collection gap: $${(CH_IDS.reduce((s,id)=>s+CH_DATA[id].rev,0)*QTR_MULT[activeQtr]*0.11).toFixed(1)}K overdue.`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`You are a CPG commercial strategist. Given dashboard data, output ONLY a JSON array of 4-5 action objects. Each must have: title (string), body (string, 1-2 sentences), action (string, starts with →), impact (string like "+$42K" or "−$18K"), urgency ("critical"|"high"|"medium"|"low"). No markdown, no preamble. Return ONLY the JSON array.`,
+        messages:[{role:'user',content:context}]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content.map(i=>i.text||'').join('');
+    const clean = text.replace(/```json|```/g,'').trim();
+    const actions = JSON.parse(clean);
+    body.innerHTML = `<div class="ai-actions">${actions.map(a=>`
+      <div class="ai-action-card urgency-${a.urgency}">
+        <div class="ai-ac-hd">
+          <div class="ai-ac-title">${a.title}</div>
+          <div class="ai-ac-badges">
+            <div class="ai-ac-impact ${a.impact.startsWith('-')?'negative':''}">${a.impact}</div>
+            <div class="urgency-badge urgency-${a.urgency}">${a.urgency}</div>
+          </div>
+        </div>
+        <div class="ai-ac-body">${a.body}</div>
+        <div class="ai-ac-action">${a.action}</div>
+      </div>`).join('')}</div>`;
+  } catch(e) {
+    const fallback = [
+      {title:'Exit Instacart & DoorDash immediately',body:'Both channels are net-negative after platform fees and returns. Continuing operations generates confirmed losses.',action:'→ Pause all Instacart & DoorDash orders today. Redirect SKUs to Walmart and Kroger.',impact:'+$34K',urgency:'critical'},
+      {title:'Emergency liquidation: Protein Powder 2lb',body:'47 days in warehouse, 8 days to expiry. No open orders. At $0 recovery this becomes a total write-off.',action:'→ Call 3 foodservice buyers now. Price at $85/unit (70% MSRP). Target recovery of $86K.',impact:'+$86K',urgency:'critical'},
+      {title:'Delist Cold-Press Juice from delivery apps',body:'Same product earns +11.2% on Kroger and −9.2% on DoorDash. The product is fine — the channels are broken.',action:'→ Remove Cold-Press Juice from Instacart & DoorDash. Expand Kroger allocation.',impact:'+$18K',urgency:'high'},
+      {title:'Lock in Granola Bar restock before Walmart review',body:'Your #1 SKU by every metric. Any stockout at Walmart costs $8,800/day in lost margin.',action:'→ Set restock trigger at 200 units minimum. Negotiate priority shelf placement in next cycle.',impact:'+$44K',urgency:'medium'},
+      {title:'Chase $665K in outstanding receivables',body:'Instacart and DoorDash alone account for $665K in delayed payments. Legal escalation warranted.',action:'→ Issue formal collection notices to Instacart (62 days) and DoorDash (54 days) this week.',impact:'+$182K',urgency:'high'},
+    ];
+    body.innerHTML = `<div class="ai-actions">${fallback.map(a=>`
+      <div class="ai-action-card urgency-${a.urgency}">
+        <div class="ai-ac-hd">
+          <div class="ai-ac-title">${a.title}</div>
+          <div class="ai-ac-badges">
+            <div class="ai-ac-impact ${a.impact.startsWith('-')?'negative':''}">${a.impact}</div>
+            <div class="urgency-badge urgency-${a.urgency}">${a.urgency}</div>
+          </div>
+        </div>
+        <div class="ai-ac-body">${a.body}</div>
+        <div class="ai-ac-action">${a.action}</div>
+      </div>`).join('')}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '⚡ Generate Actions';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// PRODUCTS VIEW
+// ══════════════════════════════════════════════════
+function selectProduct(id, btn) {
+  activeProd = id;
+  document.querySelectorAll('.prod-chip').forEach(c => c.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderProdView();
+}
+
+function updateBrandKPIs(mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  const ch = activeChannel;
+  let prods = PRODUCTS_DATA;
+  if(ch !== 'all') {
+    const chName = CHANNELS[CH_IDS.indexOf(ch)].replace(' ','');
+    prods = PRODUCTS_DATA.map(p => {
+      const chKey = Object.keys(p.chRev).find(k => k.toLowerCase().replace(/\s/g,'') === ch || k.toLowerCase().includes(ch.slice(0,4)));
+      return {...p, rev: chKey ? p.chRev[chKey] : 0};
+    }).filter(p => p.rev > 0);
+  }
+  const byRev = [...prods].sort((a,b) => b.rev - a.rev);
+  const byMgn = [...prods].sort((a,b) => a.margin - b.margin);
+  const top = byRev[0];
+  const worst = byMgn[0];
+  const fastest = byRev[0];
+  if(top) {
+    flash('pkpiTop', top.name.split(' ').slice(0,2).join(' '));
+    document.getElementById('pkpiTopSub').textContent = fmtUSD(Math.round(top.rev*mult)) + ' · ' + top.channels + '/7 channels';
+  }
+  if(worst) {
+    flash('pkpiWorst', worst.name.split(' ').slice(0,2).join(' '));
+    document.getElementById('pkpiWorstSub').textContent = worst.margin.toFixed(1) + '% margin · ' + (worst.margin < 0 ? 'Delist now' : 'Monitor');
+  }
+  if(fastest) {
+    flash('pkpiFast', fastest.name.split(' ').slice(0,2).join(' '));
+    document.getElementById('pkpiFastSub').textContent = 'Highest velocity · Walmart #1';
+  }
+  document.getElementById('prodKpiLabel').textContent = ch === 'all' ? 'All Channels' : CHANNELS[CH_IDS.indexOf(ch)];
+}
+
+function sortProd(by, btn) {
+  activeSortProd = by;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const mult = QTR_MULT[activeQtr];
+  renderProdList(mult);
+}
+
+function renderProdView() {
+  const mult = QTR_MULT[activeQtr];
+  const spot = document.getElementById('spotBanner');
+  const breakdown = document.getElementById('prodChBreakdown');
+  if(activeProd !== 'all') {
+    const pd = PRODUCTS_DATA.find(p => p.id === activeProd);
+    if(pd) {
+      spot.style.display = 'flex';
+      document.getElementById('spotEmoji').textContent = pd.emoji;
+      document.getElementById('spotName').textContent = pd.name;
+      document.getElementById('spotSub').textContent = pd.margin >= 0 ? 'Profitable · ' + pd.channels + ' channels' : '⚠ Net-negative · ' + pd.channels + ' channels';
+      document.getElementById('spotRev').textContent = fmtUSD(Math.round(pd.rev * mult));
+      document.getElementById('spotMargin').textContent = (pd.margin >= 0 ? '+' : '') + pd.margin + '%';
+      document.getElementById('spotUnits').textContent = Math.round((pd.rev * mult) / 8.2).toLocaleString();
+      document.getElementById('spotChannels').textContent = pd.channels;
+      breakdown.classList.add('show');
+      document.getElementById('prodChLabel').textContent = pd.name;
+      document.getElementById('prodChChartTitle').textContent = 'Revenue by Channel — ' + pd.name;
+      buildProdChCharts(pd, mult);
+    }
+  } else {
+    spot.style.display = 'none';
+    breakdown.classList.remove('show');
+    if(prodChBarChart) { prodChBarChart.destroy(); prodChBarChart = null; }
+    if(prodChMarginChart) { prodChMarginChart.destroy(); prodChMarginChart = null; }
+  }
+  renderProdList(mult);
+  renderProdInsights();
+  renderProdRetailTable(mult);
+  updateBrandKPIs(mult);
+}
+
+function buildProdChCharts(pd, mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  const labels = Object.keys(pd.chRev);
+  const revVals = Object.values(pd.chRev).map(v => +((v * mult)/1000).toFixed(2));
+  const mgnVals = Object.values(pd.chMgn);
+
+  if(prodChBarChart) prodChBarChart.destroy();
+  const ctx1 = document.getElementById('prodChBarChart').getContext('2d');
+  prodChBarChart = new Chart(ctx1, {
+    type:'bar',
+    data:{ labels, datasets:[{label:'Revenue ($K)', data:revVals, backgroundColor:'rgba(37,99,235,.7)', borderColor:'#2563EB', borderWidth:1}] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10},callback:v=>'$'+v+'K'}},x:{grid:{display:false},ticks:{color:tickColor(),font:{size:10}}}} }
+  });
+
+  if(prodChMarginChart) prodChMarginChart.destroy();
+  const ctx2 = document.getElementById('prodChMarginChart').getContext('2d');
+  prodChMarginChart = new Chart(ctx2, {
+    type:'bar',
+    data:{ labels, datasets:[{label:'Margin %', data:mgnVals, backgroundColor:mgnVals.map(v => v < 0 ? 'rgba(239,68,68,.7)' : 'rgba(16,185,129,.7)'), borderColor:mgnVals.map(v=>v<0?'#EF4444':'#10B981'), borderWidth:1}] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10},callback:v=>v+'%'}},x:{grid:{display:false},ticks:{color:tickColor(),font:{size:10}}}} }
+  });
+}
+
+function renderProdList(mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  let prods = [...PRODUCTS_DATA];
+  if(activeSortProd === 'margin') prods.sort((a,b) => b.margin - a.margin);
+  else prods.sort((a,b) => b.rev - a.rev);
+
+  const el = document.getElementById('prodList');
+  el.innerHTML = prods.map((p, i) => {
+    const mCls = p.margin < 0 ? 'neg' : p.margin < 10 ? 'warn' : 'pos';
+    const mPfx = p.margin >= 0 ? '+' : '';
+    return `<div class="prod-row" onclick="selectProduct('${p.id}', document.getElementById('chip-${p.id}'))">
+      <div class="prod-rank">${String(i+1).padStart(2,'0')}</div>
+      <div class="prod-emoji">${p.emoji}</div>
+      <div class="prod-info">
+        <div class="prod-name">${p.name}</div>
+        <div class="prod-meta">${p.channels}/7 channels</div>
+      </div>
+      <div class="prod-rev">${fmtUSD(Math.round(p.rev * mult))}</div>
+      <div class="prod-margin ${mCls}">${mPfx}${p.margin}%</div>
+    </div>`;
+  }).join('');
+
+  if(!prodBarChart) buildProdBar(prods, mult);
+  else updateProdBar(prods, mult);
+}
+
+function buildProdBar(prods, mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  const ctx = document.getElementById('prodBarChart').getContext('2d');
+  prodBarChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: prods.map(p => p.emoji + ' ' + p.name.split(' ').slice(0,2).join(' ')),
+      datasets:[
+        {label:'Revenue ($K)', data:prods.map(p=>+((p.rev*mult)/1000).toFixed(1)), backgroundColor:prods.map(p=>p.margin<0?'rgba(239,68,68,.6)':'rgba(37,99,235,.6)'), yAxisID:'y'},
+        {label:'Margin %', type:'line', data:prods.map(p=>p.margin), borderColor:prods.map(p=>p.margin<0?'#EF4444':'#10B981'), pointBackgroundColor:prods.map(p=>p.margin<0?'#EF4444':'#10B981'), pointRadius:4, tension:.3, fill:false, yAxisID:'y2'}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10},callback:v=>'$'+v+'K'}},
+        y2:{position:'right',grid:{display:false},ticks:{color:tickColor(),font:{size:10},callback:v=>v+'%'}}
+      }
+    }
+  });
+}
+
+function updateProdBar(prods, mult) {
+  mult = mult || QTR_MULT[activeQtr];
+  if(!prodBarChart) return;
+  prodBarChart.data.labels = prods.map(p => p.emoji + ' ' + p.name.split(' ').slice(0,2).join(' '));
+  prodBarChart.data.datasets[0].data = prods.map(p=>+((p.rev*mult)/1000).toFixed(1));
+  prodBarChart.data.datasets[0].backgroundColor = prods.map(p=>p.margin<0?'rgba(239,68,68,.6)':'rgba(37,99,235,.6)');
+  prodBarChart.data.datasets[1].data = prods.map(p=>p.margin);
+  prodBarChart.data.datasets[1].pointBackgroundColor = prods.map(p=>p.margin<0?'#EF4444':'#10B981');
+  prodBarChart.update();
+}
+
+function renderProdInsights() {
+  const stack = document.getElementById('prodInsightStack');
+  let insights;
+  if(activeProd !== 'all' && PROD_INSIGHTS[activeProd]) {
+    insights = PROD_INSIGHTS[activeProd];
+  } else {
+    insights = INSIGHTS_DATA;
+  }
+  const typeClass = {critical:'critical', opportunity:'opportunity', watch:'watch', info:'info'};
+  stack.innerHTML = insights.map(ins => `
+    <div class="insight-card ${typeClass[ins.type]||'info'}">
+      <div class="insight-num">${ins.num}</div>
+      <div class="insight-title">${ins.title}</div>
+      <div class="insight-desc">${ins.desc}</div>
+      <div class="insight-action">${ins.action}</div>
+    </div>`).join('');
+  document.getElementById('prodInsightTag').textContent = insights.filter(i=>i.type==='critical').length + ' Issues Detected';
+}
+
+function renderProdRetailTable() {
+  const body = document.getElementById('prodRetailBody');
+  const filtered = activeChannel === 'all' ? RETAILER_DATA : RETAILER_DATA.filter(r => r.ch === activeChannel);
+  const mult = QTR_MULT[activeQtr];
+  body.innerHTML = filtered.map((row, i) => {
+    const q1 = Math.round(row.q1 * mult);
+    const q2 = Math.round(row.q2 * mult);
+    const g = ((q2-q1)/q1*100).toFixed(0);
+    const trendHtml = q2 > q1 ? `<span style="color:var(--positive)">↑ ${g}%</span>` : `<span style="color:var(--negative)">↓ ${Math.abs(g)}%</span>`;
+    return `<tr>
+      <td><span class="rank-num">${String(i+1).padStart(2,'0')}</span></td>
+      <td style="font-weight:600;color:var(--text)">${row.name}</td>
+      <td class="mono">$${(q1/1000).toFixed(0)}K</td>
+      <td>${trendHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  buildChannelChart();
+  buildDonut();
+  buildTrend();
+  buildBrand();
+  renderVelocityTable();
+  renderDeductionTable();
+  renderRetailerTable();
+  updateKPIs();
+  updateAlert();
+});
+</script>
+</body>
+</html>

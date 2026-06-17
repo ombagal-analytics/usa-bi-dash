@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harvest & Co. Foods — Brand Intelligence Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#070c18;--surface:#0e1628;--surface2:#131e30;--surface3:#192540;
+  --border:#1c2d45;--border2:#243650;--accent:#00d4aa;--accent2:#0ea5e9;
+  --amber:#f59e0b;--positive:#10b981;--positive-bg:rgba(16,185,129,.07);
+  --warning:#f59e0b;--warning-bg:rgba(245,158,11,.07);
+  --negative:#ef4444;--negative-bg:rgba(239,68,68,.07);
+  --text:#e8f0fe;--text2:#8da4c4;--text3:#4d6680;--muted:#3a5068;
+  --shadow:0 2px 20px rgba(0,0,0,.5);--shadow-lg:0 8px 48px rgba(0,0,0,.6);
+  --r:10px;--font-display:'Syne',sans-serif;--font-body:'Manrope',sans-serif;--font-mono:'IBM Plex Mono',monospace;
+}
+[data-theme="light"]{
+  --bg:#f4f7fb;--surface:#fff;--surface2:#f8fafc;--surface3:#f0f4f8;
+  --border:#e2e8f0;--border2:#cbd5e1;--text:#0f172a;--text2:#334155;
+  --text3:#64748b;--muted:#94a3b8;--shadow:0 2px 12px rgba(0,0,0,.07);--shadow-lg:0 8px 32px rgba(0,0,0,.1);
+}
+html,body{height:100%;font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:13.5px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 22px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+.brand{display:flex;align-items:center;gap:11px}
+.brand-mark{width:36px;height:36px;background:linear-gradient(135deg,#00d4aa,#0ea5e9);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.brand-name{font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.2px;line-height:1.1}
+.brand-name em{color:var(--accent);font-style:normal}
+.brand-tag{font-size:9.5px;color:var(--text3);letter-spacing:.6px;text-transform:uppercase;font-weight:500}
+.topbar-center{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.src-pill{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 9px;white-space:nowrap;font-weight:500}
+.src-dot{width:5px;height:5px;border-radius:50%;animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.live-pill{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--accent);background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.18);border-radius:20px;padding:4px 11px}
+.live-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:blink 1.8s infinite}
+.wk-badge{font-family:var(--font-mono);font-size:10px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 9px}
+.theme-btn{width:40px;height:22px;background:var(--surface3);border:1px solid var(--border2);border-radius:11px;position:relative;cursor:pointer;flex-shrink:0}
+.theme-thumb{width:16px;height:16px;background:var(--accent);border-radius:50%;position:absolute;top:2px;left:2px;transition:transform .25s;font-size:9px;display:flex;align-items:center;justify-content:center}
+[data-theme="light"] .theme-thumb{transform:translateX(18px)}
+.alert-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:7px 22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.alert-tag{font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;flex-shrink:0}
+.chip-alert{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:500;padding:4px 10px;border-radius:6px}
+.chip-alert.red{background:var(--negative-bg);color:var(--negative);border:1px solid rgba(239,68,68,.18)}
+.chip-alert.amber{background:var(--warning-bg);color:var(--amber);border:1px solid rgba(245,158,11,.18)}
+.chip-alert.green{background:var(--positive-bg);color:var(--positive);border:1px solid rgba(16,185,129,.18)}
+.tab-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 22px;display:flex;gap:0;overflow-x:auto}
+.tab-btn{padding:13px 18px;font-size:11.5px;font-weight:600;color:var(--text3);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .18s;display:flex;align-items:center;gap:6px;white-space:nowrap;font-family:var(--font-body)}
+.tab-btn:hover{color:var(--text)}.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-badge{background:var(--negative);color:#fff;font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700}
+.main{padding:18px 22px;max-width:1640px;margin:0 auto}
+.tab-content{display:none}.tab-content.active{display:block}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow)}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.pt{font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:6px}
+.pa{font-size:11px;color:var(--accent);cursor:pointer;font-weight:500}
+.pa:hover{text-decoration:underline}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;transition:border-color .2s,transform .15s}
+.kpi:hover{transform:translateY(-1px);border-color:var(--border2)}
+.kpi.green{border-top:2.5px solid var(--positive)}.kpi.amber{border-top:2.5px solid var(--amber)}.kpi.red{border-top:2.5px solid var(--negative)}
+.kpi-label{font-size:9.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between}
+.kpi-val{font-family:var(--font-mono);font-size:24px;font-weight:500;color:var(--text);letter-spacing:-1px;margin-bottom:3px}
+.kpi-sub{font-size:9.5px;color:var(--text3);margin-bottom:6px;line-height:1.4}
+.kpi-delta{font-size:10.5px;font-weight:600;display:flex;align-items:center;gap:3px}
+.kpi-delta.pos{color:var(--positive)}.kpi-delta.neg{color:var(--negative)}.kpi-delta.warn{color:var(--amber)}
+.kpi-bench{font-size:9px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 7px;display:inline-flex;align-items:center;gap:3px;margin-top:5px}
+.kpi-cta{font-size:9px;color:var(--accent);margin-top:6px;cursor:pointer;font-weight:600;border-top:1px dashed var(--border);padding-top:6px;display:block}
+.kpi-cta:hover{text-decoration:underline}
+.reset-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
+.rc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 14px;position:relative;overflow:hidden}
+.rc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.rc.critical::before{background:var(--negative)}.rc.warning::before{background:var(--amber)}.rc.stable::before{background:var(--positive)}
+.rc-ret{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.rc-logo{width:18px;height:18px;border-radius:4px;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+.rc-sr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px}
+.rc-score{font-family:var(--font-mono);font-size:28px;font-weight:500;line-height:1}
+.rc.critical .rc-score{color:var(--negative)}.rc.warning .rc-score{color:var(--amber)}.rc.stable .rc-score{color:var(--positive)}
+.rc-sl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;font-weight:600}
+.rc-days{font-size:10px;font-weight:700;padding:3px 7px;border-radius:5px}
+.rc.critical .rc-days{background:var(--negative-bg);color:var(--negative)}
+.rc.warning .rc-days{background:var(--warning-bg);color:var(--amber)}
+.rc.stable .rc-days{background:var(--positive-bg);color:var(--positive)}
+.rc-bar{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:8px}
+.rc-bar-fill{height:100%;border-radius:3px}
+.rc.critical .rc-bar-fill{background:var(--negative)}.rc.warning .rc-bar-fill{background:var(--amber)}.rc.stable .rc-bar-fill{background:var(--positive)}
+.rc-factors{display:flex;flex-direction:column;gap:3px}
+.rc-f{font-size:9px;color:var(--text3);display:flex;justify-content:space-between}
+.rc-f span.pos{color:var(--positive);font-weight:600}.rc-f span.neg{color:var(--negative);font-weight:600}.rc-f span.warn{color:var(--amber);font-weight:600}
+.rc-date{font-size:9px;color:var(--text3);border-top:1px solid var(--border);padding-top:6px;margin-top:6px;font-family:var(--font-mono)}
+.rc-date strong{color:var(--text2)}
+.rc-dist{font-size:8.5px;color:var(--muted);margin-top:3px;font-style:italic}
+.exec-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px}
+.ec{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px 17px}
+.ec.win{border-left:3px solid var(--positive)}.ec.risk{border-left:3px solid var(--negative)}.ec.action{border-left:3px solid var(--amber)}
+.ec-hdr{display:flex;align-items:center;gap:7px;margin-bottom:12px}
+.ec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.ec.win .ec-lbl{color:var(--positive)}.ec.risk .ec-lbl{color:var(--negative)}.ec.action .ec-lbl{color:var(--amber)}
+.ec-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:11.5px;color:var(--text2);line-height:1.5}
+.ec-item:last-child{border-bottom:none;padding-bottom:0}
+.ec-num{width:18px;height:18px;border-radius:4px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.ec.win .ec-num{background:rgba(16,185,129,.12);color:var(--positive)}
+.ec.risk .ec-num{background:rgba(239,68,68,.12);color:var(--negative)}
+.ec.action .ec-num{background:rgba(245,158,11,.12);color:var(--amber)}
+.aq{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:18px}
+.aq-hdr{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--accent);margin-bottom:12px;display:flex;justify-content:space-between}
+.aq-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.aq-row:last-child{border-bottom:none;padding-bottom:0}
+.aq-pri{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;flex-shrink:0;letter-spacing:.3px}
+.aq-pri.critical{background:var(--negative-bg);color:var(--negative);border:1px solid rgba(239,68,68,.25)}
+.aq-pri.high{background:var(--warning-bg);color:var(--amber);border:1px solid rgba(245,158,11,.25)}
+.aq-pri.monitor{background:rgba(0,212,170,.06);color:var(--accent);border:1px solid rgba(0,212,170,.18)}
+.aq-text{font-size:11.5px;color:var(--text2);flex:1;line-height:1.5}
+.aq-text strong{color:var(--text);display:block;margin-bottom:1px;font-size:12px}
+.aq-btn{font-size:10px;font-weight:600;padding:5px 11px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;white-space:nowrap;font-family:var(--font-body);transition:all .18s}
+.aq-btn:hover{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sh-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:6px}
+.sh-sub{font-size:10px;color:var(--muted)}
+.conn-banner{background:rgba(0,212,170,.04);border:1px solid rgba(0,212,170,.13);border-radius:8px;padding:9px 14px;display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.conn-lbl{font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+.conn-tags{display:flex;gap:6px;flex-wrap:wrap}
+.ctag{display:flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border2);color:var(--text2);border-radius:6px;padding:3px 9px;font-size:10px;font-weight:500}
+.ctag .cd{width:5px;height:5px;border-radius:50%}
+.ctag.live .cd{background:var(--positive)}.ctag.indirect .cd{background:var(--amber)}
+.ctag.pending{opacity:.5;border-style:dashed;cursor:pointer}.ctag.pending .cd{background:var(--text3)}
+</style>
+<style>
+.ret-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;margin-bottom:18px}
+.ret-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 14px;cursor:pointer;transition:all .18s;position:relative}
+.ret-card:hover,.ret-card.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,212,170,.1)}
+.ret-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.ret-logo{width:20px;height:20px;border-radius:4px;font-size:8.5px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff}
+.ret-rev{font-family:var(--font-mono);font-size:19px;font-weight:500;color:var(--text);margin-bottom:2px}
+.ret-margin{font-size:11px;font-weight:600;margin-bottom:6px}
+.ret-margin.pos{color:var(--positive)}.ret-margin.warn{color:var(--amber)}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chip{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:500}
+.chip.vel{background:rgba(14,165,233,.1);color:#38bdf8}.chip.acv{background:rgba(99,102,241,.1);color:#a5b4fc}
+.chip.void{background:rgba(239,68,68,.1);color:var(--negative)}.chip.ok{background:rgba(16,185,129,.1);color:var(--positive)}
+.chip.dist{background:rgba(245,158,11,.08);color:var(--amber);font-style:italic}
+.buyer-btn{font-size:9px;position:absolute;top:10px;right:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text3);padding:3px 7px;border-radius:5px;cursor:pointer;font-family:var(--font-body);transition:all .18s}
+.buyer-btn:hover{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.charts-2col{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:18px}
+.charts-3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px}
+.chart-wrap{height:215px;position:relative}
+.v-table{width:100%;border-collapse:collapse}
+.v-table th{font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;background:var(--surface2)}
+.v-table td{padding:9px 10px;border-bottom:1px solid var(--border);font-size:11.5px;color:var(--text2)}
+.v-table tr:last-child td{border-bottom:none}.v-table tr:hover td{background:var(--surface2)}
+.void-flag{display:flex;flex-direction:column;gap:2px}
+.void-pct{font-weight:700;font-size:12px;display:flex;align-items:center;gap:5px}
+.void-pct.red{color:var(--negative)}.void-pct.amber{color:var(--amber)}.void-pct.green{color:var(--positive)}
+.void-action{font-size:9.5px;color:var(--accent);cursor:pointer;font-weight:600}
+.wos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.wos-card{border-radius:8px;padding:12px 13px}
+.wos-card.critical{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.18)}
+.wos-card.warning{background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.18)}
+.wos-card.healthy{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15)}
+.wos-sku{font-size:11px;font-weight:600;color:var(--text);margin-bottom:3px}
+.wos-ret{font-size:9.5px;color:var(--text3);margin-bottom:7px}
+.wos-val{font-family:var(--font-mono);font-size:21px;font-weight:500;margin-bottom:1px}
+.wos-card.critical .wos-val{color:var(--negative)}.wos-card.warning .wos-val{color:var(--amber)}.wos-card.healthy .wos-val{color:var(--positive)}
+.wos-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px}
+.wos-action{font-size:9.5px;color:var(--accent);margin-top:6px;cursor:pointer;font-weight:600;display:block}
+.cm-waterfall{display:flex;flex-direction:column;gap:0}
+.cm-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;margin-bottom:3px;transition:background .15s}
+.cm-row:hover{background:var(--surface3)}.cm-row.total{background:var(--surface2);border:1px solid var(--border)}
+.cm-label{font-size:11.5px;color:var(--text2);flex:1;display:flex;align-items:center;gap:7px}
+.cm-icon{font-size:13px}.cm-name{font-weight:500}.cm-desc{font-size:9.5px;color:var(--text3);margin-left:4px}
+.cm-val{font-family:var(--font-mono);font-size:12px;font-weight:500;min-width:72px;text-align:right}
+.cm-val.pos{color:var(--positive)}.cm-val.neg{color:var(--negative)}.cm-val.warn{color:var(--amber)}
+.cm-pct{font-size:10px;color:var(--text3);min-width:44px;text-align:right;font-family:var(--font-mono)}
+.cm-bar-cell{width:120px;flex-shrink:0}
+.cm-bar-t{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.cm-bar-f{height:100%;border-radius:3px}
+.cm-divider{height:1px;background:var(--border);margin:5px 0}
+.dd-wrap{background:var(--negative-bg);border:1px solid rgba(239,68,68,.15);border-radius:7px;padding:10px 13px;margin-bottom:10px}
+.dd-hdr{font-size:10px;font-weight:700;color:var(--negative);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;justify-content:space-between}
+.dd-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(239,68,68,.1);font-size:11px}
+.dd-row:last-child{border-bottom:none}
+.dd-name{color:var(--text2)}.dd-ret{font-size:9.5px;color:var(--text3);margin-left:5px}.dd-amt{font-family:var(--font-mono);color:var(--negative);font-weight:500}
+.dd-status{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600}
+.dd-status.open{background:var(--negative-bg);color:var(--negative)}.dd-status.disputed{background:var(--warning-bg);color:var(--amber)}.dd-status.resolved{background:var(--positive-bg);color:var(--positive)}
+.sku-tbl{width:100%;border-collapse:collapse}
+.sku-tbl th{font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;background:var(--surface2);white-space:nowrap}
+.sku-tbl td{padding:9px 10px;border-bottom:1px solid var(--border);font-size:11.5px;color:var(--text2);vertical-align:middle}
+.sku-tbl tr:last-child td{border-bottom:none}.sku-tbl tr:hover td{background:var(--surface2)}
+.sku-name{font-weight:600;color:var(--text);font-size:12px}
+.sku-tags{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px}
+.sku-tag{font-size:8px;padding:1px 5px;border-radius:3px;background:var(--surface3);color:var(--text3);font-weight:500}
+.badge{font-size:9px;padding:2px 7px;border-radius:4px;font-weight:600;display:inline-block}
+.badge.green{background:var(--positive-bg);color:var(--positive);border:1px solid rgba(16,185,129,.18)}
+.badge.amber{background:var(--warning-bg);color:var(--amber);border:1px solid rgba(245,158,11,.18)}
+.badge.red{background:var(--negative-bg);color:var(--negative);border:1px solid rgba(239,68,68,.18)}
+.view-toggle{display:flex;gap:4px}
+.vtb{font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text3);cursor:pointer;font-family:var(--font-body);transition:all .18s;font-weight:500}
+.vtb.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.show{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:26px;width:560px;max-width:93vw;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:translateY(14px);transition:transform .2s;position:relative}
+.overlay.show .modal{transform:translateY(0)}.modal.wide{width:660px}
+.modal-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;padding-right:24px}
+.modal-sub{font-size:11px;color:var(--text3);margin-bottom:17px}
+.modal-close{position:absolute;top:18px;right:20px;cursor:pointer;font-size:17px;color:var(--text3);background:none;border:none;font-family:var(--font-body)}
+.mrow{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.mrow:last-of-type{border-bottom:none}
+.micon{font-size:15px;flex-shrink:0;margin-top:2px}
+.mtext{font-size:11.5px;color:var(--text2);line-height:1.55}
+.mtext strong{color:var(--text);display:block;margin-bottom:2px;font-size:12px}
+.mbtn{display:inline-block;margin-top:5px;font-size:10px;font-weight:600;padding:4px 11px;border-radius:6px;background:var(--accent);color:var(--bg);cursor:pointer;border:none;font-family:var(--font-body)}
+.at-form{display:flex;flex-direction:column;gap:9px;margin-bottom:13px}
+.at-row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.at-label{font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.at-input,.at-select,.at-textarea{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;font-size:11.5px;color:var(--text);font-family:var(--font-body);outline:none;transition:border-color .18s}
+.at-input:focus,.at-select:focus,.at-textarea:focus{border-color:var(--accent)}
+.at-textarea{resize:vertical;min-height:68px}
+.at-email-box{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:12px 14px;font-size:11px;color:var(--text2);line-height:1.7;white-space:pre-wrap;margin-bottom:11px;font-family:var(--font-mono);max-height:240px;overflow-y:auto}
+.at-btns{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px}
+.at-btn{padding:7px 15px;border-radius:7px;font-size:11.5px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);transition:all .18s}
+.at-btn.primary{background:var(--accent);color:var(--bg)}.at-btn.primary:hover{opacity:.88}
+.at-btn.secondary{background:var(--surface3);color:var(--text2);border:1px solid var(--border2)}.at-btn.secondary:hover{border-color:var(--accent);color:var(--accent)}
+.at-btn.danger{background:var(--negative);color:#fff}
+.at-success{display:none;background:var(--positive-bg);border:1px solid rgba(16,185,129,.2);border-radius:7px;padding:11px 14px;font-size:11.5px;color:var(--positive);font-weight:500;margin-top:10px;text-align:center}
+.at-cal-row{display:flex;align-items:flex-start;gap:11px;padding:9px 0;border-bottom:1px solid var(--border)}
+.at-cal-row:last-child{border-bottom:none}
+.at-cal-date{font-family:var(--font-mono);font-size:10.5px;color:var(--accent);flex-shrink:0;width:80px;padding-top:1px}
+.at-cal-text{font-size:11.5px;color:var(--text2);line-height:1.5}
+.at-cal-text strong{color:var(--text);display:block;margin-bottom:1px}
+.at-table{width:100%;border-collapse:collapse;margin-bottom:13px}
+.at-table th{font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:7px 10px;border-bottom:1px solid var(--border);text-align:left;background:var(--surface2)}
+.at-table td{padding:8px 10px;border-bottom:1px solid var(--border);font-size:11.5px;color:var(--text2)}
+.at-table tr:last-child td{border-bottom:none}
+.at-promo-row{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--border)}
+.at-promo-row:last-child{border-bottom:none}
+.at-promo-bar{flex:1;height:7px;background:var(--surface3);border-radius:4px;position:relative;overflow:hidden}
+.at-promo-fill{height:100%;border-radius:4px;position:absolute;top:0;left:0}
+.warn-box{background:var(--warning-bg);border:1px solid rgba(245,158,11,.2);border-radius:7px;padding:9px 12px;font-size:11px;color:var(--amber);margin-bottom:11px}
+.info-box{background:var(--positive-bg);border:1px solid rgba(16,185,129,.18);border-radius:7px;padding:9px 12px;font-size:11px;color:var(--positive);margin-bottom:11px}
+.danger-box{background:var(--negative-bg);border:1px solid rgba(239,68,68,.18);border-radius:7px;padding:9px 12px;font-size:11px;color:var(--negative);margin-bottom:11px}
+.rsc-hdr{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:15px;border-bottom:1px solid var(--border)}
+.rsc-logo{width:42px;height:42px;border-radius:10px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff}
+.rsc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:15px}
+.rsc-m{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.rsc-ml{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:700;margin-bottom:4px}
+.rsc-mv{font-family:var(--font-mono);font-size:17px;font-weight:500;color:var(--text)}
+.rsc-mc{font-size:9.5px;margin-top:2px;color:var(--text3)}
+.rsc-sku-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:11px}
+.rsc-sku-row:last-child{border-bottom:none}
+.rsc-note{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-size:11px;color:var(--text2);margin-bottom:14px;line-height:1.6}
+.rsc-dist{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:7px;padding:9px 12px;font-size:10.5px;color:var(--amber);margin-bottom:14px;line-height:1.6}
+.rsc-print{width:100%;padding:10px;background:var(--accent);color:var(--bg);border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body)}
+.rsc-print:hover{opacity:.9}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--positive);color:#fff;padding:9px 20px;border-radius:20px;font-size:11.5px;font-weight:600;z-index:9999;transition:transform .28s;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@media(max-width:1280px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.reset-strip{grid-template-columns:repeat(3,1fr)}.ret-grid{grid-template-columns:repeat(3,1fr)}.charts-2col{grid-template-columns:1fr}.wos-grid{grid-template-columns:repeat(2,1fr)}.exec-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.main{padding:12px}.kpi-grid{grid-template-columns:1fr 1fr}.ret-grid{grid-template-columns:1fr 1fr}.reset-strip{grid-template-columns:1fr 1fr}.exec-grid{grid-template-columns:1fr}.topbar-center{display:none}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><div class="brand-mark">🌾</div><div><div class="brand-name">Harvest <em>&</em> Co. Foods</div><div class="brand-tag">Brand Intelligence · Natural & Organic Channel</div></div></div>
+  <div class="topbar-center">
+    <div class="src-pill"><div class="src-dot" style="background:var(--positive)"></div>Nielsen IQ Scanner</div>
+    <div class="src-pill"><div class="src-dot" style="background:var(--positive)"></div>SPINS Natural Ch.</div>
+    <div class="src-pill"><div class="src-dot" style="background:var(--positive)"></div>Walmart Luminate</div>
+    <div class="src-pill"><div class="src-dot" style="background:var(--positive)"></div>Kroger 84.51°</div>
+    <div class="src-pill"><div class="src-dot" style="background:var(--amber)"></div>UNFI → Whole Foods</div>
+    <div class="src-pill"><div class="src-dot" style="background:var(--amber)"></div>KeHE → Sprouts</div>
+  </div>
+  <div class="topbar-right">
+    <div class="live-pill"><div class="live-dot"></div>Live</div>
+    <div class="wk-badge">W23 · Jun 2026</div>
+    <div class="theme-btn" onclick="toggleTheme()"><div class="theme-thumb" id="themeThumb">🌙</div></div>
+  </div>
+</div>
+<div class="alert-bar">
+  <div class="alert-tag">⚡ Alerts</div>
+  <div class="chip-alert red">🔴 Kroger void 18% — reset Jun 30 · 21 days</div>
+  <div class="chip-alert amber">⚠ Trail Blazer Bar WOS 1.8 wks @ WF/UNFI — past reorder point</div>
+  <div class="chip-alert amber">⚠ $38.4K open deductions — Kroger deadline Jun 20</div>
+  <div class="chip-alert amber">⚠ Trade ROI 2.4x vs 3.0x — Instacart promo underperforming</div>
+  <div class="chip-alert green">✓ Walmart $248/sw — expansion threshold exceeded</div>
+</div>
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('exec',this)">📊 Executive Pulse <span class="tab-badge">4</span></button>
+  <button class="tab-btn" onclick="switchTab('retail',this)">🏪 Retail Performance</button>
+  <button class="tab-btn" onclick="switchTab('financial',this)">💰 P&L & Deductions</button>
+  <button class="tab-btn" onclick="switchTab('sku',this)">📦 SKU Intelligence</button>
+</div>
+
+<!-- EXEC TAB -->
+<div id="tab-exec" class="tab-content active"><div class="main">
+  <div class="conn-banner">
+    <div class="conn-lbl">Data Sources</div>
+    <div class="conn-tags">
+      <div class="ctag live"><div class="cd"></div>Nielsen IQ Retail Scanner</div>
+      <div class="ctag live"><div class="cd"></div>SPINS Natural Channel</div>
+      <div class="ctag live"><div class="cd"></div>Walmart Luminate</div>
+      <div class="ctag live"><div class="cd"></div>Kroger 84.51°</div>
+      <div class="ctag indirect"><div class="cd" style="background:var(--amber)"></div>UNFI → Whole Foods (indirect · fill rate risk)</div>
+      <div class="ctag indirect"><div class="cd" style="background:var(--amber)"></div>KeHE → Sprouts (indirect · scan programs apply)</div>
+      <div class="ctag pending"><div class="cd"></div>Amazon Vendor Central → Connect</div>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi green"><div class="kpi-label">$/Store/Week Velocity <span>✅</span></div><div class="kpi-val" data-target="186" data-prefix="$">$0</div><div class="kpi-sub">Avg · 5 accounts · 1,168 doors · direct + UNFI/KeHE</div><div class="kpi-delta pos">▲ +$22 vs prior 4-week rolling avg</div><div class="kpi-bench">📊 Category benchmark $145–$165 · You're +13% above</div></div>
+    <div class="kpi amber"><div class="kpi-label">% ACV Distribution <span>⚠️</span></div><div class="kpi-val" data-target="62.4" data-suffix="%">0%</div><div class="kpi-sub">Weighted by store volume · 5-SKU avg · direct + dist. doors</div><div class="kpi-delta warn">▲ +4.1pp vs 90 days · Gap to 70% target: 7.6pp</div><div class="kpi-bench">🎯 Target 70%+ ACV for top 3 SKUs</div><div class="kpi-cta" onclick="openAction('acv')">→ 3 steps to close ACV gap by Q3</div></div>
+    <div class="kpi red"><div class="kpi-label">Void Rate <span>🔴</span></div><div class="kpi-val" data-target="14.2" data-suffix="%">0%</div><div class="kpi-sub">Auth. stores not scanning · Kroger 18% · reset risk Jun 30</div><div class="kpi-delta neg">▲ +3.8pp vs 60 days — worsening trend</div><div class="kpi-bench">🚨 Benchmark &lt;8% · Deauth risk &gt;15% at reset</div><div class="kpi-cta" onclick="openAction('void')">→ Broker call + email template ready</div></div>
+    <div class="kpi amber"><div class="kpi-label">Trade Spend ROI <span>⚠️</span></div><div class="kpi-val" data-target="2.4" data-suffix="x">0x</div><div class="kpi-sub">$3.2M trade spend · $7.68M attributed lift · 6 promos</div><div class="kpi-delta neg">▼ −0.6x vs Q1 · Instacart Digital dragging portfolio</div><div class="kpi-bench">📊 Industry avg 3.0–3.5x · 2 promos below threshold</div><div class="kpi-cta" onclick="openAction('trade')">→ View underperforming promos</div></div>
+    <div class="kpi red"><div class="kpi-label">Weeks on Shelf (WOS) <span>🔴</span></div><div class="kpi-val" data-target="3.1" data-suffix=" wks">0 wks</div><div class="kpi-sub">Portfolio avg · 2 SKUs critical · OOS risk this week</div><div class="kpi-delta neg">▼ Trail Blazer Bar 1.8 wks @ WF/UNFI — past safe reorder</div><div class="kpi-bench">🎯 Target 4–6 wks · Critical &lt;2.5 wks</div><div class="kpi-cta" onclick="openAction('wos')">→ Emergency reorder — 2 SKUs</div></div>
+    <div class="kpi green"><div class="kpi-label">Gross Margin % (CM1) <span>✅</span></div><div class="kpi-val" data-target="41.2" data-suffix="%">0%</div><div class="kpi-sub">Net revenue minus landed COGS · before freight/trade/broker</div><div class="kpi-delta pos">▲ +1.4pp vs Q1 · Packaging cost reduction working</div><div class="kpi-bench">📊 Natural snack benchmark 28–37% · You're above</div></div>
+    <div class="kpi amber"><div class="kpi-label">Category Market Share <span>⚠️</span></div><div class="kpi-val" data-target="2.1" data-suffix="%">0%</div><div class="kpi-sub">Natural/Organic Snacks · $46B category · SPINS natural ch.</div><div class="kpi-delta neg">▼ −0.3pp vs 6 months · Competitor Kind Bar +0.4pp</div><div class="kpi-bench">🎯 Target 2.8% by Q4 2026</div><div class="kpi-cta" onclick="openAction('share')">→ Competitor analysis + response plan</div></div>
+    <div class="kpi green"><div class="kpi-label">Consumer Repeat Rate <span>✅</span></div><div class="kpi-val" data-target="41.2" data-suffix="%">0%</div><div class="kpi-sub">90-day repeat purchase · Nielsen Homescan panel data</div><div class="kpi-delta pos">▲ +3.4pp vs prior period · Loyalty program validating</div><div class="kpi-bench">📊 Benchmark 35–40% natural snacks · You're leading</div></div>
+  </div>
+
+  <div class="sh"><div class="sh-title">🗓 Reset Readiness Score — 5 Retailers</div><div class="sh-sub">Score = void rate (−30) · velocity trend (±20) · ACV gap (−15) · trade ROI (±10) · WOS (±10) · repeat rate (±15)</div></div>
+  <div class="reset-strip">
+    <div class="rc critical"><div class="rc-ret"><div class="rc-logo" style="background:#1e5aa8">K</div>Kroger</div><div class="rc-sr"><div><div class="rc-sl">Reset Score</div><div class="rc-score">38</div></div><div class="rc-days">21 days</div></div><div class="rc-bar"><div class="rc-bar-fill" style="width:38%"></div></div><div class="rc-factors"><div class="rc-f">Void Rate 18% <span class="neg">−28 pts</span></div><div class="rc-f">Velocity −8% trend <span class="neg">−12 pts</span></div><div class="rc-f">ACV 58% (gap 12pp) <span class="warn">−8 pts</span></div><div class="rc-f">Repeat 38.4% <span class="warn">+8 pts</span></div></div><div class="rc-date">Next: <strong>Jun 30, 2026</strong> · Snacks/Granola</div><div class="rc-dist">Direct account · No distributor</div></div>
+    <div class="rc stable"><div class="rc-ret"><div class="rc-logo" style="background:#0071ce">W</div>Walmart</div><div class="rc-sr"><div><div class="rc-sl">Reset Score</div><div class="rc-score">82</div></div><div class="rc-days">54 days</div></div><div class="rc-bar"><div class="rc-bar-fill" style="width:82%"></div></div><div class="rc-factors"><div class="rc-f">Void Rate 4.2% <span class="pos">+22 pts</span></div><div class="rc-f">Velocity +12% trend <span class="pos">+18 pts</span></div><div class="rc-f">ACV 74% <span class="pos">+12 pts</span></div><div class="rc-f">Trade ROI 3.8x <span class="pos">+10 pts</span></div></div><div class="rc-date">Next: <strong>Aug 4, 2026</strong> · Natural Snacks Q3</div><div class="rc-dist">Direct account · No distributor</div></div>
+    <div class="rc warning"><div class="rc-ret"><div class="rc-logo" style="background:#cc0000">T</div>Target</div><div class="rc-sr"><div><div class="rc-sl">Reset Score</div><div class="rc-score">61</div></div><div class="rc-days">88 days</div></div><div class="rc-bar"><div class="rc-bar-fill" style="width:61%"></div></div><div class="rc-factors"><div class="rc-f">Void Rate 7.3% <span class="warn">+4 pts</span></div><div class="rc-f">Velocity flat <span class="warn">0 pts</span></div><div class="rc-f">ACV 61% (gap 9pp) <span class="warn">−9 pts</span></div><div class="rc-f">3 doors inactive <span class="neg">−6 pts</span></div></div><div class="rc-date">Next: <strong>Sep 2, 2026</strong> · Natural/BFY</div><div class="rc-dist">Direct account · No distributor</div></div>
+    <div class="rc warning"><div class="rc-ret"><div class="rc-logo" style="background:#00674b">WF</div>Whole Foods</div><div class="rc-sr"><div><div class="rc-sl">Reset Score</div><div class="rc-score">54</div></div><div class="rc-days">88 days</div></div><div class="rc-bar"><div class="rc-bar-fill" style="width:54%"></div></div><div class="rc-factors"><div class="rc-f">WOS 1.8 wks (critical) <span class="neg">−18 pts</span></div><div class="rc-f">Void 7.2% <span class="warn">+3 pts</span></div><div class="rc-f">CM3 4.8% (thin) <span class="warn">−8 pts</span></div><div class="rc-f">Repeat 42.1% <span class="pos">+14 pts</span></div></div><div class="rc-date">Next: <strong>Sep 2, 2026</strong> · Snacks/Wellness</div><div class="rc-dist">Via UNFI · ~6–7% markup · fill rate risk</div></div>
+    <div class="rc stable"><div class="rc-ret"><div class="rc-logo" style="background:#5a7a3a">S</div>Sprouts</div><div class="rc-sr"><div><div class="rc-sl">Reset Score</div><div class="rc-score">74</div></div><div class="rc-days">61 days</div></div><div class="rc-bar"><div class="rc-bar-fill" style="width:74%"></div></div><div class="rc-factors"><div class="rc-f">Void Rate 5.4% <span class="pos">+16 pts</span></div><div class="rc-f">Velocity +22% YoY <span class="pos">+18 pts</span></div><div class="rc-f">ACV 38% (low) <span class="warn">−12 pts</span></div><div class="rc-f">WOS 3.8 wks <span class="warn">−4 pts</span></div></div><div class="rc-date">Next: <strong>Aug 7, 2026</strong> · Natural Snacks</div><div class="rc-dist">Via KeHE · ~8% markup · scan programs</div></div>
+  </div>
+
+  <div class="sh"><div class="sh-title">🗓 Monday Morning Brief — Week 23</div><div class="sh-sub">No charts. Just what matters right now.</div></div>
+  <div class="exec-grid">
+    <div class="ec win"><div class="ec-hdr"><span>✅</span><div class="ec-lbl">Top 3 Wins</div></div>
+      <div class="ec-item"><div class="ec-num">1</div>Golden Grain Oats hit $248/sw at Walmart — above their $220 regional expansion threshold. Reset Score 82/100. Request expanded distribution before the Aug 4 reset window closes.</div>
+      <div class="ec-item"><div class="ec-num">2</div>CM1 (gross margin) improved to 41.2% — +1.4pp vs Q1. Packaging supplier renegotiation is working. On track for 43% by Q4 2026 — above the 28–37% natural snack benchmark.</div>
+      <div class="ec-item"><div class="ec-num">3</div>Consumer repeat rate 41.2% — above the 35–40% category benchmark. Nielsen Homescan confirms loyalty cohort from Feb launch is sustaining at 90 days.</div>
+    </div>
+    <div class="ec risk"><div class="ec-hdr"><span>🚨</span><div class="ec-lbl">Top 3 Risks</div></div>
+      <div class="ec-item"><div class="ec-num">1</div>Kroger reset Jun 30 — Reset Score 38/100. Void rate 18% is 10pp above the deauthorization trigger threshold (&gt;15%). 21 days to recover or risk losing 2 facings in the Natural Snacks category reset.</div>
+      <div class="ec-item"><div class="ec-num">2</div>Trail Blazer Bar at 1.8 WOS at Whole Foods via UNFI. UNFI standard replenishment lead time is 4.2 weeks. You are already 2 weeks past the safe reorder window. OOS event this period = velocity gap in the Sep reset data reviewed by the WF buyer.</div>
+      <div class="ec-item"><div class="ec-num">3</div>$38.4K in open retailer deductions — Kroger shortage claim $18.2K (deadline Jun 20, 11 days), Whole Foods/UNFI compliance chargeback $14.6K, Target TPR dispute $5.6K. Recovery probability drops sharply after 60 days.</div>
+    </div>
+    <div class="ec action"><div class="ec-hdr"><span>⚡</span><div class="ec-lbl">3 Actions This Week</div></div>
+      <div class="ec-item"><div class="ec-num">1</div><strong>TODAY:</strong> Call Kroger broker. Request store-level compliance list via 84.51°. Identify top 20 non-compliant doors by volume. Deploy field merchandiser this week. 21 days to Jun 30 reset review — this is a non-negotiable action.</div>
+      <div class="ec-item"><div class="ec-num">2</div><strong>By Tue:</strong> Emergency PO — Trail Blazer Bar to UNFI Chicago + Portland DCs. Request rush handling (+$0.18/case). At 1.8 WOS and 4.2-week UNFI lead time you are already past the safe window. Every day increases the OOS gap.</div>
+      <div class="ec-item"><div class="ec-num">3</div><strong>By Thu Jun 20:</strong> File dispute on Kroger $18.2K shortage claim. You have signed BOL documentation. The 60-day dispute window closes Jun 20 — after that, recovery drops below 30%. This is a same-week deadline.</div>
+    </div>
+  </div>
+
+  <div class="aq">
+    <div class="aq-hdr"><span>⚡ 6 Open Actions — Sorted by Revenue Impact</span><span style="color:var(--text3);font-size:10px;font-weight:400">Jun 9, 2026</span></div>
+    <div class="aq-row"><div class="aq-pri critical">Critical</div><div class="aq-text"><strong>Kroger void 18% → Broker call + store compliance sweep · Reset Jun 30</strong>Every 1pp void = ~$42K annualized. Reset Score 38/100. Deauth threshold &gt;15%.</div><button class="aq-btn" onclick="openAction('email_kroger')">📧 Email Template</button></div>
+    <div class="aq-row"><div class="aq-pri critical">Critical</div><div class="aq-text"><strong>Trail Blazer Bar — Emergency PO to UNFI · WOS 1.8 wks · lead time 4.2 wks</strong>OOS event = velocity gap in Sep WF reset review. Already past safe reorder point.</div><button class="aq-btn" onclick="openAction('po')">📦 Create PO</button></div>
+    <div class="aq-row"><div class="aq-pri critical">Critical</div><div class="aq-text"><strong>File Kroger shortage dispute — $18.2K · deadline Jun 20 · 11 days</strong>Signed BOL documentation available. After 60 days recovery drops to &lt;30%.</div><button class="aq-btn" onclick="openAction('dispute')">⚖️ File Dispute</button></div>
+    <div class="aq-row"><div class="aq-pri high">High</div><div class="aq-text"><strong>Activate Jun 12 Kroger TPR — counter Kind Bar Co. · 3-day overlap</strong>Previous Kroger TPR generated +0.6pp velocity lift. Nielsen period closes Jun 16.</div><button class="aq-btn" onclick="openAction('schedule')">🗓 Schedule</button></div>
+    <div class="aq-row"><div class="aq-pri high">High</div><div class="aq-text"><strong>Activate 3 approved Target PNW doors — +$558/wk · +1.2pp ACV</strong>Approved, not receiving orders. Activate via DST to capture Sep 2 reset data period.</div><button class="aq-btn" onclick="openAction('doors')">📋 Activate Doors</button></div>
+    <div class="aq-row"><div class="aq-pri monitor">Monitor</div><div class="aq-text"><strong>Walmart buyer meeting — Golden Grain expansion · Reset Score 82/100</strong>$248/sw exceeds $220 expansion threshold. Aug 4 reset = optimal timing window.</div><button class="aq-btn" onclick="openAction('meeting')">📅 Request Mtg</button></div>
+  </div>
+</div></div>
+<!-- RETAIL TAB -->
+<div id="tab-retail" class="tab-content"><div class="main">
+  <div class="sh"><div class="sh-title">🏪 Retailer Scorecard — 5 Accounts</div><div class="sh-sub">Click any card for buyer-ready summary · Indirect = net-of-distributor CM3</div></div>
+  <div class="ret-grid">
+    <div class="ret-card" onclick="openRetailer('walmart')"><button class="buyer-btn" onclick="event.stopPropagation();openRetailer('walmart')">📄 Buyer Card</button><div class="ret-name"><div class="ret-logo" style="background:#0071ce">W</div>Walmart</div><div class="ret-rev">$412K</div><div class="ret-margin pos">+18.4% CM3 · Direct</div><div class="chips"><div class="chip vel">$248/sw</div><div class="chip acv">74% ACV</div><div class="chip ok">Void 4.2%</div></div></div>
+    <div class="ret-card" onclick="openRetailer('target')"><button class="buyer-btn" onclick="event.stopPropagation();openRetailer('target')">📄 Buyer Card</button><div class="ret-name"><div class="ret-logo" style="background:#cc0000">T</div>Target</div><div class="ret-rev">$218K</div><div class="ret-margin pos">+15.2% CM3 · Direct</div><div class="chips"><div class="chip vel">$196/sw</div><div class="chip acv">61% ACV</div><div class="chip ok">Void 6.8%</div></div></div>
+    <div class="ret-card" onclick="openRetailer('kroger')"><button class="buyer-btn" onclick="event.stopPropagation();openRetailer('kroger')">📄 Buyer Card</button><div class="ret-name"><div class="ret-logo" style="background:#1e5aa8">K</div>Kroger</div><div class="ret-rev">$184K</div><div class="ret-margin warn">+11.8% CM3 · Direct</div><div class="chips"><div class="chip vel">$174/sw</div><div class="chip acv">58% ACV</div><div class="chip void">Void 18% 🔴</div></div></div>
+    <div class="ret-card" onclick="openRetailer('wholefds')"><button class="buyer-btn" onclick="event.stopPropagation();openRetailer('wholefds')">📄 Buyer Card</button><div class="ret-name"><div class="ret-logo" style="background:#00674b">WF</div>Whole Foods</div><div class="ret-rev">$96K</div><div class="ret-margin warn">+4.8% CM3 · via UNFI</div><div class="chips"><div class="chip vel">$142/sw</div><div class="chip acv">48% ACV</div><div class="chip void">WOS 1.8⚠</div><div class="chip dist">UNFI ~6–7%</div></div></div>
+    <div class="ret-card" onclick="openRetailer('sprouts')"><button class="buyer-btn" onclick="event.stopPropagation();openRetailer('sprouts')">📄 Buyer Card</button><div class="ret-name"><div class="ret-logo" style="background:#5a7a3a">S</div>Sprouts</div><div class="ret-rev">$54K</div><div class="ret-margin pos">+9.2% CM3 · via KeHE</div><div class="chips"><div class="chip vel">$162/sw</div><div class="chip acv">38% ACV</div><div class="chip ok">Void 5.4%</div><div class="chip dist">KeHE ~8%</div></div></div>
+  </div>
+  <div class="charts-2col">
+    <div class="panel"><div class="ph"><div class="pt">Revenue & Velocity Trend — 6 Months</div><div class="pa">Full history →</div></div><div class="chart-wrap"><canvas id="revChart"></canvas></div></div>
+    <div class="panel"><div class="ph"><div class="pt">Channel Revenue Mix</div></div><div class="chart-wrap"><canvas id="donutChart"></canvas></div></div>
+  </div>
+  <div class="charts-2col">
+    <div class="panel"><div class="ph"><div class="pt">🚨 Void Rate by Retailer & SKU</div><div class="pa" onclick="openAction('void')">Action plan →</div></div>
+      <table class="v-table"><thead><tr><th>Retailer</th><th>SKU</th><th>Auth.</th><th>Scanning</th><th>Void Rate</th><th>vs Benchmark</th></tr></thead><tbody>
+        <tr><td>Kroger</td><td>Trail Blazer Bar 12-pk</td><td>312</td><td>256</td><td><div class="void-flag"><div class="void-pct red">🔴 18.0%</div><div class="void-action" onclick="openAction('email_kroger')">→ Broker call today</div></div></td><td><span class="badge red">+10pp over</span></td></tr>
+        <tr><td>Whole Foods/UNFI</td><td>Sunrise Granola 18oz</td><td>88</td><td>78</td><td><div class="void-flag"><div class="void-pct amber">⚠ 11.4%</div><div class="void-action">→ UNFI fill rate issue</div></div></td><td><span class="badge amber">+3.4pp over</span></td></tr>
+        <tr><td>Target</td><td>Golden Grain Oats 24oz</td><td>246</td><td>228</td><td><div class="void-flag"><div class="void-pct amber">⚠ 7.3%</div></div></td><td><span class="badge amber">Just over</span></td></tr>
+        <tr><td>Walmart</td><td>Trail Blazer Bar 12-pk</td><td>380</td><td>364</td><td><div class="void-flag"><div class="void-pct green">✓ 4.2%</div></div></td><td><span class="badge green">Under target</span></td></tr>
+        <tr><td>Sprouts/KeHE</td><td>All SKUs</td><td>142</td><td>134</td><td><div class="void-flag"><div class="void-pct green">✓ 5.4%</div></div></td><td><span class="badge green">Under target</span></td></tr>
+      </tbody></table>
+    </div>
+    <div class="panel"><div class="ph"><div class="pt">Trade Promo ROI — 6 Active Promos</div><div class="pa" onclick="openAction('trade')">Optimize →</div></div><div class="chart-wrap"><canvas id="promoChart"></canvas></div></div>
+  </div>
+  <div class="sh"><div class="sh-title">📦 Weeks on Shelf (WOS)</div><div class="sh-sub">Target 4–6 weeks · UNFI/KeHE lead times factored in</div></div>
+  <div class="wos-grid">
+    <div class="wos-card critical"><div class="wos-sku">Trail Blazer Bar 12-pk</div><div class="wos-ret">Whole Foods · via UNFI · Chicago + Portland DCs</div><div class="wos-val">1.8</div><div class="wos-lbl">Weeks on Shelf</div><span class="wos-action" onclick="openAction('po')">→ Emergency PO · UNFI 4.2 wk lead time — already late</span></div>
+    <div class="wos-card critical"><div class="wos-sku">Sunrise Granola 18oz</div><div class="wos-ret">Kroger · Mid-Atlantic DC</div><div class="wos-val">2.1</div><div class="wos-lbl">Weeks on Shelf</div><span class="wos-action">→ Reorder this week · Kroger 2.8 wk lead time</span></div>
+    <div class="wos-card warning"><div class="wos-sku">Garden Blend Crackers</div><div class="wos-ret">Target · Midwest</div><div class="wos-val">3.2</div><div class="wos-lbl">Weeks on Shelf</div><span class="wos-action">→ Place reorder by Friday</span></div>
+    <div class="wos-card warning"><div class="wos-sku">Maple Seed Clusters 8oz</div><div class="wos-ret">Sprouts · via KeHE · Southwest</div><div class="wos-val">2.9</div><div class="wos-lbl">Weeks on Shelf</div><span class="wos-action">→ KeHE lead time 3.8 wks — reorder now</span></div>
+    <div class="wos-card healthy"><div class="wos-sku">Golden Grain Oats 24oz</div><div class="wos-ret">Walmart · National</div><div class="wos-val">5.4</div><div class="wos-lbl">Weeks on Shelf</div></div>
+    <div class="wos-card healthy"><div class="wos-sku">Trail Blazer Bar 12-pk</div><div class="wos-ret">Walmart · National</div><div class="wos-val">4.8</div><div class="wos-lbl">Weeks on Shelf</div></div>
+    <div class="wos-card healthy"><div class="wos-sku">Sunrise Granola 18oz</div><div class="wos-ret">Target · National</div><div class="wos-val">4.1</div><div class="wos-lbl">Weeks on Shelf</div></div>
+    <div class="wos-card healthy"><div class="wos-sku">Golden Grain Oats 24oz</div><div class="wos-ret">Kroger · National</div><div class="wos-val">4.6</div><div class="wos-lbl">Weeks on Shelf</div></div>
+  </div>
+</div></div>
+
+<!-- P&L TAB -->
+<div id="tab-financial" class="tab-content"><div class="main">
+  <div class="charts-2col" style="align-items:start">
+    <div class="panel">
+      <div class="ph"><div class="pt">💰 P&L Waterfall — CM1 → CM2 → CM3</div><div class="sh-sub" style="font-size:9.5px">W23 YTD · All 5 accounts blended</div></div>
+      <div class="cm-waterfall">
+        <div class="cm-row total"><div class="cm-label"><span class="cm-icon">📦</span><span class="cm-name">Gross Revenue (Invoiced)</span><span class="cm-desc">Before deductions or trade</span></div><div class="cm-val pos">$964K</div><div class="cm-pct">100%</div><div class="cm-bar-cell"><div class="cm-bar-t"><div class="cm-bar-f" style="width:100%;background:var(--accent)"></div></div></div></div>
+        <div class="cm-row"><div class="cm-label"><span class="cm-icon">📉</span><span class="cm-name">Retailer Deductions</span><span class="cm-desc">Shortage claims · compliance · promo disputes</span></div><div class="cm-val neg">−$38.4K</div><div class="cm-pct neg">−4.0%</div><div class="cm-bar-cell"><div class="cm-bar-t"><div class="cm-bar-f" style="width:4%;background:var(--negative)"></div></div></div></div>
+        <div class="cm-row total"><div class="cm-label"><span class="cm-icon">💵</span><span class="cm-name">Net Revenue (Collected)</span><span class="cm-desc">What actually hit your bank</span></div><div class="cm-val pos">$925.6K</div><div class="cm-pct">96.0%</div><div class="cm-bar-cell"><div class="cm-bar-t"><div class="cm-bar-f" style="width:96%;background:var(--accent)"></div></div></div></div>
+        <div class="cm-divider"></div>
+        <div class="cm-row"><div class="cm-label"><span class="cm-icon">🏭</span><span class="cm-name">COGS (Landed)</span><span class="cm-desc">Mfg + packaging + inbound freight + duties</span></div><div class="cm-val neg">−$543.7K</div><div class="cm-pct neg">−56.4%</div><div class="cm-bar-cell"><div class="cm-bar-t"><div class="cm-bar-f" style="width:56%;background:var(--negative)"></div></div></div></div>
+        <div class="cm-row total"><div class="cm-label"><span class="cm-icon">📊</span><span class="cm-name">CM1 — Gross Margin</span><span class="cm-desc">Net revenue minus landed COGS</span></div><div class="cm-val pos">$381.9K</div><div class="cm-pct pos">41.2%</div><div class="cm-bar-cell"><div class="cm-bar-t"><div class="cm-bar-f" style="width:41%;background:var(--positive)"></div></div></div></div>
+        <div class="cm-divider"></div>
+        <div class="cm-row"><div class="cm-label"><span class="cm-icon">🚛</span><span class="cm-name">Outbound Freight</span><span class="cm-desc">To retailer DCs · direct accounts</span></div><div class="cm-val neg">−$57.8K</div><div class="cm-pct neg">−6.0%</div><div class="cm-bar-cell"><div class="cm-bar-t"><div class="cm-bar-f" style="width:6%;background:var(--negative)"></div></div></div></div>
+        <div class="cm-row"><div class="cm-label"><span class="cm-icon">🤝</span><span class="cm-name">Broker Fees</span><span class="cm-desc">5% of invoiced sales · Acosta + regional</span></div><div class="cm-val neg">−$48.2K</div><div class="cm-pct neg">−5.0%</div><div class="cm-bar-cell"><div class="cm-bar-t"><div class="cm-bar-f" style="width:5%;background:var(--negative)"></div></div></div></div>
+        <div class="cm-row"><div class="cm-label"><span class="cm-icon">📦</span><span class="cm-name">Distributor Margin</span><span class="cm-desc">UNFI ~6.5% · KeHE ~8% · indirect accounts only</span></div><div class="cm-val neg">−$24.1K</div><div class="cm-pct warn">−2.5%</div><div class="cm-bar-cell"><div class="cm-bar-t"><div class="cm-bar-f" style="width:2.5%;background:var(--amber)"></div></div></div></div>
+        <div class="cm-row total"><div class="cm-label"><span class="cm-icon">📈</span><span class="cm-name">CM2 — After Fulfillment</span><span class="cm-desc">CM1 minus freight, broker, distributor</span></div><div class="cm-val pos">$251.8K</div><div class="cm-pct pos">27.2%</div><div class="cm-bar-cell"><div class="cm-bar-t"><div class="cm-bar-f" style="width:27%;background:var(--positive)"></div></div></div></div>
+        <div class="cm-divider"></div>
+        <div class="cm-row"><div class="cm-label"><span class="cm-icon">📣</span><span class="cm-name">Trade Spend</span><span class="cm-desc">TPR · FSI · demos · OI · scanbacks · 6 programs</span></div><div class="cm-val neg">−$96.0K</div><div class="cm-pct neg">−10.0%</div><div class="cm-bar-cell"><div class="cm-bar-t"><div class="cm-bar-f" style="width:10%;background:var(--negative)"></div></div></div></div>
+        <div class="cm-row"><div class="cm-label"><span class="cm-icon">🎯</span><span class="cm-name">Shopper Marketing / Retail Media</span><span class="cm-desc">Kroger 84.51° · Walmart Connect · SPINS ads</span></div><div class="cm-val neg">−$28.8K</div><div class="cm-pct neg">−3.0%</div><div class="cm-bar-cell"><div class="cm-bar-t"><div class="cm-bar-f" style="width:3%;background:var(--negative)"></div></div></div></div>
+        <div class="cm-row total" style="border:1px solid var(--accent);background:rgba(0,212,170,.04)"><div class="cm-label"><span class="cm-icon">💰</span><span class="cm-name">CM3 — Net Contribution</span><span class="cm-desc">Before fixed overhead, SG&A, R&D</span></div><div class="cm-val" style="color:var(--accent);font-size:14px">$127.0K</div><div class="cm-pct" style="color:var(--accent);font-size:11px">13.2%</div><div class="cm-bar-cell"><div class="cm-bar-t"><div class="cm-bar-f" style="width:13%;background:var(--accent)"></div></div></div></div>
+        <div style="font-size:9.5px;color:var(--text3);margin-top:8px;padding:0 4px;line-height:1.5">⚠ CM3 13.2% — below healthy 20% threshold. Fix priority: recover $38.4K open deductions + pause Instacart promo (1.8x ROI). Together these moves add ~$56K, lifting CM3 to ~19%.</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="panel">
+        <div class="ph"><div class="pt">⚖️ Open Deductions — $38.4K at Risk</div><div class="pa" onclick="openAction('dispute')">File dispute →</div></div>
+        <div class="dd-wrap" style="margin-bottom:0">
+          <div class="dd-hdr"><span>Open Deduction Log</span><span style="font-family:var(--font-mono);font-size:11px">Total: $38,400</span></div>
+          <div class="dd-row"><div><div class="dd-name">Shortage Claim — 3 pallets short<span class="dd-ret"> · Kroger DC Cincinnati</span></div></div><div style="display:flex;align-items:center;gap:8px"><div class="dd-amt">−$18,200</div><div class="dd-status open">Open · 58d</div></div></div>
+          <div class="dd-row"><div><div class="dd-name">Compliance Chargeback — Label format<span class="dd-ret"> · Whole Foods / UNFI-routed</span></div></div><div style="display:flex;align-items:center;gap:8px"><div class="dd-amt">−$14,600</div><div class="dd-status disputed">Disputed · 41d</div></div></div>
+          <div class="dd-row"><div><div class="dd-name">Promo Allowance Dispute — TPR variance<span class="dd-ret"> · Target HQ deduction</span></div></div><div style="display:flex;align-items:center;gap:8px"><div class="dd-amt">−$5,600</div><div class="dd-status disputed">Disputed · 28d</div></div></div>
+          <div class="dd-row"><div><div class="dd-name">New Item Stocking Fee<span class="dd-ret"> · Sprouts / via KeHE</span></div></div><div style="display:flex;align-items:center;gap:8px"><div class="dd-amt">−$3,200</div><div class="dd-status resolved">Resolved ✓</div></div></div>
+          <div style="font-size:9.5px;color:var(--text3);margin-top:10px;border-top:1px solid rgba(239,68,68,.12);padding-top:8px">🚨 Kroger shortage claim deadline: <strong style="color:var(--negative)">Jun 20</strong> (11 days). You have signed BOL. File now — after 60 days recovery drops below 30%.</div>
+        </div>
+      </div>
+      <div class="panel"><div class="ph"><div class="pt">CM3 % by Retailer Account</div></div><div class="chart-wrap" style="height:195px"><canvas id="cm3Chart"></canvas></div></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- SKU TAB -->
+<div id="tab-sku" class="tab-content"><div class="main">
+  <div class="charts-3col">
+    <div class="panel"><div class="ph"><div class="pt">Velocity $/Store/Week by SKU</div></div><div class="chart-wrap"><canvas id="velChart"></canvas></div></div>
+    <div class="panel"><div class="ph"><div class="pt">CM1 Gross Margin % by SKU</div></div><div class="chart-wrap"><canvas id="marginChart"></canvas></div></div>
+    <div class="panel"><div class="ph"><div class="pt">Market Share Trend — Natural Snacks</div></div><div class="chart-wrap"><canvas id="shareChart"></canvas></div></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div class="pt">📦 SKU Performance Matrix — All 8 Metrics</div><div class="view-toggle"><button class="vtb active" onclick="filterSKU('all',this)">All SKUs</button><button class="vtb" onclick="filterSKU('green',this)">✓ Healthy</button><button class="vtb" onclick="filterSKU('red',this)">🔴 At Risk</button></div></div>
+    <div style="overflow-x:auto"><table class="sku-tbl"><thead><tr><th>SKU</th><th>$/sw Velocity</th><th>ACV %</th><th>Void Rate</th><th>WOS</th><th>CM1 %</th><th>Trade ROI</th><th>Repeat %</th><th>Mkt Shr</th><th>Status</th></tr></thead><tbody id="skuBody"></tbody></table></div>
+  </div>
+</div></div>
+<!-- MODALS -->
+<div class="overlay" id="actionOverlay" onclick="closeAction()"><div class="modal" onclick="event.stopPropagation()"><button class="modal-close" onclick="closeAction()">✕</button><div class="modal-title" id="aTitle"></div><div class="modal-sub" id="aSub"></div><div id="aBody"></div></div></div>
+<div class="overlay" id="retailerOverlay" onclick="closeRetailer()"><div class="modal wide" onclick="event.stopPropagation()"><button class="modal-close" onclick="closeRetailer()">✕</button><div id="rBody"></div><button class="rsc-print" onclick="window.print()">🖨️ Print / Export for Buyer Meeting</button></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+function toggleTheme(){const h=document.documentElement,t=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',t);document.getElementById('themeThumb').textContent=t==='dark'?'☀️':'🌙';}
+function animKPI(el){const tgt=parseFloat(el.dataset.target),pre=el.dataset.prefix||'',suf=el.dataset.suffix||'',dec=tgt%1!==0?1:0;let s=null;const dur=1200;function step(ts){if(!s)s=ts;const p=Math.min((ts-s)/dur,1),e=1-Math.pow(1-p,3);el.textContent=pre+(tgt*e).toFixed(dec)+suf;if(p<1)requestAnimationFrame(step);else el.textContent=pre+tgt.toFixed(dec)+suf;}requestAnimationFrame(step);}
+document.querySelectorAll('[data-target]').forEach(el=>animKPI(el));
+const built={retail:false,financial:false,sku:false};
+function switchTab(id,btn){document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');btn.classList.add('active');if(id==='retail'&&!built.retail){buildRetail();built.retail=true;}if(id==='financial'&&!built.financial){buildFinancial();built.financial=true;}if(id==='sku'&&!built.sku){buildSKUCharts();buildSKUTable();built.sku=true;}}
+const isDark=()=>document.documentElement.getAttribute('data-theme')==='dark';
+const tc=()=>isDark()?'rgba(141,164,196,.65)':'rgba(71,85,105,.65)';
+const gc=()=>isDark()?'rgba(255,255,255,.04)':'rgba(0,0,0,.04)';
+const tbg=()=>isDark()?'#131e30':'#fff';const tbr=()=>isDark()?'#1c2d45':'#e2e8f0';
+const ttc=()=>isDark()?'#e8f0fe':'#0f172a';const tbc=()=>isDark()?'#8da4c4':'#334155';
+
+function buildRetail(){
+  const c1=document.getElementById('revChart').getContext('2d');
+  new Chart(c1,{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],datasets:[{label:'Net Revenue ($K)',data:[892,908,924,936,948,964],borderColor:'#00d4aa',backgroundColor:'rgba(0,212,170,.06)',tension:0.4,fill:true,pointBackgroundColor:'#00d4aa',pointBorderColor:'#070c18',pointBorderWidth:2,pointRadius:4,borderWidth:2.5,yAxisID:'y'},{label:'Velocity $/sw',data:[158,164,172,178,182,186],borderColor:'#f59e0b',backgroundColor:'transparent',tension:0.4,fill:false,pointBackgroundColor:'#f59e0b',pointBorderColor:'#070c18',pointBorderWidth:2,pointRadius:4,borderWidth:2,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:tc(),font:{size:11},boxWidth:10}},tooltip:{backgroundColor:tbg(),borderColor:tbr(),borderWidth:1,titleColor:ttc(),bodyColor:tbc(),padding:11}},scales:{x:{ticks:{color:tc(),font:{size:11}},grid:{color:gc()}},y:{ticks:{color:tc(),font:{size:10},callback:v=>'$'+v+'K'},grid:{color:gc()},position:'left'},y1:{ticks:{color:'#f59e0b',font:{size:10},callback:v=>'$'+v},grid:{display:false},position:'right'}}}});
+  const c2=document.getElementById('donutChart').getContext('2d');
+  new Chart(c2,{type:'doughnut',data:{labels:['Walmart','Target','Kroger','Whole Foods','Sprouts'],datasets:[{data:[412,218,184,96,54],backgroundColor:['#0071ce','#cc0000','#1e5aa8','#00674b','#5a7a3a'],borderWidth:2.5,borderColor:isDark()?'#0e1628':'#fff',hoverBorderWidth:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'70%',plugins:{legend:{position:'right',labels:{color:tc(),font:{size:11},boxWidth:10,padding:8}},tooltip:{backgroundColor:tbg(),borderColor:tbr(),borderWidth:1,titleColor:ttc(),bodyColor:tbc(),padding:10,callbacks:{label:c=>' '+c.label+': $'+c.raw+'K ('+((c.raw/964)*100).toFixed(1)+'%)'}}}}}); 
+  const c3=document.getElementById('promoChart').getContext('2d');
+  const pn=['Walmart FSI Q2','Target Circo Q1','Kroger TPR May','WF Demo Jun','Instacart Dig.','Sprouts FSI'];
+  const pr=[3.8,3.2,2.8,3.1,1.8,2.4];
+  new Chart(c3,{type:'bar',data:{labels:pn,datasets:[{label:'ROI (x)',data:pr,backgroundColor:pr.map(v=>v>=3?'rgba(16,185,129,.75)':v>=2?'rgba(245,158,11,.75)':'rgba(239,68,68,.75)'),borderRadius:5,borderSkipped:false},{label:'Target 3.0x',data:[3,3,3,3,3,3],type:'line',borderColor:'rgba(0,212,170,.45)',borderDash:[4,3],borderWidth:1.5,pointRadius:0,fill:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{backgroundColor:tbg(),borderColor:tbr(),borderWidth:1,titleColor:ttc(),bodyColor:tbc(),padding:10}},scales:{x:{ticks:{color:tc(),font:{size:10},callback:v=>v+'x'},grid:{color:gc()},min:0,max:5},y:{ticks:{color:tc(),font:{size:10}},grid:{display:false}}}}});
+}
+function buildFinancial(){
+  const c=document.getElementById('cm3Chart').getContext('2d');
+  new Chart(c,{type:'bar',data:{labels:['Walmart','Target','Kroger','Whole Foods','Sprouts'],datasets:[{label:'CM3 %',data:[18.4,15.2,11.8,4.8,9.2],backgroundColor:['rgba(16,185,129,.75)','rgba(16,185,129,.75)','rgba(245,158,11,.75)','rgba(245,158,11,.65)','rgba(16,185,129,.65)'],borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:tbg(),borderColor:tbr(),borderWidth:1,titleColor:ttc(),bodyColor:tbc(),padding:10,callbacks:{label:c=>' CM3: '+c.raw+'%'}}},scales:{x:{ticks:{color:tc(),font:{size:10}},grid:{display:false}},y:{ticks:{color:tc(),font:{size:10},callback:v=>v+'%'},grid:{color:gc()},min:0,max:25}}}});
+}
+const SKUS=[
+  {name:'Golden Grain Oats 24oz',ret:['Walmart','Target','Kroger'],vel:248,acv:74,void:4.8,wos:5.2,cm1:42.4,roi:3.8,rep:46.2,shr:0.62,st:'green'},
+  {name:'Trail Blazer Bar 12-pk',ret:['Walmart','WF/UNFI','Kroger'],vel:186,acv:62,void:14.2,wos:2.4,cm1:36.8,roi:2.6,rep:38.4,shr:0.48,st:'red'},
+  {name:'Sunrise Granola 18oz',ret:['WF/UNFI','Kroger','Sprouts/KeHE'],vel:162,acv:58,void:11.4,wos:3.1,cm1:34.6,roi:2.9,rep:35.8,shr:0.42,st:'amber'},
+  {name:'Garden Blend Crackers 6oz',ret:['Target','Walmart'],vel:144,acv:66,void:5.2,wos:3.8,cm1:38.2,roi:3.2,rep:40.1,shr:0.28,st:'green'},
+  {name:'Maple Seed Clusters 8oz',ret:['Sprouts/KeHE','WF/UNFI'],vel:138,acv:48,void:5.8,wos:2.9,cm1:44.1,roi:3.6,rep:44.8,shr:0.24,st:'amber'},
+  {name:'Harvest Hummus 10oz',ret:['Walmart','Target','Kroger'],vel:124,acv:55,void:8.4,wos:4.4,cm1:28.6,roi:2.2,rep:31.2,shr:0.16,st:'amber'},
+];
+function buildSKUTable(filter='all'){
+  const body=document.getElementById('skuBody');
+  const rows=filter==='all'?SKUS:SKUS.filter(s=>s.st===filter||(filter==='red'&&s.st==='amber'));
+  body.innerHTML=rows.map(s=>{
+    const vb=s.void>=12?'red':s.void>=7?'amber':'green';
+    const wb=s.wos<2.5?'red':s.wos<3.5?'amber':'green';
+    const mb=s.cm1>=40?'green':s.cm1>=32?'amber':'red';
+    const rb=s.roi>=3?'green':s.roi>=2?'amber':'red';
+    const repb=s.rep>=40?'green':s.rep>=32?'amber':'red';
+    const tags=s.ret.map(r=>`<span class="sku-tag">${r}</span>`).join('');
+    const si=s.st==='green'?'<span class="badge green">✓ Healthy</span>':s.st==='red'?'<span class="badge red">🔴 At Risk</span>':'<span class="badge amber">⚠ Watch</span>';
+    return `<tr><td><div class="sku-name">${s.name}</div><div class="sku-tags">${tags}</div></td><td><span style="font-family:var(--font-mono)">$${s.vel}</span></td><td><span class="badge ${s.acv>=65?'green':s.acv>=50?'amber':'red'}">${s.acv}%</span></td><td><span class="badge ${vb}">${s.void}%</span></td><td><span class="badge ${wb}">${s.wos} wks</span></td><td><span class="badge ${mb}">${s.cm1}%</span></td><td><span class="badge ${rb}">${s.roi}x</span></td><td><span class="badge ${repb}">${s.rep}%</span></td><td><span class="badge ${s.shr>=0.5?'green':'amber'}">${s.shr}%</span></td><td>${si}</td></tr>`;
+  }).join('');
+}
+function filterSKU(f,btn){document.querySelectorAll('.vtb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');buildSKUTable(f);}
+function buildSKUCharts(){
+  buildSKUTable();
+  const c1=document.getElementById('velChart').getContext('2d');
+  new Chart(c1,{type:'bar',data:{labels:SKUS.map(s=>s.name.slice(0,17)+'…'),datasets:[{label:'$/sw',data:SKUS.map(s=>s.vel),backgroundColor:SKUS.map(s=>s.st==='green'?'rgba(16,185,129,.75)':s.st==='red'?'rgba(239,68,68,.75)':'rgba(245,158,11,.75)'),borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{backgroundColor:tbg(),borderColor:tbr(),borderWidth:1,titleColor:ttc(),bodyColor:tbc(),padding:10}},scales:{x:{ticks:{color:tc(),font:{size:10},callback:v=>'$'+v},grid:{color:gc()}},y:{ticks:{color:tc(),font:{size:9.5}},grid:{display:false}}}}});
+  const c2=document.getElementById('marginChart').getContext('2d');
+  new Chart(c2,{type:'bar',data:{labels:SKUS.map(s=>s.name.slice(0,17)+'…'),datasets:[{label:'CM1 %',data:SKUS.map(s=>s.cm1),backgroundColor:SKUS.map(s=>s.cm1>=40?'rgba(16,185,129,.75)':s.cm1>=32?'rgba(245,158,11,.75)':'rgba(239,68,68,.75)'),borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{backgroundColor:tbg(),borderColor:tbr(),borderWidth:1,titleColor:ttc(),bodyColor:tbc(),padding:10,callbacks:{label:c=>' CM1: '+c.raw+'%'}}},scales:{x:{ticks:{color:tc(),font:{size:10},callback:v=>v+'%'},grid:{color:gc()}},y:{ticks:{color:tc(),font:{size:9.5}},grid:{display:false}}}}});
+  const c3=document.getElementById('shareChart').getContext('2d');
+  new Chart(c3,{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],datasets:[{label:'Harvest & Co.',data:[2.2,2.1,2.2,2.3,2.1,2.1],borderColor:'#00d4aa',backgroundColor:'rgba(0,212,170,.07)',tension:0.4,fill:true,pointBackgroundColor:'#00d4aa',pointBorderColor:'#070c18',pointBorderWidth:2,pointRadius:4,borderWidth:2.5},{label:'Kind Bar Co.',data:[1.8,1.9,2.0,2.2,2.4,2.4],borderColor:'rgba(239,68,68,.6)',backgroundColor:'transparent',tension:0.4,fill:false,pointRadius:3,borderWidth:1.8,borderDash:[4,3]}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:tc(),font:{size:10.5},boxWidth:10}},tooltip:{backgroundColor:tbg(),borderColor:tbr(),borderWidth:1,titleColor:ttc(),bodyColor:tbc(),padding:10,callbacks:{label:c=>' '+c.dataset.label+': '+c.raw+'%'}}},scales:{x:{ticks:{color:tc(),font:{size:10.5}},grid:{color:gc()}},y:{ticks:{color:tc(),font:{size:10.5},callback:v=>v+'%'},grid:{color:gc()},min:1,max:3}}}});
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+const ACTIONS={
+  void:{t:'🔴 Kroger Void Rate 18% — Action Plan',s:'Authorized stores not scanning. Reset review Jun 30. 21 days remaining.',b:`<div class="mrow"><div class="micon">📞</div><div class="mtext"><strong>Call broker today — request store-level compliance list via 84.51°</strong>Ask your Kroger broker to pull store IDs not scanning vs authorized. Target: identify top 20 non-compliant stores by volume. Every 1pp void = ~$42K annualized revenue. <button class="mbtn" onclick="toast('Broker script copied ✓')">📋 Copy Script</button></div></div><div class="mrow"><div class="micon">📧</div><div class="mtext"><strong>Email buyer proactively — show recovery plan before Jun 30 reset</strong>18% void rate flags you as a deauthorization candidate. A proactive email with a compliance recovery timeline protects your facings before the reset reviewer sees your data. <button class="mbtn" onclick="openAction('email_kroger')">Open template →</button></div></div><div class="mrow"><div class="micon">🏪</div><div class="mtext"><strong>Deploy field merchandiser — top 20 non-compliant doors this week</strong>Recovering 10 stores brings void rate to ~15%. At $42K annualized per pp, 3pp recovery = $126K protected. <button class="mbtn" onclick="toast('Store list downloaded ✓')">📍 Store list</button></div></div>`},
+  wos:{t:'📦 WOS Alert — 2 SKUs at OOS Risk',s:'Trail Blazer Bar 1.8 wks · Sunrise Granola 2.1 wks · both past safe reorder window',b:`<div class="warn-box">⚠ UNFI replenishment to Whole Foods DCs: 4.2-week lead time. At 1.8 WOS you are 2+ weeks past the safe reorder point. An OOS event before the Sep reset period closes will show as a velocity gap to the WF buyer.</div><div class="mrow"><div class="micon">📦</div><div class="mtext"><strong>Emergency PO — Trail Blazer Bar → UNFI Chicago + Portland DCs</strong>Place today. Request UNFI rush handling (+$0.18/case premium). OOS at Whole Foods during the Nielsen period costs ~$14K velocity impact. <button class="mbtn" onclick="openAction('po')">Create PO →</button></div></div><div class="mrow"><div class="micon">📦</div><div class="mtext"><strong>Reorder Sunrise Granola → Kroger Mid-Atlantic DC</strong>2.1 WOS · Kroger lead time 2.8 weeks. Place by Tuesday to avoid OOS. <button class="mbtn" onclick="toast('Kroger PO form opened')">Create PO →</button></div></div><div class="mrow"><div class="micon">🔔</div><div class="mtext"><strong>Set automated WOS alert at 3.5-week threshold</strong>An OOS event costs 4–8 weeks of velocity momentum with the buyer. Automate this reorder trigger. <button class="mbtn" onclick="toast('Alert set at 3.5 wks ✓')">Set Alert</button></div></div>`},
+  trade:{t:'📊 Trade Spend ROI — 2.4x vs 3.0x Target',s:'Instacart Digital at 1.8x ROI. Reallocating $460K to Walmart FSI projected at 3.8x.',b:`<div class="danger-box">⚠ Instacart Q2 Digital: $460K spend → 1.8x ROI = $828K lift. Same budget at Walmart FSI (3.8x) = $1.75M lift. That is a $920K difference from the same trade dollars.</div><div class="mrow"><div class="micon">⏸</div><div class="mtext"><strong>Pause Instacart Q2 Digital promo — ROI 1.8x, below 2.0x floor</strong>At 1.8x the incremental lift doesn't justify the $460K investment vs alternative deployment. Pause before next cycle accrual. <button class="mbtn" onclick="toast('Instacart promo paused ✓')">Pause Promo</button></div></div><div class="mrow"><div class="micon">🔁</div><div class="mtext"><strong>Reallocate $460K to Walmart FSI Q3 — projected 3.8x ROI</strong>Walmart FSI outperforming at 3.8x. Reallocation projects portfolio ROI from 2.4x to 3.1x — above the 3.0x benchmark. <button class="mbtn" onclick="toast('Scenario saved ✓')">Run Scenario</button></div></div><div class="mrow"><div class="micon">📋</div><div class="mtext"><strong>Activate Jun 12 Kroger TPR — highest-ROI open window</strong>Kroger TPR historically generates 2.8x and counter-positions you against Kind Bar Co. promo ending Jun 15. <button class="mbtn" onclick="openAction('schedule')">Open Planner →</button></div></div>`},
+  acv:{t:'📦 ACV Distribution — 62.4% vs 70% Target',s:'7.6pp gap = ~$88K annualized revenue · 3 approved doors not yet active',b:`<div class="info-box">✓ 3 Target doors in PNW are authorized and approved. They are not receiving orders because DST activation is pending. This is a same-week fix worth $29K annualized.</div><div class="mrow"><div class="micon">🏪</div><div class="mtext"><strong>Activate 3 approved Target PNW doors via DST this week</strong>Stores T-0482 Portland, T-0614 Seattle, T-0731 Eugene — adds $558/wk velocity + 1.2pp ACV. <button class="mbtn" onclick="openAction('doors')">Activate Doors →</button></div></div><div class="mrow"><div class="micon">📋</div><div class="mtext"><strong>Pitch 4 new Kroger doors at Jun 14 buyer call</strong>Trail Blazer Bar velocity supports 4 additional Charlottesville cluster doors. Bring the Kroger Buyer Card as your data packet. <button class="mbtn" onclick="openRetailer('kroger');closeAction()">Open Kroger Card →</button></div></div><div class="mrow"><div class="micon">📈</div><div class="mtext"><strong>Complete Sprouts NW + SE onboarding via KeHE — +17pp ACV</strong>Both regions approved Harvest & Co. as vendor. Onboarding paperwork pending. Completing adds ~17pp ACV toward 70% target. <button class="mbtn" onclick="toast('KeHE onboarding checklist opened')">View Checklist</button></div></div>`},
+  share:{t:'📉 Market Share −0.3pp — Competitor Gaining',s:'Kind Bar Co. +0.4pp in 6 months. Your Jun 12 TPR is the response.',b:`<div class="mrow"><div class="micon">⚡</div><div class="mtext"><strong>Activate Kroger TPR Jun 12 — 3-day overlap with competitor promo</strong>Kind Bar Co. TPR ends Jun 15. Your Jun 12 window creates head-to-head overlap. Previous Kroger TPR generated +0.6pp velocity lift in the next Nielsen period. <button class="mbtn" onclick="openAction('schedule')">Schedule →</button></div></div><div class="mrow"><div class="micon">📦</div><div class="mtext"><strong>Expand Golden Grain Oats — 3 new Walmart regions</strong>$248/sw exceeds Walmart's $220 expansion threshold. Aug 4 reset = ideal timing. Request meeting before Jul 15. <button class="mbtn" onclick="openAction('meeting')">Request Mtg →</button></div></div><div class="mrow"><div class="micon">📊</div><div class="mtext"><strong>Pull SPINS 4-week trend — identify doors where competitor over-indexes</strong>Compare store-cluster velocity to find exact doors where Kind Bar Co. is gaining share. <button class="mbtn" onclick="toast('SPINS report request sent ✓')">Pull Report</button></div></div>`},
+  email_kroger:{t:'📧 Kroger Broker Email — Void Rate Compliance',s:'Pre-filled with your account data. Send today.',b:`<div class="at-email-box" id="emailBox">Subject: Harvest & Co. Foods — Kroger Void Rate Action Plan (W23, Jun 2026)
+
+Hi [Broker Name],
+
+Following up urgently on a compliance issue flagged in our Kroger 84.51° scan data this week.
+
+Current void rate: 18.0% across 312 authorized doors (56 stores authorized but not scanning). This puts us above the 15% deauthorization flag threshold ahead of the Jun 30 Natural Snacks reset review.
+
+What I need from you by EOD Friday:
+  1. Store-level compliance list: Which of our 312 Kroger doors are not scanning Trail Blazer Bar 12-pk and Sunrise Granola 18oz?
+  2. Top 20 non-compliant stores by volume: We will deploy our field merchandiser to those first, this week.
+  3. Kroger buyer contact: I want to send a proactive recovery plan email before the reset review date.
+
+Context: Every 1pp of void rate = ~$42K annualized revenue impact. Recovering from 18% to under 8% before Jun 30 protects our facing allocation and our Q3 velocity data.
+
+Please confirm receipt and send availability for a call today or tomorrow.
+
+Best,
+[Your Name]
+Harvest & Co. Foods | [Phone] | [Email]</div><div class="at-btns"><button class="at-btn primary" onclick="copyEmail()">📋 Copy Email</button><button class="at-btn secondary" onclick="openMailto()">✉️ Open in Mail</button><button class="at-btn secondary" onclick="closeAction()">Close</button></div><div class="at-success" id="copyOK">✓ Copied to clipboard</div>`},
+  po:{t:'📦 Create PO — Trail Blazer Bar 12-pk → UNFI',s:'WOS 1.8 wks · UNFI lead time 4.2 wks · You are already past the safe reorder window',b:`<div class="warn-box">⚠ At 1.8 WOS and 4.2-week UNFI lead time, placing today still risks a 2-week OOS gap. Request rush handling (+$0.18/case) to minimize gap.</div><div class="at-form"><div class="at-row2"><div><div class="at-label">SKU</div><input class="at-input" value="Trail Blazer Bar 12-pk · #HCF-TBB-12" readonly></div><div><div class="at-label">Route To</div><input class="at-input" value="UNFI → Whole Foods Market" readonly></div></div><div class="at-row2"><div><div class="at-label">UNFI DC — Chicago (priority)</div><input class="at-input" id="qChi" type="number" value="480"></div><div><div class="at-label">UNFI DC — Portland</div><input class="at-input" id="qPor" type="number" value="320"></div></div><div class="at-row2"><div><div class="at-label">Ship Date</div><input class="at-input" type="date" value="2026-06-09"></div><div><div class="at-label">Handling</div><select class="at-select"><option selected>🔴 Rush — UNFI priority (+$0.18/case)</option><option>Standard — 4.2 week lead time</option></select></div></div><div><div class="at-label">Notes to Warehouse</div><textarea class="at-textarea">URGENT: Whole Foods WOS 1.8 weeks. OOS before Jun 16 impacts Nielsen velocity data reviewed by WF buyer at Sep reset. Prioritize Chicago DC. Confirm receipt by COB today. Request UNFI rush acknowledgment.</textarea></div></div><div class="at-btns"><button class="at-btn primary" onclick="subPO()">📦 Submit PO</button><button class="at-btn secondary" onclick="closeAction()">Cancel</button></div><div class="at-success" id="poOK">✓ PO submitted — UNFI notified. Confirmation #HCF-PO-2026-0609</div>`},
+  dispute:{t:'⚖️ File Deduction Dispute — Kroger $18.2K',s:'Shortage claim · 60-day window closes Jun 20 · You have signed BOL',b:`<div class="danger-box">🚨 Deadline: Jun 20 (11 days). You have signed Bills of Lading and carrier POD confirming full delivery. After 60 days, recovery drops below 30%.</div><div class="at-form"><div class="at-row2"><div><div class="at-label">Deduction Type</div><input class="at-input" value="Shortage Claim — 3 pallets short" readonly></div><div><div class="at-label">Retailer</div><input class="at-input" value="Kroger · DC Cincinnati" readonly></div></div><div class="at-row2"><div><div class="at-label">Amount</div><input class="at-input" value="$18,200" readonly></div><div><div class="at-label">Deadline</div><input class="at-input" value="Jun 20, 2026 — 11 days" readonly></div></div><div><div class="at-label">Supporting Documentation</div><select class="at-select"><option selected>✓ Signed BOL #KR-2026-0412 · Carrier POD confirmed</option></select></div><div><div class="at-label">Dispute Narrative</div><textarea class="at-textarea">Kroger DC Cincinnati issued shortage claim for 3 pallets (Deduction #KRG-2026-D-0481, $18,200) on shipment PO-2026-0412. Our Bill of Lading #KR-2026-0412 shows full 12-pallet delivery, signed by Kroger receiving. Carrier proof of delivery confirms all pallets received May 12, 2026. We respectfully dispute this shortage claim and request credit reversal within 10 business days.</textarea></div></div><div class="at-btns"><button class="at-btn primary" onclick="subDispute()">⚖️ File Dispute</button><button class="at-btn secondary" onclick="toast('BOL document opened')">📎 Attach BOL</button><button class="at-btn secondary" onclick="closeAction()">Cancel</button></div><div class="at-success" id="dispOK">✓ Dispute filed · Case #KRG-DSP-2026-0609 created</div>`},
+  schedule:{t:'🗓 Schedule — Kroger TPR Jun 12',s:'Counter Kind Bar Co. · 3-day overlap · Nielsen period closes Jun 16',b:`<div class="info-box">✓ Kind Bar Co. TPR ends Jun 15. Your Jun 12 window creates a 3-day overlap. Previous Kroger TPR generated +0.6pp velocity lift.</div><div style="margin-bottom:14px"><div class="at-cal-row"><div class="at-cal-date">Jun 9 Today</div><div class="at-cal-text"><strong>Submit TPR form to Kroger Trade Desk</strong>48hr deadline before activation. Include promo price, UPCs, door list.</div></div><div class="at-cal-row"><div class="at-cal-date">Jun 12</div><div class="at-cal-text"><strong>TPR Activation — All 312 Authorized Kroger Doors</strong>Price reduction live. Broker confirms compliance at top 20 volume doors.</div></div><div class="at-cal-row"><div class="at-cal-date">Jun 15</div><div class="at-cal-text"><strong>Competitor Kind Bar Co. promo ends</strong>3-day overlap complete. Monitor scan velocity via 84.51°.</div></div><div class="at-cal-row"><div class="at-cal-date">Jun 16</div><div class="at-cal-text"><strong>Nielsen 4-week period closes</strong>Velocity data reviewed by Kroger buyer for Jun 30 reset decision.</div></div><div class="at-cal-row"><div class="at-cal-date">Jun 30</div><div class="at-cal-text"><strong>Kroger Reset Review — Natural Snacks</strong>Facing allocation decisions based on this period's velocity + void rate. Reset Score must improve from 38 to 55+ to protect current facings.</div></div></div><div class="at-form"><div class="at-row2"><div><div class="at-label">TPR Discount</div><select class="at-select"><option>10% off MSRP</option><option selected>15% off MSRP</option><option>20% off MSRP</option></select></div><div><div class="at-label">Duration</div><select class="at-select"><option>1 week</option><option selected>2 weeks (Jun 12–26)</option><option>3 weeks</option></select></div></div></div><div class="at-btns"><button class="at-btn primary" onclick="subSchedule()">✓ Confirm & Add to Calendar</button><button class="at-btn secondary" onclick="dlICS()">📅 Download .ICS</button><button class="at-btn secondary" onclick="closeAction()">Cancel</button></div><div class="at-success" id="schOK">✓ TPR scheduled Jun 12–26 · 15% off · Calendar invite created</div>`},
+  doors:{t:'📋 Activate 3 Target PNW Doors',s:'Approved, not receiving orders · +$558/wk · +1.2pp ACV toward 70% target',b:`<div class="info-box">✓ These 3 doors are authorized and approved. DST activation paperwork is all that remains. Same-week fix worth $29K annualized and 1.2pp ACV.</div><table class="at-table"><thead><tr><th>Store #</th><th>Location</th><th>Est. Weekly Vol.</th><th>Status</th></tr></thead><tbody><tr><td>T-0482</td><td>Portland, OR · Burnside</td><td>$186/wk</td><td><span class="badge amber">Approved · Pending</span></td></tr><tr><td>T-0614</td><td>Seattle, WA · Capitol Hill</td><td>$204/wk</td><td><span class="badge amber">Approved · Pending</span></td></tr><tr><td>T-0731</td><td>Eugene, OR · Valley River</td><td>$168/wk</td><td><span class="badge amber">Approved · Pending</span></td></tr></tbody></table><div class="at-form"><div class="at-row2"><div><div class="at-label">DST Contact</div><select class="at-select"><option selected>Mark R. — Pacific NW DST Lead</option><option>Sarah K. — Backup DST</option></select></div><div><div class="at-label">First Shipment</div><input class="at-input" type="date" value="2026-06-14"></div></div><div><div class="at-label">First Order Notes</div><textarea class="at-textarea">2 cases Golden Grain Oats 24oz + 2 cases Trail Blazer Bar 12-pk per door. Confirm shelf tags on first delivery. Target reset Sep 2 — establish velocity data this period.</textarea></div></div><div class="at-btns"><button class="at-btn primary" onclick="subDoors()">✓ Activate All 3 Doors</button><button class="at-btn secondary" onclick="closeAction()">Cancel</button></div><div class="at-success" id="doorsOK">✓ All 3 doors activated. Mark R. (DST) notified. First shipment Jun 14.</div>`},
+  meeting:{t:'📅 Walmart Buyer Meeting Request',s:'Golden Grain Oats $248/sw — above $220 expansion threshold · Reset Aug 4',b:`<div class="info-box">✓ $248/sw is 13% above Walmart's regional expansion threshold. Reset Score 82/100. Aug 4 reset = optimal window. This is the strongest velocity position you have ever had at Walmart.</div><div class="at-form"><div class="at-row2"><div><div class="at-label">Buyer Name</div><input class="at-input" id="bName" value="Jennifer Walsh"></div><div><div class="at-label">Buyer Email</div><input class="at-input" id="bEmail" value="jwalsh@walmart.com"></div></div><div class="at-row2"><div><div class="at-label">Proposed Date</div><input class="at-input" type="date" id="mDate" value="2026-06-23"></div><div><div class="at-label">Format</div><select class="at-select" id="mFmt"><option selected>Video Call (Teams)</option><option>In-Person · Bentonville, AR</option></select></div></div><div><div class="at-label">Pitch Focus</div><select class="at-select"><option selected>Expand Golden Grain Oats — 3 new Walmart regions</option><option>Add 2 new SKUs to existing doors</option></select></div></div><div class="at-btns"><button class="at-btn primary" onclick="subMeeting()">📧 Send Meeting Request</button><button class="at-btn secondary" onclick="openRetailer('walmart');closeAction()">📄 Preview Buyer Card</button><button class="at-btn secondary" onclick="closeAction()">Cancel</button></div><div class="at-success" id="mtgOK">✓ Meeting request sent. Walmart Buyer Card attached. Follow-up reminder set Jun 20.</div>`},
+};
+function openAction(key){const a=ACTIONS[key];if(!a)return;document.getElementById('aTitle').textContent=a.t;document.getElementById('aSub').textContent=a.s;document.getElementById('aBody').innerHTML=a.b;document.getElementById('actionOverlay').classList.add('show');}
+function closeAction(){document.getElementById('actionOverlay').classList.remove('show');}
+function copyEmail(){const txt=document.getElementById('emailBox').textContent;navigator.clipboard.writeText(txt).then(()=>{document.getElementById('copyOK').style.display='block';toast('✓ Email copied');}).catch(()=>{const t=document.createElement('textarea');t.value=txt;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);document.getElementById('copyOK').style.display='block';toast('✓ Email copied');});}
+function openMailto(){const s='Harvest & Co. Foods — Kroger Void Rate Action Plan (W23)';const b=document.getElementById('emailBox').textContent;window.location.href='mailto:?subject='+encodeURIComponent(s)+'&body='+encodeURIComponent(b);}
+function subPO(){const c=document.getElementById('qChi').value,p=document.getElementById('qPor').value;document.getElementById('poOK').textContent='✓ PO submitted — '+(parseInt(c)+parseInt(p))+' units ('+c+' Chicago · '+p+' Portland). UNFI notified. #HCF-PO-2026-0609';document.getElementById('poOK').style.display='block';toast('✓ Purchase Order submitted');}
+function subDispute(){document.getElementById('dispOK').style.display='block';toast('✓ Dispute filed · Case #KRG-DSP-2026-0609');}
+function subSchedule(){document.getElementById('schOK').style.display='block';toast('✓ Kroger TPR scheduled Jun 12–26');}
+function dlICS(){const ics='BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:20260612T090000Z\nDTEND:20260626T170000Z\nSUMMARY:Kroger TPR — Harvest & Co. Foods (15% off MSRP)\nDESCRIPTION:312 authorized Kroger doors. Counter Kind Bar Co. promo. Nielsen period closes Jun 16. Reset Jun 30.\nEND:VEVENT\nEND:VCALENDAR';const b=new Blob([ics],{type:'text/calendar'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='kroger-tpr-jun12-2026.ics';a.click();toast('✓ Calendar file downloaded');}
+function subDoors(){document.getElementById('doorsOK').style.display='block';toast('✓ 3 Target PNW doors activated');}
+function subMeeting(){const n=document.getElementById('bName').value,e=document.getElementById('bEmail').value,d=document.getElementById('mDate').value,f=document.getElementById('mFmt').value;const s='Meeting Request — Harvest & Co. Foods Walmart Distribution Expansion';const b='Hi '+n+',\n\nI would like to schedule a meeting to discuss a distribution expansion opportunity for Harvest & Co. Foods at Walmart.\n\nOur Golden Grain Oats 24oz is currently performing at $248/store/week — 13% above your regional expansion threshold — with a Reset Readiness Score of 82/100 heading into the Aug 4 Natural Snacks reset.\n\nI will bring the full Walmart Retailer Summary Card with velocity, ACV, margin, and category comparison data.\n\nProposed: '+d+' via '+f+'.\n\nLooking forward to connecting.\n\nBest,\n[Your Name]\nHarvest & Co. Foods';window.location.href='mailto:'+encodeURIComponent(e)+'?subject='+encodeURIComponent(s)+'&body='+encodeURIComponent(b);document.getElementById('mtgOK').style.display='block';toast('✓ Meeting request opened in mail app');}
+const RETAILERS={
+  walmart:{name:'Walmart',color:'#0071ce',letter:'W',route:'Direct account',rev:'$412K',growth:'+14.8% YoY',cm3:'18.4%',vel:'$248/sw',acv:'74%',void:'4.2%',wos:'4.8 wks',score:'82/100',reset:'Aug 4, 2026',skus:[{n:'Golden Grain Oats 24oz',rev:'$148K',vel:'$248',cm:'42.4%',t:'▲ +18%'},{n:'Trail Blazer Bar 12-pk',rev:'$96K',vel:'$194',cm:'36.8%',t:'▲ +6%'},{n:'Garden Blend Crackers',rev:'$82K',vel:'$168',cm:'38.2%',t:'▲ +11%'},{n:'Harvest Hummus 10oz',rev:'$86K',vel:'$176',cm:'28.6%',t:'▼ −2%'}],note:'Walmart is your highest-volume, highest-margin direct account. Golden Grain Oats at $248/sw is 13% above the regional expansion threshold ($220). Reset Score 82/100. Request expanded distribution at Aug 4 reset — strongest velocity position ever.',dist:null},
+  target:{name:'Target',color:'#cc0000',letter:'T',route:'Direct account',rev:'$218K',growth:'+9.4% YoY',cm3:'15.2%',vel:'$196/sw',acv:'61%',void:'6.8%',wos:'4.1 wks',score:'61/100',reset:'Sep 2, 2026',skus:[{n:'Golden Grain Oats 24oz',rev:'$78K',vel:'$196',cm:'42.4%',t:'▲ +8%'},{n:'Garden Blend Crackers',rev:'$62K',vel:'$188',cm:'38.2%',t:'▲ +14%'},{n:'Trail Blazer Bar 12-pk',rev:'$48K',vel:'$162',cm:'36.8%',t:'▲ +3%'},{n:'Sunrise Granola 18oz',rev:'$30K',vel:'$148',cm:'34.6%',t:'▼ −4%'}],note:'Target is your #2 direct account with consistent velocity growth. 3 PNW doors approved but not yet activated — same-week fix worth $29K annualized and 1.2pp ACV. Reset Sep 2. Activate doors now to establish velocity data in this review period.',dist:null},
+  kroger:{name:'Kroger',color:'#1e5aa8',letter:'K',route:'Direct account',rev:'$184K',growth:'+2.1% YoY',cm3:'11.8%',vel:'$174/sw',acv:'58%',void:'18.0% 🔴',wos:'3.6 wks',score:'38/100 🔴',reset:'Jun 30, 2026 — 21 days',skus:[{n:'Golden Grain Oats 24oz',rev:'$68K',vel:'$182',cm:'42.4%',t:'▲ +4%'},{n:'Trail Blazer Bar 12-pk',rev:'$56K',vel:'$174',cm:'36.8%',t:'▼ −8%'},{n:'Harvest Hummus 10oz',rev:'$38K',vel:'$148',cm:'28.6%',t:'▼ −6%'},{n:'Sunrise Granola 18oz',rev:'$22K',vel:'$142',cm:'34.6%',t:'▲ +2%'}],note:'⚠ CRITICAL: Reset Score 38/100. Void rate 18% is above the deauthorization threshold. Jun 30 reset is 21 days away. Trail Blazer Bar velocity declining −8% — linked to OOS events from compliance failures. Broker call + field merchandiser deployment this week is non-negotiable.',dist:null},
+  wholefds:{name:'Whole Foods Market',color:'#00674b',letter:'WF',route:'Indirect — via UNFI · UNFI markup ~6–7%',rev:'$96K',growth:'+6.8% YoY',cm3:'4.8%',vel:'$142/sw',acv:'48%',void:'7.2%',wos:'1.8 wks 🔴',score:'54/100',reset:'Sep 2, 2026',skus:[{n:'Maple Seed Clusters 8oz',rev:'$38K',vel:'$168',cm:'44.1%',t:'▲ +12%'},{n:'Sunrise Granola 18oz',rev:'$28K',vel:'$148',cm:'34.6%',t:'▲ +8%'},{n:'Trail Blazer Bar 12-pk',rev:'$30K',vel:'$138',cm:'36.8%',t:'▼ −14%'}],note:'⚠ Trail Blazer Bar at 1.8 WOS — emergency reorder to UNFI needed today. CM3 at 4.8% reflects UNFI markup (~6.5%) + WF compliance costs. Maple Seed Clusters is your natural channel anchor. At Sep 2 reset, WOS gap and UNFI fill rate issue will be evaluated by the WF buyer.',dist:'UNFI routes your product to Whole Foods DCs. UNFI markup: ~6–7% of your invoice price. Recent UNFI data fee: ~2.5% of net sales. Spoilage allowance: ~1.5%. Fill rate issues at UNFI level show directly as void rate at the WF store level.'},
+  sprouts:{name:'Sprouts Farmers Market',color:'#5a7a3a',letter:'S',route:'Indirect — via KeHE · KeHE markup ~8%',rev:'$54K',growth:'+22.4% YoY',cm3:'9.2%',vel:'$162/sw',acv:'38%',void:'5.4%',wos:'3.8 wks',score:'74/100',reset:'Aug 7, 2026',skus:[{n:'Maple Seed Clusters 8oz',rev:'$24K',vel:'$178',cm:'44.1%',t:'▲ +28%'},{n:'Sunrise Granola 18oz',rev:'$18K',vel:'$162',cm:'34.6%',t:'▲ +18%'},{n:'Garden Blend Crackers',rev:'$12K',vel:'$148',cm:'38.2%',t:'▲ +16%'}],note:'Fastest-growing account at +22% YoY. KeHE scan programs apply. ACV at 38% is the biggest gap — NW and SE Sprouts regions approved as new vendor, onboarding pending via KeHE. Completing adds ~17pp ACV.',dist:'KeHE routes your product to Sprouts DCs. KeHE markup: ~8% of invoice. KeHE scan programs: 6% promotional scan (mandatory in Natural Snacks). New item stocking fee: $3,200 (paid, resolved). Real-time velocity available in KeHE Navigator portal.'},
+};
+function openRetailer(key){
+  const r=RETAILERS[key];if(!r)return;
+  const pos=v=>v.startsWith('▲')?'color:var(--positive)':'color:var(--negative)';
+  document.getElementById('rBody').innerHTML=`
+    <div class="rsc-hdr"><div class="rsc-logo" style="background:${r.color}">${r.letter}</div><div><div class="modal-title">${r.name} — Retailer Summary Card</div><div class="modal-sub">${r.route} · W23 Jun 2026 · Harvest & Co. Foods</div></div></div>
+    <div class="rsc-grid">
+      <div class="rsc-m"><div class="rsc-ml">Revenue (YTD)</div><div class="rsc-mv">${r.rev}</div><div class="rsc-mc" style="color:var(--positive)">${r.growth}</div></div>
+      <div class="rsc-m"><div class="rsc-ml">CM3 Contribution</div><div class="rsc-mv">${r.cm3}</div><div class="rsc-mc">After freight·broker·dist·trade</div></div>
+      <div class="rsc-m"><div class="rsc-ml">Velocity</div><div class="rsc-mv">${r.vel}</div><div class="rsc-mc">Category avg: $145/sw</div></div>
+      <div class="rsc-m"><div class="rsc-ml">ACV Distribution</div><div class="rsc-mv">${r.acv}</div><div class="rsc-mc">Target: 70%+</div></div>
+      <div class="rsc-m"><div class="rsc-ml">Void Rate</div><div class="rsc-mv" style="color:${parseFloat(r.void)>10?'var(--negative)':parseFloat(r.void)>7?'var(--amber)':'var(--positive)'}">${r.void}</div><div class="rsc-mc">Benchmark: &lt;8%</div></div>
+      <div class="rsc-m"><div class="rsc-ml">Reset Score · Date</div><div class="rsc-mv" style="font-size:14px">${r.score}</div><div class="rsc-mc">${r.reset}</div></div>
+    </div>
+    <div style="margin-bottom:14px">${r.skus.map(s=>`<div class="rsc-sku-row"><span style="color:var(--text);font-weight:600">${s.n}</span><span style="color:var(--text3)">${s.rev}</span><span style="font-family:var(--font-mono)">${s.vel}/sw</span><span>${s.cm} CM1</span><span style="${pos(s.t)}">${s.t}</span></div>`).join('')}</div>
+    ${r.dist?`<div class="rsc-dist"><strong>⚠ Distributor Note:</strong> ${r.dist}</div>`:''}
+    <div class="rsc-note"><strong style="color:var(--accent)">Account Notes: </strong>${r.note}</div>
+  `;
+  document.getElementById('retailerOverlay').classList.add('show');
+}
+function closeRetailer(){document.getElementById('retailerOverlay').classList.remove('show');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAction();closeRetailer();}});
+</script></body></html>

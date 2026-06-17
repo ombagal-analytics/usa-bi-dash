@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harvest & Co. Foods — CPG Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Epilogue:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f4f1eb;--sf:#fff;--sf2:#ede9e0;--sf3:#e4dfd4;
+  --bd:#dbd3c4;--bd2:#c9bfad;
+  --ink:#17120d;--ink2:#3a2f22;--ink3:#7a6a58;--ink4:#b0a08c;
+  --ac:#c14b0c;--ac2:#e06018;--ac-bg:#fdf0e8;
+  --gr:#287a4a;--gr-bg:#eaf5ee;
+  --am:#a07010;--am-bg:#fdf5e0;
+  --re:#c02828;--re-bg:#fdf0f0;
+  --bl:#1a5a88;--bl-bg:#e8f2fa;
+  --pu:#6a4aa8;--pu-bg:#f2eefa;
+  --sh:0 1px 3px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.07);
+  --ff:'Epilogue',sans-serif;
+  --ffd:'DM Serif Display',Georgia,serif;
+  --ffm:'JetBrains Mono',monospace;
+  --r:9px;--r2:12px;
+}
+[data-theme="dark"]{
+  --bg:#0e0b08;--sf:#191410;--sf2:#211c15;--sf3:#2a241b;
+  --bd:#302820;--bd2:#42361f;
+  --ink:#f0e8d4;--ink2:#c4b49a;--ink3:#7a6a58;--ink4:#46392a;
+  --ac:#e05818;--ac-bg:rgba(224,88,24,.13);
+  --gr:#38a060;--gr-bg:rgba(56,160,96,.13);
+  --am:#d09020;--am-bg:rgba(208,144,32,.13);
+  --re:#e03838;--re-bg:rgba(224,56,56,.13);
+  --bl:#3a80b8;--bl-bg:rgba(58,128,184,.13);
+  --pu:#9470d8;--pu-bg:rgba(148,112,216,.13);
+}
+
+/* === RESET === */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{
+  background:var(--bg);font-family:var(--ff);color:var(--ink);
+  font-size:12.5px;line-height:1.4;
+  display:flex;flex-direction:column;
+}
+button{cursor:pointer;border:none;background:none;font-family:var(--ff);outline:none;}
+select{font-family:var(--ff);outline:none;}
+
+/* === TOPBAR === */
+.topbar{
+  height:48px;flex-shrink:0;
+  background:var(--sf);border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;padding:0 18px;gap:14px;z-index:50;
+}
+.logo{font-family:var(--ffd);font-size:16px;color:var(--ink);white-space:nowrap;}
+.logo em{color:var(--ac);font-style:normal;}
+.demo-tag{background:var(--ac-bg);color:var(--ac);font-size:8.5px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:3px;text-transform:uppercase;flex-shrink:0;}
+.sep{width:1px;height:20px;background:var(--bd);flex-shrink:0;}
+
+/* Quarter tabs */
+.q-tabs{display:flex;background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:2px;gap:2px;flex-shrink:0;}
+.q-tab{padding:4px 11px;border-radius:5px;font-size:11px;font-weight:700;color:var(--ink3);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.q-tab.on{background:var(--sf);color:var(--ac);box-shadow:0 1px 3px rgba(0,0,0,.1);}
+
+/* Period tabs */
+.p-tabs{display:flex;background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:2px;gap:2px;flex-shrink:0;}
+.p-tab{padding:4px 9px;border-radius:5px;font-size:10.5px;font-weight:700;color:var(--ink3);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.p-tab.on{background:var(--sf);color:var(--ac);box-shadow:0 1px 3px rgba(0,0,0,.1);}
+
+/* Retailer dropdown */
+.r-sel{background:var(--sf);border:1px solid var(--bd2);color:var(--ink);padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;}
+
+.tb-spacer{flex:1;}
+.tb-updated{font-size:10.5px;color:var(--ink3);white-space:nowrap;}
+.tb-theme{background:var(--sf2);border:1px solid var(--bd);color:var(--ink2);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;flex-shrink:0;}
+.tb-cta{background:var(--ac);color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;transition:background .15s;white-space:nowrap;flex-shrink:0;}
+.tb-cta:hover{background:var(--ac2);}
+
+/* === ALERT STRIP === */
+.alert-strip{
+  height:30px;flex-shrink:0;
+  background:linear-gradient(90deg,#6a1a1a,#c14b0c);
+  display:flex;align-items:center;padding:0 18px;gap:8px;
+  font-size:11px;font-weight:500;color:#fff;
+}
+.a-dot{width:5px;height:5px;background:#ffb090;border-radius:50%;animation:blink 1.4s infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.a-x{margin-left:auto;opacity:.65;cursor:pointer;font-size:13px;padding:0 3px;}
+.a-x:hover{opacity:1;}
+
+/* === DASHBOARD GRID === */
+.dash{
+  flex:1;overflow:hidden;
+  padding:12px 16px;
+  display:grid;
+  grid-template-rows:auto 1fr 1fr 1fr;
+  grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:10px;
+}
+
+/* KPI ROW spans all 4 cols, fixed height */
+.kpi-row{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:8px;
+}
+
+/* === KPI CARD === */
+.kpi{
+  background:var(--sf);border:1px solid var(--bd);
+  border-radius:var(--r);padding:10px 12px;
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
+  box-shadow:var(--sh);transition:box-shadow .18s;
+}
+.kpi:hover{box-shadow:0 2px 8px rgba(0,0,0,.12);}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;}
+.kpi.c-or::before{background:var(--ac);}
+.kpi.c-gr::before{background:var(--gr);}
+.kpi.c-am::before{background:var(--am);}
+.kpi.c-re::before{background:var(--re);}
+.kpi.c-bl::before{background:var(--bl);}
+.kpi.c-pu::before{background:var(--pu);}
+.kpi-lbl{font-size:8.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--ink3);margin-bottom:5px;}
+.kpi-val{font-family:var(--ffm);font-size:19px;font-weight:500;color:var(--ink);line-height:1;margin-bottom:3px;}
+.kpi-d{font-size:9.5px;font-weight:600;}
+.kpi-d.up{color:var(--gr);}
+.kpi-d.dn{color:var(--re);}
+.kpi-d.fl{color:var(--am);}
+.kpi-bm{font-size:8px;font-weight:700;margin-top:5px;padding:1px 5px;border-radius:3px;display:inline-block;}
+.kpi-bm.ok{background:var(--gr-bg);color:var(--gr);}
+.kpi-bm.warn{background:var(--am-bg);color:var(--am);}
+.kpi-bm.bad{background:var(--re-bg);color:var(--re);}
+
+/* === CARD === */
+.card{
+  background:var(--sf);border:1px solid var(--bd);
+  border-radius:var(--r2);padding:12px 14px;
+  box-shadow:var(--sh);
+  display:flex;flex-direction:column;
+  overflow:hidden;min-height:0;
+}
+.card-h{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:10px;flex-shrink:0;}
+.card-h h3{font-family:var(--ffd);font-size:13px;color:var(--ink);line-height:1.2;}
+.card-h p{font-size:9.5px;color:var(--ink3);margin-top:2px;}
+.badge{font-size:8.5px;font-weight:700;padding:2px 7px;border-radius:100px;white-space:nowrap;flex-shrink:0;}
+.b-or{background:var(--ac-bg);color:var(--ac);}
+.b-gr{background:var(--gr-bg);color:var(--gr);}
+.b-re{background:var(--re-bg);color:var(--re);}
+.b-am{background:var(--am-bg);color:var(--am);}
+
+/* chart container fills remaining card space */
+.ch-wrap{flex:1;position:relative;min-height:0;}
+.ch-wrap canvas{position:absolute;inset:0;width:100%!important;height:100%!important;}
+
+/* === TABLE === */
+.tbl-wrap{flex:1;overflow-y:auto;min-height:0;}
+.tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.tbl th{text-align:left;padding:5px 8px;font-size:8px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);border-bottom:1px solid var(--bd2);position:sticky;top:0;background:var(--sf);z-index:1;}
+.tbl td{padding:6px 8px;border-bottom:1px solid var(--bd);}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--sf2);}
+.mono{font-family:var(--ffm);font-size:10.5px;}
+
+/* === PILL === */
+.pill{display:inline-block;padding:1px 6px;border-radius:100px;font-size:8.5px;font-weight:700;}
+.p-gr{background:var(--gr-bg);color:var(--gr);}
+.p-re{background:var(--re-bg);color:var(--re);}
+.p-am{background:var(--am-bg);color:var(--am);}
+.p-or{background:var(--ac-bg);color:var(--ac);}
+.p-bl{background:var(--bl-bg);color:var(--bl);}
+
+/* === ALERT CARDS IN GRID === */
+.alert-list{display:flex;flex-direction:column;gap:6px;flex:1;overflow:hidden;}
+.acard{border-radius:7px;padding:8px 10px;font-size:10.5px;line-height:1.5;border:1px solid transparent;flex-shrink:0;}
+.acard strong{font-weight:700;display:block;margin-bottom:1px;}
+.acard.danger{background:var(--re-bg);border-color:rgba(192,40,40,.18);}
+.acard.danger strong{color:var(--re);}
+.acard.warn{background:var(--am-bg);border-color:rgba(160,112,16,.18);}
+.acard.warn strong{color:var(--am);}
+.acard.ok{background:var(--gr-bg);border-color:rgba(40,122,74,.18);}
+.acard.ok strong{color:var(--gr);}
+
+/* === VELOCITY GAUGES === */
+.vel-list{flex:1;overflow:hidden;display:flex;flex-direction:column;gap:0;}
+.g-row{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--bd);flex-shrink:0;}
+.g-row:last-child{border-bottom:none;}
+.g-name{font-size:10.5px;font-weight:500;width:130px;flex-shrink:0;color:var(--ink);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.g-bar{flex:1;}
+.prog{background:var(--sf2);border-radius:100px;height:4px;overflow:hidden;}
+.prog-f{height:100%;border-radius:100px;}
+.g-val{font-family:var(--ffm);font-size:10px;width:30px;text-align:right;flex-shrink:0;color:var(--ink2);}
+.g-tag{width:54px;text-align:right;flex-shrink:0;}
+
+/* === DONUT + LEG === */
+.donut-wrap{display:flex;gap:10px;flex:1;min-height:0;align-items:center;}
+.donut-ch{position:relative;width:110px;height:110px;flex-shrink:0;}
+.donut-ch canvas{position:absolute;inset:0;width:100%!important;height:100%!important;}
+.donut-leg{flex:1;display:flex;flex-direction:column;gap:4px;overflow:hidden;}
+.leg-row{display:flex;align-items:center;gap:6px;font-size:10.5px;}
+.leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.leg-name{flex:1;color:var(--ink2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.leg-pct{font-family:var(--ffm);font-size:10px;font-weight:500;color:var(--ink);flex-shrink:0;}
+.leg-val{font-family:var(--ffm);font-size:9.5px;color:var(--ink3);flex-shrink:0;}
+
+/* === WOS MINI GRID === */
+.wos-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:repeat(3,1fr);
+  gap:4px;flex:1;min-height:0;overflow:hidden;
+}
+.wos-c{
+  border-radius:6px;padding:5px 8px;border:1px solid var(--bd);
+  display:flex;flex-direction:row;align-items:center;gap:8px;
+  min-height:0;overflow:hidden;
+}
+.wos-c.crit{background:var(--re-bg);border-color:rgba(192,40,40,.25);}
+.wos-c.warn{background:var(--am-bg);border-color:rgba(160,112,16,.2);}
+.wos-c.ok{background:var(--gr-bg);border-color:rgba(40,122,74,.2);}
+.wos-left{flex-shrink:0;}
+.wos-val{font-family:var(--ffm);font-size:18px;font-weight:500;line-height:1;}
+.wos-c.crit .wos-val{color:var(--re);}
+.wos-c.warn .wos-val{color:var(--am);}
+.wos-c.ok .wos-val{color:var(--gr);}
+.wos-right{flex:1;min-width:0;}
+.wos-name{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--ink2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height:1.2;}
+.wos-sub{font-size:7.5px;color:var(--ink3);margin-top:1px;line-height:1.2;}
+
+/* === FOOTER === */
+.foot{
+  flex-shrink:0;height:26px;
+  display:flex;align-items:center;justify-content:center;
+  border-top:1px solid var(--bd);padding:0 18px;
+  font-size:10px;color:var(--ink3);gap:8px;
+}
+.foot a{color:var(--ac);font-weight:600;}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">🌾 Harvest <em>&</em> Co. Foods</div>
+  <span class="demo-tag">Demo</span>
+  <div class="sep"></div>
+
+  <!-- Quarter tabs -->
+  <div class="q-tabs">
+    <div class="q-tab on" onclick="setQ('ALL',this)">All</div>
+    <div class="q-tab" onclick="setQ('Q1',this)">Q1</div>
+    <div class="q-tab" onclick="setQ('Q2',this)">Q2</div>
+    <div class="q-tab" onclick="setQ('Q3',this)">Q3</div>
+    <div class="q-tab" onclick="setQ('Q4',this)">Q4</div>
+  </div>
+
+  <!-- Period tabs -->
+  <div class="p-tabs">
+    <div class="p-tab on" onclick="setP('Monthly',this)">Monthly</div>
+    <div class="p-tab" onclick="setP('Weekly',this)">Weekly</div>
+    <div class="p-tab" onclick="setP('Quarterly',this)">Quarterly</div>
+    <div class="p-tab" onclick="setP('Yearly',this)">Yearly</div>
+  </div>
+
+  <!-- Retailer dropdown -->
+  <select class="r-sel" id="retSel" onchange="setRetailer()">
+    <option value="all">All Retailers</option>
+    <option value="wf">Whole Foods</option>
+    <option value="wm">Walmart</option>
+    <option value="tg">Target</option>
+    <option value="kr">Kroger</option>
+    <option value="amz">Amazon Fresh</option>
+    <option value="dtc">DTC</option>
+  </select>
+
+  <div class="tb-spacer"></div>
+  <span class="tb-updated" id="clock">—</span>
+  <button class="tb-theme" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+  <a href="mailto:ombagal.official@gmail.com?subject=CPG Dashboard" class="tb-cta">Get this for my brand →</a>
+</div>
+
+<!-- ALERT STRIP -->
+<div class="alert-strip" id="alertBar">
+  <div class="a-dot"></div>
+  <strong>2 Alerts:</strong>&nbsp;Ancient Grain Bowl OOS — 11 Whole Foods ($22K/wk)&nbsp;|&nbsp;Kroger void rate 17% — buyer reset risk 19 days
+  <span class="a-x" onclick="this.parentElement.style.display='none'">✕</span>
+</div>
+
+<!-- MAIN DASHBOARD GRID -->
+<div class="dash" id="dash">
+
+  <!-- ROW 0: 8 KPI CARDS -->
+  <div class="kpi-row">
+    <div class="kpi c-or">
+      <div class="kpi-lbl">Sales Velocity</div>
+      <div class="kpi-val" id="kv0">5.1</div>
+      <div class="kpi-d up">↑ 16.4% vs prior</div>
+      <span class="kpi-bm ok">✓ Above avg 4.2</span>
+    </div>
+    <div class="kpi c-gr">
+      <div class="kpi-lbl">ACV Distribution</div>
+      <div class="kpi-val" id="kv1">76%</div>
+      <div class="kpi-d up">↑ 7pts vs prior</div>
+      <span class="kpi-bm ok">✓ Strong shelf</span>
+    </div>
+    <div class="kpi c-am">
+      <div class="kpi-lbl">Trade Promo ROI</div>
+      <div class="kpi-val" id="kv2">2.6×</div>
+      <div class="kpi-d fl">→ Below 3.2× target</div>
+      <span class="kpi-bm warn">⚠ Review needed</span>
+    </div>
+    <div class="kpi c-re">
+      <div class="kpi-lbl">Out-of-Stock Rate</div>
+      <div class="kpi-val" id="kv3">6.8%</div>
+      <div class="kpi-d dn">↑ 1.8pts worsening</div>
+      <span class="kpi-bm bad">✗ Above 5% floor</span>
+    </div>
+    <div class="kpi c-gr">
+      <div class="kpi-lbl">Gross Margin</div>
+      <div class="kpi-val" id="kv4">44.8%</div>
+      <div class="kpi-d up">↑ 2.6pts vs prior</div>
+      <span class="kpi-bm ok">✓ CPG avg 38–42%</span>
+    </div>
+    <div class="kpi c-or">
+      <div class="kpi-lbl">Net Revenue</div>
+      <div class="kpi-val" id="kv5">$2.05M</div>
+      <div class="kpi-d up">↑ 21.3% YoY</div>
+      <span class="kpi-bm ok">✓ Ahead of plan</span>
+    </div>
+    <div class="kpi c-re">
+      <div class="kpi-lbl">Void Rate</div>
+      <div class="kpi-val" id="kv6">11%</div>
+      <div class="kpi-d dn">↑ 4pts — Kroger</div>
+      <span class="kpi-bm bad">✗ Act now</span>
+    </div>
+    <div class="kpi c-pu">
+      <div class="kpi-lbl">Weeks of Supply</div>
+      <div class="kpi-val" id="kv7">4.9</div>
+      <div class="kpi-d fl">↓ 1.4 wks tight</div>
+      <span class="kpi-bm warn">⚠ Reorder zone</span>
+    </div>
+  </div>
+
+  <!-- ROW 1 -->
+  <!-- Col 1-2: Revenue trend -->
+  <div class="card" style="grid-column:span 2;">
+    <div class="card-h">
+      <div><h3>Revenue Trend</h3><p id="revSub">Monthly net revenue · 2025–2026</p></div>
+      <span class="badge b-gr" id="revBadge">↑ 21.3% YoY</span>
+    </div>
+    <div class="ch-wrap"><canvas id="revChart"></canvas></div>
+  </div>
+  <!-- Col 3: Channel mix -->
+  <div class="card">
+    <div class="card-h"><div><h3>Channel Mix</h3><p>Revenue share</p></div></div>
+    <div class="donut-wrap">
+      <div class="donut-ch"><canvas id="donutChart"></canvas></div>
+      <div class="donut-leg" id="donutLeg"></div>
+    </div>
+  </div>
+  <!-- Col 4: Alerts -->
+  <div class="card">
+    <div class="card-h"><div><h3>Live Alerts</h3><p>Action required now</p></div><span class="badge b-re">2 Critical</span></div>
+    <div class="alert-list">
+      <div class="acard danger"><strong>🚨 OOS — Whole Foods 11 stores</strong>Ancient Grain Bowl out-of-stock. $22K/wk lost. ETA 5 days.</div>
+      <div class="acard danger"><strong>🚨 Kroger void 17%</strong>23 stores silent. Buyer reset risk in 19 days. Broker call needed.</div>
+      <div class="acard warn"><strong>⚠ Walmart FSI ROI 2.3×</strong>Below 3.2× target. $14K gap. Shift to TPR for Q3.</div>
+      <div class="acard ok"><strong>✅ Whole Foods +22.4% velocity</strong>7.1 u/s/w vs cat avg 4.2. Request SKU expansion in July.</div>
+    </div>
+  </div>
+
+  <!-- ROW 2 -->
+  <!-- Col 1: SKU Velocity gauges -->
+  <div class="card">
+    <div class="card-h"><div><h3>SKU Velocity</h3><p>Units/store/week vs 4.2 avg</p></div><span class="badge b-or">Cat: 4.2</span></div>
+    <div class="vel-list" id="velList"></div>
+  </div>
+  <!-- Col 2: Retailer Q1 vs Q2 -->
+  <div class="card">
+    <div class="card-h"><div><h3>Retailer Revenue</h3><p id="qoqSub">Q1 vs Q2 2026</p></div></div>
+    <div class="ch-wrap"><canvas id="qoqChart"></canvas></div>
+  </div>
+  <!-- Col 3: ACV -->
+  <div class="card">
+    <div class="card-h"><div><h3>ACV Distribution</h3><p>% retail volume carrying</p></div></div>
+    <div class="ch-wrap"><canvas id="acvChart"></canvas></div>
+  </div>
+  <!-- Col 4: Void table -->
+  <div class="card">
+    <div class="card-h"><div><h3>Void Rate</h3><p>Stores not scanning · 15% threshold</p></div><span class="badge b-re">Kroger Critical</span></div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Retailer</th><th>Auth</th><th>Void%</th><th>Status</th></tr></thead>
+        <tbody id="voidTbl"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ROW 3 -->
+  <!-- Col 1-2: Promo table -->
+  <div class="card" style="grid-column:span 2;">
+    <div class="card-h"><div><h3>Trade Promo ROI</h3><p>Campaign breakdown · Repeat / Optimize / Pause</p></div><span class="badge b-am">Target 3.2×</span></div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Campaign</th><th>Retailer</th><th>Type</th><th>Spend</th><th>Incr. Rev</th><th>ROI</th><th>Verdict</th></tr></thead>
+        <tbody id="promoTbl"></tbody>
+      </table>
+    </div>
+  </div>
+  <!-- Col 3: WOS grid -->
+  <div class="card">
+    <div class="card-h"><div><h3>Weeks of Supply</h3><p>Critical &lt;4 · Warn 4–6 · OK &gt;6</p></div><span class="badge b-re">3 At Risk</span></div>
+    <div class="wos-grid" id="wosGrid"></div>
+  </div>
+  <!-- Col 4: Margin chart -->
+  <div class="card">
+    <div class="card-h"><div><h3>Gross Margin by SKU</h3><p>Target 42%+</p></div></div>
+    <div class="ch-wrap"><canvas id="marginChart"></canvas></div>
+  </div>
+
+</div><!-- /dash -->
+
+<!-- FOOTER -->
+<div class="foot">
+  Built by <a href="mailto:ombagal.official@gmail.com">Om Bagal Analytics</a> &nbsp;·&nbsp;
+  ombagal-analytics.github.io &nbsp;·&nbsp; +91 99872 58696 &nbsp;·&nbsp;
+  Harvest & Co. Foods is a fictional brand for portfolio demonstration
+</div>
+
+<script>
+// ── CLOCK ──
+function tick(){document.getElementById('clock').textContent='Updated '+new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});}
+tick();setInterval(tick,60000);
+
+// ── THEME ──
+function toggleTheme(){
+  const d=document.documentElement,dk=d.getAttribute('data-theme')==='dark';
+  d.setAttribute('data-theme',dk?'light':'dark');
+  document.getElementById('themeBtn').textContent=dk?'🌙 Dark':'☀️ Light';
+  setTimeout(()=>{destroyCharts();buildAll();},50);
+}
+
+// ── DATA per Quarter ──
+const DATA={
+  ALL:{rev:[1.38,1.42,1.51,1.58,1.64,1.72,1.68,1.78,1.84,1.92,1.98,2.05],revLbls:['Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun'],revBadge:'↑ 21.3% YoY',revSub:'Monthly · Q3 2025 – Q2 2026',kv:['5.1','76%','2.6×','6.8%','44.8%','$2.05M','11%','4.9'],qoq:[{n:'Whole Foods',a:388,b:498},{n:'Walmart',a:412,b:468},{n:'Target',a:284,b:322},{n:'Kroger',a:248,b:264},{n:'Amz Fresh',a:186,b:244},{n:'DTC',a:142,b:172}],qoqLbls:['Q1','Q2'],qoqSub:'Q1 vs Q2 2026'},
+  Q1:{rev:[340,362,388,412,284,248,186,142],revLbls:['Jan W1','Jan W2','Feb W1','Feb W2','Mar W1','Mar W2','Mar W3','Mar W4'],revBadge:'↑ 14.2% vs Q4',revSub:'Weekly · Q1 2026',kv:['4.4','69%','2.6×','5.0%','42.2%','$1.62M','7%','6.3'],qoq:[{n:'Whole Foods',a:320,b:388},{n:'Walmart',a:380,b:412},{n:'Target',a:260,b:284},{n:'Kroger',a:224,b:248},{n:'Amz Fresh',a:162,b:186},{n:'DTC',a:124,b:142}],qoqLbls:['Q4 2025','Q1 2026'],qoqSub:'Q4 2025 vs Q1 2026'},
+  Q2:{rev:[454,468,482,476,494,498,486,502],revLbls:['Apr W1','Apr W2','May W1','May W2','Jun W1','Jun W2','Jun W3','Jun W4'],revBadge:'↑ 21.3% vs Q1',revSub:'Weekly · Q2 2026',kv:['5.1','76%','2.6×','6.8%','44.8%','$2.05M','11%','4.9'],qoq:[{n:'Whole Foods',a:388,b:498},{n:'Walmart',a:412,b:468},{n:'Target',a:284,b:322},{n:'Kroger',a:248,b:264},{n:'Amz Fresh',a:186,b:244},{n:'DTC',a:142,b:172}],qoqLbls:['Q1','Q2'],qoqSub:'Q1 vs Q2 2026'},
+  Q3:{rev:[510,524,518,536,542,528,548,556],revLbls:['Jul W1','Jul W2','Aug W1','Aug W2','Sep W1','Sep W2','Sep W3','Sep W4'],revBadge:'↑ 18.6% projected',revSub:'Weekly · Q3 2026 (projected)',kv:['5.6','80%','2.9×','5.8%','45.6%','$2.24M','9%','5.2'],qoq:[{n:'Whole Foods',a:498,b:548},{n:'Walmart',a:468,b:502},{n:'Target',a:322,b:354},{n:'Kroger',a:264,b:278},{n:'Amz Fresh',a:244,b:294},{n:'DTC',a:172,b:198}],qoqLbls:['Q2','Q3 proj.'],qoqSub:'Q2 vs Q3 2026 (proj.)'},
+  Q4:{rev:[562,578,570,590,598,582,610,622],revLbls:['Oct W1','Oct W2','Nov W1','Nov W2','Dec W1','Dec W2','Dec W3','Dec W4'],revBadge:'↑ 22.1% projected',revSub:'Weekly · Q4 2026 (projected)',kv:['5.9','83%','3.1×','5.2%','46.2%','$2.48M','7%','5.8'],qoq:[{n:'Whole Foods',a:548,b:614},{n:'Walmart',a:502,b:558},{n:'Target',a:354,b:388},{n:'Kroger',a:278,b:298},{n:'Amz Fresh',a:294,b:348},{n:'DTC',a:198,b:228}],qoqLbls:['Q3 proj.','Q4 proj.'],qoqSub:'Q3 vs Q4 2026 (proj.)'},
+};
+
+let currentQ='ALL',currentP='Monthly',currentR='all';
+function gc(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+
+// ── CHARTS REGISTRY ──
+const CHS={};
+function destroyCharts(){Object.keys(CHS).forEach(k=>{if(CHS[k]){CHS[k].destroy();delete CHS[k];}});}
+
+function mkChart(id,type,data,opts){
+  const el=document.getElementById(id);if(!el)return;
+  const dk=document.documentElement.getAttribute('data-theme')==='dark';
+  const grid=dk?'rgba(255,255,255,.05)':'rgba(0,0,0,.05)';
+  const tc='#7a6a58';
+  const base={responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{bodyFont:{family:'JetBrains Mono'},titleFont:{family:'Epilogue',weight:'700'}}},
+    scales:{x:{grid:{color:grid},ticks:{color:tc,font:{family:'Epilogue',size:9.5},maxRotation:0}},
+            y:{grid:{color:grid},ticks:{color:tc,font:{family:'JetBrains Mono',size:9.5}}}}};
+  CHS[id]=new Chart(el,{type,data,options:Chart.helpers.merge(base,opts||{})});
+}
+
+// ── BUILD ALL ──
+function buildAll(){
+  const d=DATA[currentQ];
+  const isFiltered=currentR!=='all';
+  const retKeyMap={wf:'Whole Foods',wm:'Walmart',tg:'Target',kr:'Kroger',amz:'Amz Fresh',dtc:'DTC'};
+  const retIdxMap={wf:0,wm:1,tg:2,kr:3,amz:4,dtc:5};
+  const RET_NAMES_ALL=['Whole Foods','Walmart','Target','Kroger','Amz Fresh','DTC'];
+  const rd=RET_DATA[currentR];
+
+  // ── KPIs ──
+  const kvVals=isFiltered&&rd.kv?rd.kv:d.kv;
+  kvVals.forEach((v,i)=>{const el=document.getElementById('kv'+i);if(el)el.textContent=v;});
+  document.getElementById('revBadge').textContent=d.revBadge;
+  document.getElementById('qoqSub').textContent=d.qoqSub;
+
+  // ── REVENUE — uses PERIOD_REV for correct granularity ──
+  const pr=PERIOD_REV[currentP][currentQ];
+  document.getElementById('revSub').textContent=currentP+' · '+d.revSub.split('·').slice(1).join('·').trim();
+  const revRaw=pr.vals;
+  const revVals=isFiltered&&rd.revMult?revRaw.map(v=>parseFloat((v*rd.revMult).toFixed(2))):revRaw;
+  mkChart('revChart','bar',{
+    labels:pr.lbls,
+    datasets:[{label:'Revenue',data:revVals,
+      backgroundColor:revVals.map((_,i,a)=>i===a.length-1?'rgba(193,75,12,.9)':'rgba(193,75,12,.28)'),
+      borderRadius:4,borderSkipped:false}]
+  },{scales:{y:{ticks:{callback:v=>v>=1?'$'+v.toFixed(2)+'M':'$'+Math.round(v*1000)+'K'}}}});
+
+  // ── DONUT ──
+  const cd_base=[{n:'Whole Foods',p:24.4,v:'$498K'},{n:'Walmart',p:23.4,v:'$468K'},{n:'Target',p:15.7,v:'$322K'},{n:'Kroger',p:12.9,v:'$264K'},{n:'Amz Fresh',p:11.9,v:'$244K'},{n:'DTC',p:8.4,v:'$172K'},{n:'Other',p:3.3,v:'$67K'}];
+  const cols_base=['#287a4a','#c14b0c','#a07010','#c02828','#6a4aa8','#1a5a88','#7a5030'];
+  const ridx=retIdxMap[currentR];
+  const cd=isFiltered&&ridx!==undefined?[cd_base[ridx]]:cd_base;
+  const cdCols=isFiltered&&ridx!==undefined?[cols_base[ridx]]:cols_base;
+  mkChart('donutChart','doughnut',{labels:cd.map(x=>x.n),datasets:[{data:cd.map(x=>x.p),backgroundColor:cdCols,borderWidth:2,borderColor:gc('--sf'),hoverOffset:3}]},{cutout:'64%',plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}});
+  const dl=document.getElementById('donutLeg');
+  if(dl)dl.innerHTML=cd.map((x,i)=>`<div class="leg-row"><div class="leg-dot" style="background:${cdCols[i]}"></div><div class="leg-name">${x.n}</div><div class="leg-pct">${x.p}%</div><div class="leg-val">${x.v}</div></div>`).join('');
+
+  // ── VELOCITY — per-retailer SKU data ──
+  const SKU_VEL={
+    all:[{n:'Ancient Grain Bowl',v:7.1},{n:'Wild Harvest Granola',v:6.2},{n:'Seed & Nut Butter',v:5.8},{n:'Heritage Oat Bar',v:5.1},{n:'Sprout & Kale Chips',v:4.4},{n:'Ancient Grain Puffs',v:3.9},{n:'Harvest Trail Mix',v:3.2},{n:'Bone Broth Powder',v:2.8}],
+    wf:[{n:'Ancient Grain Bowl',v:7.1},{n:'Wild Harvest Granola',v:6.8},{n:'Seed & Nut Butter',v:6.2},{n:'Heritage Oat Bar',v:5.4},{n:'Sprout & Kale Chips',v:4.8},{n:'Ancient Grain Puffs',v:4.2},{n:'Harvest Trail Mix',v:3.6},{n:'Bone Broth Powder',v:3.1}],
+    wm:[{n:'Ancient Grain Bowl',v:5.2},{n:'Wild Harvest Granola',v:4.8},{n:'Seed & Nut Butter',v:4.4},{n:'Heritage Oat Bar',v:4.8},{n:'Sprout & Kale Chips',v:3.8},{n:'Ancient Grain Puffs',v:3.2},{n:'Harvest Trail Mix',v:3.6},{n:'Bone Broth Powder',v:2.2}],
+    tg:[{n:'Ancient Grain Bowl',v:6.1},{n:'Wild Harvest Granola',v:5.8},{n:'Seed & Nut Butter',v:5.8},{n:'Heritage Oat Bar',v:4.9},{n:'Sprout & Kale Chips',v:4.2},{n:'Ancient Grain Puffs',v:3.6}],
+    kr:[{n:'Ancient Grain Bowl',v:4.2},{n:'Wild Harvest Granola',v:3.8},{n:'Seed & Nut Butter',v:3.6},{n:'Heritage Oat Bar',v:3.8},{n:'Harvest Trail Mix',v:3.2}],
+    amz:[{n:'Ancient Grain Bowl',v:6.8},{n:'Wild Harvest Granola',v:6.2},{n:'Seed & Nut Butter',v:5.6},{n:'Heritage Oat Bar',v:5.2},{n:'Sprout & Kale Chips',v:4.8},{n:'Ancient Grain Puffs',v:4.2},{n:'Harvest Trail Mix',v:3.8},{n:'Bone Broth Powder',v:3.4}],
+    dtc:[{n:'Wild Harvest Bundle',v:null},{n:'Seed & Nut Butter',v:null},{n:'Ancient Grain Bowl',v:null}],
+  };
+  const skus=SKU_VEL[currentR]||SKU_VEL.all;
+  const vl=document.getElementById('velList');
+  if(vl)vl.innerHTML=skus.filter(s=>s.v!==null).map(s=>{
+    const pct=Math.min(s.v/9*100,100);
+    const col=s.v>5.5?'var(--gr)':s.v>4?'var(--ac)':s.v>3?'var(--am)':'var(--re)';
+    const tag=s.v>4.2?'<span class="pill p-gr">↑ Above</span>':s.v>3?'<span class="pill p-am">Below</span>':'<span class="pill p-re">Low</span>';
+    return`<div class="g-row"><div class="g-name">${s.n}</div><div class="g-bar"><div class="prog"><div class="prog-f" style="width:${pct}%;background:${col}"></div></div></div><div class="g-val">${s.v}</div><div class="g-tag">${tag}</div></div>`;
+  }).join('');
+
+  // ── QOQ — filtered by retailer ──
+  const qoqA_base=d.qoq.map(r=>r.a);
+  const qoqB_base=d.qoq.map(r=>r.b);
+  const qoqNames_base=d.qoq.map(r=>r.n);
+  const qoqA=isFiltered&&ridx!==undefined?[qoqA_base[ridx]]:qoqA_base;
+  const qoqB=isFiltered&&ridx!==undefined?[qoqB_base[ridx]]:qoqB_base;
+  const qoqNames=isFiltered&&ridx!==undefined?[qoqNames_base[ridx]]:qoqNames_base;
+  mkChart('qoqChart','bar',{labels:qoqNames,datasets:[
+    {label:d.qoqLbls[0],data:qoqA,backgroundColor:'rgba(193,75,12,.22)',borderRadius:3},
+    {label:d.qoqLbls[1],data:qoqB,backgroundColor:'rgba(193,75,12,.82)',borderRadius:3}
+  ]},{plugins:{legend:{display:true,labels:{font:{family:'Epilogue',size:9},color:gc('--ink3'),boxWidth:9,padding:6}}},scales:{y:{ticks:{callback:v=>'$'+v+'K'}}}});
+
+  // ── ACV — filtered ──
+  const acvAll=[88,82,74,68,100,100];
+  const acvVals=isFiltered&&ridx!==undefined?[acvAll[ridx]]:acvAll;
+  const acvNames=isFiltered&&ridx!==undefined?[RET_NAMES_ALL[ridx]]:RET_NAMES_ALL;
+  mkChart('acvChart','bar',{labels:acvNames,datasets:[{label:'ACV %',data:acvVals,backgroundColor:acvVals.map(v=>v>=80?'rgba(40,122,74,.7)':v>=65?'rgba(160,112,16,.7)':'rgba(192,40,40,.7)'),borderRadius:4,borderSkipped:false}]},{scales:{y:{max:100,ticks:{callback:v=>v+'%'}}}});
+
+  // ── VOID TABLE — filtered ──
+  const VOID_ALL=[{r:'Whole Foods',a:412,v:4.9,s:'ok'},{r:'Target',a:892,v:7.1,s:'ok'},{r:'Walmart',a:1840,v:9.0,s:'warn'},{r:'Amz Fresh',a:null,v:0,s:'ok'},{r:'Kroger',a:1220,v:17.1,s:'crit'}];
+  const voidRows=isFiltered?VOID_ALL.filter(x=>x.r===retKeyMap[currentR]):VOID_ALL;
+  const vt=document.getElementById('voidTbl');
+  if(vt)(voidRows.length?voidRows:VOID_ALL).forEach(x=>{
+    const pill=x.s==='ok'?'<span class="pill p-gr">OK</span>':x.s==='warn'?'<span class="pill p-am">Warn</span>':'<span class="pill p-re">Critical</span>';
+    vt.innerHTML+='';
+  });
+  if(vt)vt.innerHTML=(voidRows.length?voidRows:VOID_ALL).map(x=>{
+    const pill=x.s==='ok'?'<span class="pill p-gr">OK</span>':x.s==='warn'?'<span class="pill p-am">Warn</span>':'<span class="pill p-re">Critical</span>';
+    return`<tr><td><strong>${x.r}</strong></td><td class="mono">${x.a||'—'}</td><td class="mono" style="color:${x.v>15?'var(--re)':x.v>7?'var(--am)':'var(--gr)'}">${x.v}%</td><td>${pill}</td></tr>`;
+  }).join('');
+
+  // ── PROMO TABLE — filtered ──
+  const PROMOS_ALL=[
+    {n:'Whole Foods Feature',r:'Whole Foods',t:'TPR',sp:28,rv:112,roi:4.0},
+    {n:'Amazon Spring Deal',r:'Amz Fresh',t:'Lightning',sp:18,rv:72,roi:4.0},
+    {n:'DTC Email Promo',r:'DTC',t:'Email',sp:8,rv:34,roi:4.3},
+    {n:'Target Endcap',r:'Target',t:'Display',sp:24,rv:84,roi:3.5},
+    {n:'Kroger Weekly Ad',r:'Kroger',t:'TPR',sp:22,rv:68,roi:3.1},
+    {n:'Whole Foods Endcap',r:'Whole Foods',t:'Display',sp:20,rv:60,roi:3.0},
+    {n:'Kroger Digital',r:'Kroger',t:'Digital',sp:14,rv:40,roi:2.9},
+    {n:'Walmart Digital',r:'Walmart',t:'Digital',sp:16,rv:44,roi:2.8},
+    {n:'Target Digital',r:'Target',t:'Digital',sp:12,rv:32,roi:2.7},
+    {n:'Walmart FSI',r:'Walmart',t:'FSI',sp:36,rv:83,roi:2.3},
+  ];
+  const promoRows=isFiltered?PROMOS_ALL.filter(p=>p.r===retKeyMap[currentR]):PROMOS_ALL;
+  const pt=document.getElementById('promoTbl');
+  if(pt)pt.innerHTML=(promoRows.length?promoRows:PROMOS_ALL).map(p=>{
+    const v=p.roi>=3.2?'<span class="pill p-gr">✓ Repeat</span>':p.roi>=2.8?'<span class="pill p-am">⚠ Opt.</span>':'<span class="pill p-re">✗ Pause</span>';
+    return`<tr><td><strong>${p.n}</strong></td><td>${p.r}</td><td>${p.t}</td><td class="mono">$${p.sp}K</td><td class="mono">$${p.rv}K</td><td class="mono" style="color:${p.roi>=3.2?'var(--gr)':p.roi>=2.8?'var(--am)':'var(--re)'}">${p.roi.toFixed(1)}×</td><td>${v}</td></tr>`;
+  }).join('');
+
+  // ── WOS — 6 items, 2 cols × 3 rows, no overflow ──
+  const WOS6=[{n:'Ancient Grain Bowl',w:3.4,s:'crit'},{n:'Bone Broth Powder',w:3.8,s:'warn'},{n:'Sprout & Kale',w:4.3,s:'warn'},{n:'Heritage Oat Bar',w:5.1,s:'ok'},{n:'Seed & Nut Butter',w:6.2,s:'ok'},{n:'Wild Harvest',w:7.8,s:'ok'}];
+  const wg=document.getElementById('wosGrid');
+  if(wg)wg.innerHTML=WOS6.map(w=>`<div class="wos-c ${w.s}"><div class="wos-left"><div class="wos-val">${w.w}</div></div><div class="wos-right"><div class="wos-name">${w.n}</div><div class="wos-sub">${w.s==='crit'?'⚠ REORDER NOW':w.s==='warn'?'Monitor':'Healthy'}</div></div></div>`).join('');
+
+  // ── MARGIN chart ──
+  const MARGIN=[{n:'Wild Harvest',m:47.9},{n:'Seed & Nut Butter',m:47.7},{n:'Turmeric Tonic',m:46.8},{n:'Ancient Grain Bowl',m:44.9},{n:'Bone Broth',m:44.4},{n:'Prebiotic Bar',m:44.2},{n:'Coconut Aminos',m:44.1},{n:'Grain Puffs',m:43.1},{n:'Oat Bar',m:40.8},{n:'Kale Chips',m:39.3},{n:'Trail Mix',m:28.4}];
+  mkChart('marginChart','bar',{
+    labels:MARGIN.map(x=>x.n.length>14?x.n.substr(0,14)+'…':x.n),
+    datasets:[
+      {label:'Margin %',data:MARGIN.map(x=>x.m),backgroundColor:MARGIN.map(x=>x.m>=42?'rgba(40,122,74,.75)':x.m>=32?'rgba(160,112,16,.7)':'rgba(192,40,40,.7)'),borderRadius:3},
+      {label:'Target 42%',data:MARGIN.map(()=>42),type:'line',borderColor:'rgba(193,75,12,.7)',borderDash:[3,3],borderWidth:1.5,pointRadius:0}
+    ]
+  },{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{min:0,max:55,ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:9}}}}});
+}
+
+// ── PERIOD DATA OVERRIDE ──
+// Each period reshapes the revenue chart labels/granularity and adjusts KPI deltas
+const PERIOD_REV={
+  Monthly:{
+    ALL:{lbls:['Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun'],vals:[1.38,1.42,1.51,1.58,1.64,1.72,1.68,1.78,1.84,1.92,1.98,2.05]},
+    Q1:{lbls:['Jan','Feb','Mar'],vals:[1.58,1.72,1.84]},
+    Q2:{lbls:['Apr','May','Jun'],vals:[1.92,1.98,2.05]},
+    Q3:{lbls:['Jul','Aug','Sep'],vals:[2.10,2.18,2.24]},
+    Q4:{lbls:['Oct','Nov','Dec'],vals:[2.28,2.42,2.48]},
+  },
+  Weekly:{
+    ALL:{lbls:['W3/2','W3/9','W3/16','W3/23','W3/30','W4/6','W4/13','W4/20','W4/27','W5/4','W5/11','W5/18'],vals:[386,402,418,412,434,444,454,448,468,464,482,486]},
+    Q1:{lbls:['Jan W1','Jan W2','Jan W3','Jan W4','Feb W1','Feb W2','Mar W1','Mar W2'],vals:[340,362,378,388,402,412,428,448]},
+    Q2:{lbls:['Apr W1','Apr W2','May W1','May W2','Jun W1','Jun W2','Jun W3','Jun W4'],vals:[454,468,482,476,494,498,486,502]},
+    Q3:{lbls:['Jul W1','Jul W2','Aug W1','Aug W2','Sep W1','Sep W2','Sep W3','Sep W4'],vals:[510,524,518,536,542,528,548,556]},
+    Q4:{lbls:['Oct W1','Oct W2','Nov W1','Nov W2','Dec W1','Dec W2','Dec W3','Dec W4'],vals:[562,578,570,590,598,582,610,622]},
+  },
+  Quarterly:{
+    ALL:{lbls:['Q3 \'25','Q4 \'25','Q1 \'26','Q2 \'26'],vals:[4.51,5.04,5.14,5.95]},
+    Q1:{lbls:['Q4 \'25','Q1 \'26'],vals:[5.04,5.14]},
+    Q2:{lbls:['Q1 \'26','Q2 \'26'],vals:[5.14,5.95]},
+    Q3:{lbls:['Q2 \'26','Q3 \'26 proj.'],vals:[5.95,6.52]},
+    Q4:{lbls:['Q3 \'26 proj.','Q4 \'26 proj.'],vals:[6.52,7.04]},
+  },
+  Yearly:{
+    ALL:{lbls:['FY 2023','FY 2024','FY 2025','FY 2026 proj.'],vals:[8.2,12.4,17.6,23.1]},
+    Q1:{lbls:['FY 2024','FY 2025','FY 2026 proj.'],vals:[12.4,17.6,23.1]},
+    Q2:{lbls:['FY 2024','FY 2025','FY 2026 proj.'],vals:[12.4,17.6,23.1]},
+    Q3:{lbls:['FY 2025','FY 2026 proj.'],vals:[17.6,23.1]},
+    Q4:{lbls:['FY 2025','FY 2026 proj.'],vals:[17.6,23.1]},
+  },
+};
+
+// ── RETAILER FILTER DATA ──
+const RET_DATA={
+  all:{
+    acv:[88,82,74,68,100,100],
+    qoqA:[388,412,284,248,186,142],qoqB:[498,468,322,264,244,172],
+    vel:[7.1,4.8,5.2,3.8,5.6,null],
+    void:[4.9,9.0,7.1,17.1,0,0],
+    oos:[5.2,7.1,5.8,8.4,3.2,0],
+  },
+  wf:{
+    acv:[88,null,null,null,null,null],
+    qoqA:[340,null,null,null,null,null],qoqB:[498,null,null,null,null,null],
+    vel:[7.1,null,null,null,null,null],void:[4.9,null,null,null,null,null],oos:[5.2,null,null,null,null,null],
+    revMult:0.244,kv:['7.1','88%','4.0×','5.2%','46.2%','$498K','4.9%','5.4'],
+  },
+  wm:{
+    acv:[null,82,null,null,null,null],
+    qoqA:[null,380,null,null,null,null],qoqB:[null,468,null,null,null,null],
+    vel:[null,4.8,null,null,null,null],void:[null,9.0,null,null,null,null],oos:[null,7.1,null,null,null,null],
+    revMult:0.229,kv:['4.8','82%','2.3×','7.1%','43.2%','$468K','9.0%','6.1'],
+  },
+  tg:{
+    acv:[null,null,74,null,null,null],
+    qoqA:[null,null,260,null,null,null],qoqB:[null,null,322,null,null,null],
+    vel:[null,null,5.2,null,null,null],void:[null,null,7.1,null,null,null],oos:[null,null,5.8,null,null,null],
+    revMult:0.157,kv:['5.2','74%','3.5×','5.8%','42.8%','$322K','7.1%','5.8'],
+  },
+  kr:{
+    acv:[null,null,null,68,null,null],
+    qoqA:[null,null,null,224,null,null],qoqB:[null,null,null,264,null,null],
+    vel:[null,null,null,3.8,null,null],void:[null,null,null,17.1,null,null],oos:[null,null,null,8.4,null,null],
+    revMult:0.129,kv:['3.8','68%','3.1×','8.4%','41.6%','$264K','17.1%','7.2'],
+  },
+  amz:{
+    acv:[null,null,null,null,100,null],
+    qoqA:[null,null,null,null,162,null],qoqB:[null,null,null,null,244,null],
+    vel:[null,null,null,null,5.6,null],void:[null,null,null,null,0,null],oos:[null,null,null,null,3.2,null],
+    revMult:0.119,kv:['5.6','100%','4.0×','3.2%','45.8%','$244K','0%','6.4'],
+  },
+  dtc:{
+    acv:[null,null,null,null,null,100],
+    qoqA:[null,null,null,null,null,124],qoqB:[null,null,null,null,null,172],
+    vel:[null,null,null,null,null,null],void:[null,null,null,null,null,0],oos:[null,null,null,null,null,0],
+    revMult:0.084,kv:['—','100%','4.3×','0%','48.2%','$172K','0%','8.2'],
+  },
+};
+const RET_NAMES=['Whole Foods','Walmart','Target','Kroger','Amz Fresh','DTC'];
+
+// ── TAB CONTROLS ──
+function setQ(q,el){
+  document.querySelectorAll('.q-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  currentQ=q;
+  destroyCharts();buildAll();
+}
+function setP(p,el){
+  document.querySelectorAll('.p-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  currentP=p;
+  destroyCharts();buildAll();
+}
+function setRetailer(){
+  currentR=document.getElementById('retSel').value;
+  destroyCharts();buildAll();
+}
+
+document.addEventListener('DOMContentLoaded',buildAll);
+</script>
+</body>
+</html>
